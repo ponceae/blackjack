@@ -132,12 +132,12 @@ def request_new_round():
 """
 Main CLI output for Blackjack.
 """
-def print_hands(player_hands, dealer_hand, wager, player_bank, is_hidden=True, active_index=-1, insurance_wager=0):
-	dealer_hand_value = str(get_hand_value(dealer_hand))
-	dealer_soft_value = str(get_soft_value(dealer_hand))
+def print_hands(hands, wager, player_bank, is_hidden=True, active_index=-1, insurance_wager=0):
+	dealer_hand_value = str(get_hand_value(hands.dealer_hand))
+	dealer_soft_value = str(get_soft_value(hands.dealer_hand))
 	"""Parallel lists for player hand values"""
-	player_hand_values = [str(get_hand_value(hand)) for hand in player_hands]
-	player_soft_values = [str(get_soft_value(hand)) for hand in player_hands]
+	player_hand_values = [str(get_hand_value(hand)) for hand in hands.player_hands]
+	player_soft_values = [str(get_soft_value(hand)) for hand in hands.player_hands]
 
 	output_buffer, dealer_buffer, player_buffer = [], [], []
  
@@ -145,15 +145,15 @@ def print_hands(player_hands, dealer_hand, wager, player_bank, is_hidden=True, a
 	dealer_buffer.append('Dealer: ')
 	if is_hidden: # Dealer showing one card
 		dealer_buffer.append(
-			f'{dealer_hand[0].get_rank_value()}\n'
-			f'{dealer_hand[0].to_string()}\n'
+			f'{hands.dealer_hand[0].get_rank_value()}\n'
+			f'{hands.dealer_hand[0].to_string()}\n'
 			'?\n'
 		)
 	else: # Dealer showing both cards
-		if is_soft(dealer_hand) and not is_twenty_one(dealer_hand):
+		if is_soft(hands.dealer_hand) and not is_twenty_one(hands.dealer_hand):
 			dealer_buffer.append(f'{dealer_soft_value} / ')
 		dealer_buffer.append(f'{dealer_hand_value}\n')
-		for card in dealer_hand:
+		for card in hands.dealer_hand:
 			dealer_buffer.append(f'{card.to_string()}\n')
 	if insurance_wager > 0:
 		dealer_buffer.append(f'Insurance [${insurance_wager:.2f}]\n')
@@ -161,7 +161,7 @@ def print_hands(player_hands, dealer_hand, wager, player_bank, is_hidden=True, a
 	output_buffer.append(dealer_buffer)
  
 	"""Player Hand Output"""
-	for i, hand in enumerate(player_hands):
+	for i, hand in enumerate(hands.player_hands):
 		player_buffer.append(f'Hand {ROMAN_NUMERALS[i + 1]}: ')
 		if is_soft(hand) and not is_twenty_one(hand): # Show soft value
 			player_buffer.append(f'{player_soft_values[i]} / ')
@@ -183,27 +183,6 @@ def print_hands(player_hands, dealer_hand, wager, player_bank, is_hidden=True, a
 
 def print_player_hands():
 	pass
-
-def print_dealer_hands(dealer_hand, dealer_soft_value, dealer_hand_value, insurance_wager, is_hidden):
-	dealer_buffer = []
-	"""Dealer Hand Output"""
-	dealer_buffer.append('Dealer: ')
-	if is_hidden: # Dealer showing one card
-		dealer_buffer.append(
-			f'{dealer_hand[0].get_rank_value()}\n'
-			f'{dealer_hand[0].to_string()}\n'
-			'?\n'
-		)
-	else: # Dealer showing both cards
-		if is_soft(dealer_hand) and not is_twenty_one(dealer_hand):
-			dealer_buffer.append(f'{dealer_soft_value} / ')
-		dealer_buffer.append(f'{dealer_hand_value}\n')
-		for card in dealer_hand:
-			dealer_buffer.append(f'{card.to_string()}\n')
-	if insurance_wager > 0:
-		dealer_buffer.append(f'Insurance [${insurance_wager:.2f}]\n')
-	dealer_buffer.append('--------------------\n')
-	return dealer_buffer
 
 """ 
 CLI output for initial round ending scenarios.
