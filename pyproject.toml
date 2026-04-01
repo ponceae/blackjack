@@ -1,0 +1,13 @@
+
+[project]
+name = "blackjack"
+version = "3.2.26"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
