@@ -10,6 +10,7 @@ Also contains CLI modification functions.
 import subprocess
 import time
 
+from .datatypes import Hand, Player, PlayerHand, DealerHand, Table
 from .constants import ACE_ALT_VALUE, DEFAULT_ACE_VALUE, TIMER_MESSAGES
 from .deck import create_deck, shuffle_deck
 
@@ -83,18 +84,19 @@ def hit_hand(hand, game_deck):
 """
 Deals cards to the player and dealer.
 """
-def initial_round_deal(player_hands, dealer_hand, game_deck):
-	player_temp = []
+def initial_round_deal(table: Table):
+	table.player.hands = [PlayerHand()]
+	table.dealer = DealerHand()
+ 
 	for i in range(4):
-		if not game_deck:
+		if not table.game_deck:
 			print('Game deck is now empty. Recreating deck and reshuffling.')
-			copy_deck(game_deck, create_and_shuffle())
-		card = game_deck.pop()
+			copy_deck(table.game_deck, create_and_shuffle())
+		card = table.game_deck.pop()
 		if i % 2 == 0:
-			player_temp.append(card)
+			table.player.hands[0].cards.append(card)
 		else:
-			dealer_hand.append(card)
-	player_hands.append(player_temp)    
+			table.dealer.cards.append(card)
 
 """
 Utility timer function for the CLI.

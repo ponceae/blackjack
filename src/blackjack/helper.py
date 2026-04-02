@@ -9,6 +9,7 @@ Also contains CLI output functions.
 
 import sys
 
+from .datatypes import Hand, Player, PlayerHand, DealerHand, Table 
 from .constants import HIT, NO, ROMAN_NUMERALS, STAND, YES, PLAYER_WIN, DEALER_WIN, PUSH
 from .utilities import clear_terminal, get_hand_value, get_soft_value
 
@@ -132,8 +133,8 @@ def request_new_round():
 """
 Main CLI output for Blackjack.
 """
-def print_hands(hands, wager, player_bank, is_hidden=True, active_index=-1, insurance_wager=0):
-	dealer_hand_value = str(get_hand_value(hands.dealer_hand))
+def print_hands(table: Table):
+	dealer_hand_value = str(get_hand_value(game_table.dealer))
 	dealer_soft_value = str(get_soft_value(hands.dealer_hand))
 	"""Parallel lists for player hand values"""
 	player_hand_values = [str(get_hand_value(hand)) for hand in hands.player_hands]
