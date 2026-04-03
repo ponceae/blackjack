@@ -1,5 +1,5 @@
 """ 
-Creates a container to store the game hands.
+Creates a container to store player and dealer data.
 
 @author Adrien P.
 @version 4.1.26
@@ -32,5 +32,5 @@ class Player:
 class Table:
     player: Player
     dealer: DealerHand = field(default_factory=DealerHand)
-    game_deck: list[Card] = field(default_factory=list)
+    deck: list[Card] = field(default_factory=list)
     

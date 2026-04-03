@@ -197,29 +197,31 @@ def verify_round_end_cond(player_hands, dealer_hand):
     if helper.is_new_round():
         return True
 
-def get_player_wager(player_bank: Bank):
-    """Set Wager"""
-    bet_amount = bank_helper.is_valid_bet(player_bank) # Prompt bet from user
+"""
+Set Wager
+"""
+def get_player_wager(player: Player):
+    bet_amount = bank_helper.is_valid_bet(player.bank) # Prompt bet from user
     utilities.clear_terminal()
     bank_helper.verify_min_bet(bet_amount)
-    player_bank.remove_chips(bet_amount) # Initial bet, remove chips
+    player.bank.remove_chips(bet_amount) # Initial bet, remove chips
     utilities.clear_terminal()
     return bet_amount
                         
 """
 Main blackjack game loop.
 """
-def blackjack(game_deck: list, player_bank: Bank):
-    game_table = Table
+def blackjack(deck: list, player_bank: Bank):
+    table = Table(Player())
     while True:
-        bet_amount = get_player_wager(player_bank)
+        bet_amount = get_player_wager(table.player)
         
         # hand1 = PlayerHand(cards=[Card('Spades', 4), Card('Spades', 2)])
         # hand2 = PlayerHand(cards=[Card('Spades', 'Ace'), Card('Spades', 10)])
         # hands.player_hands, hands.dealer_hand = [[Card('Spades', 4), Card('Spades', 2)]], [Card('Spades', 'Ace'), Card('Spades', 10)]
         round_done = False
         
-        utilities.initial_round_deal(game_table: Table)
+        utilities.initial_round_deal(table)
         helper.print_hands(hands, bet_amount, player_bank)
         
         """Check for initial round conditions"""

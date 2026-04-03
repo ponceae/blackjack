@@ -5,8 +5,8 @@ Tests some blackjack methods from blackjack.py
 @version 2.24.26
 """
 
-from blackjack.helper import can_split, get_hand_value, get_soft_value, is_split_aces, is_soft
-from blackjack.utilities import hit_hand, init_deal
+from blackjack.conditions import can_split, get_hand_value, get_soft_value, is_split_aces, is_soft
+from blackjack.actions import hit_hand, init_deal
 from blackjack.card import Card
 
 def test_is_split_aces():

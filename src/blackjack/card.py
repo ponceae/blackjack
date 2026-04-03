@@ -29,6 +29,7 @@ class Card:
 				return FACE_CARD_VALUE # Value of 10
 			else:
 				return DEFAULT_ACE_VALUE # Value of 11
+		return 0
 
 	def get_suit(self):
 		return self.suit

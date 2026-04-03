@@ -12,7 +12,7 @@ from .card import Card
 from .constants import CARD_RANKS, CARD_SUITS
 
 """
-Creates a standard 52-card deck.
+Creates a and returns a standard 52-card deck as a list.
 """		
 def create_deck():
 	deck = []		
@@ -22,14 +22,14 @@ def create_deck():
 	return deck
 	
 """
-Shuffles the virtual deck of cards.
+Shuffles and returns the deck of cards as a list.
 
 Uses a variation of the Fisher-Yates shuffle algorithm. 
 Reference Link: https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 """	
-def shuffle_deck(curr_deck):
-	for i in range(len(curr_deck) - 1, 0, -1):
+def shuffle_deck(deck: list):
+	for i in range(len(deck) - 1, 0, -1):
 		seed = random.randint(0, i)
-		curr_deck[i], curr_deck[seed] = curr_deck[seed], curr_deck[i]
-	return curr_deck
+		deck[i], deck[seed] = deck[seed], deck[i]
+	return deck
 		
