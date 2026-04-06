@@ -46,7 +46,7 @@ TIMER_MESSAGES = {
     4: 'Dealer is hitting... {}',  
     5: 'Comparing hand values... {}',  
     6: 'Dealer is flipping card... {}', 
-    7: 'You cannot afford that... {}'
+    7: 'You cannot afford that... {}',
 }
 
 PLAYER_CHIPS = 'player_chips'

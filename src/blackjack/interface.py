@@ -35,6 +35,7 @@ from .datatypes import (
 	Table
 )
 from .payout_calculator import push_payout, standard_payout
+from .actions import get_hand_value
 
 # ==========================================
 # DISPLAY
@@ -54,8 +55,8 @@ def compare_hands(table: Table, hand: PlayerHand, index: int):
 		int: The flag determining the round outcome.
 	"""
 	msg = 'Hand ' + ROMAN_NUMERALS[index + 1]
-	player_hand_value = table.player.hands[index].value
-	dealer_hand_value = table.dealer.value
+	player_hand_value = get_hand_value(hand)
+	dealer_hand_value = get_hand_value(table.dealer)
 	if player_hand_value == dealer_hand_value:
 		print(f'{msg} Push. Returned ${push_payout(hand):.2f}')
 		return PUSH
