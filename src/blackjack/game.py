@@ -206,7 +206,7 @@ def handle_hitting(table: Table, split: SplitHands, hand: PlayerHand, i: int):
 	"""
 	while interface.hit_or_stand() == constants.HIT:
 		actions.hit_hand(table, hand)
-		interface.clear_and_print()
+		interface.clear_and_print(table)
 		if conditions.is_bust(hand): 
 			prev_action = constants.BUST
 			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} has Busted\n')
@@ -317,17 +317,17 @@ def exe_dealer_control(table: Table):
 	interface.load_timer(constants.SHOW) 
 	table.dealer.is_hidden = False
 	interface.clear_and_print(table)
-	while actions.get_hand_value(table.dealer.cards) < 17: 
+	while actions.get_hand_value(table.dealer) < 17: 
 		interface.load_timer(constants.DEALER) 
 		actions.hit_hand(table, table.dealer) 
 		interface.clear_and_print(table)
 		if conditions.is_bust(table.dealer):
-			print('Dealer has Busted\n')
+			print('Dealer has Busted')
 			return
 		elif conditions.is_twenty_one(table.dealer):
-			print('Dealer is Standing\n')
+			print('Dealer is Standing')
 			return
-	print('Dealer is Standing\n')
+	print('Dealer is Standing')
 
 def verify_round_end_cond(table: Table):
 	""" 
@@ -343,7 +343,7 @@ def verify_round_end_cond(table: Table):
 	dealer_hand_value = actions.get_hand_value(table.dealer), 
 	dealer_bust = conditions.is_bust(table.dealer)
 	table.dealer.is_hidden = False
-	interface.print_hands
+	interface.print_hands(table)
 	for i, hand in enumerate(table.player.hands):
 		player_hand_value = actions.get_hand_value(hand)
 		player_bust = conditions.is_bust(hand)
@@ -355,7 +355,7 @@ def verify_round_end_cond(table: Table):
 			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} Win')
 			table.player.bank.add_chips(payout_calculator.standard_payout(hand))
 		elif not player_bust and not dealer_bust: 
-			outcome = interface.compare_hands(player_hand_value, dealer_hand_value, i)
+			outcome = interface.compare_hands(table, hand, i)
 			if outcome == constants.PUSH:
 				table.player.bank.add_chips(payout_calculator.push_payout(hand))
 			elif outcome == constants.PLAYER_WIN:
@@ -382,14 +382,16 @@ def get_player_wager(player: Player):
 Main blackjack game loop.
 """
 def blackjack(deck: list, player_bank: Bank):
+	"""
+	Execute the main blackjack game loop.
+
+	Args:
+		
+	"""
 	table = Table(Player(bank=player_bank))
+	table.deck = deck
 	while True:
 		wager_amount = get_player_wager(table.player)    
-		
-
-		# hand1 = PlayerHand(cards=[Card('Spades', 4), Card('Spades', 2)])
-		# hand2 = PlayerHand(cards=[Card('Spades', 'Ace'), Card('Spades', 10)])
-		# hands.player_hands, hands.dealer_hand = [[Card('Spades', 4), Card('Spades', 2)]], [Card('Spades', 'Ace'), Card('Spades', 10)]
 		round_done = False
 		
 		actions.initial_round_deal(table)

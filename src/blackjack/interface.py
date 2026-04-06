@@ -34,13 +34,14 @@ from .datatypes import (
 	PlayerHand,
 	Table
 )
+from .payout_calculator import push_payout, standard_payout
 
 # ==========================================
 # DISPLAY
 # Main CLI display functions.
 # ==========================================
 
-def compare_hands(table: Table, index: int):
+def compare_hands(table: Table, hand: PlayerHand, index: int):
 	"""
 	Compare the player and dealer hands at the end of the round and displays the 
 	outcome. Return the round outcome flag.
@@ -56,10 +57,10 @@ def compare_hands(table: Table, index: int):
 	player_hand_value = table.player.hands[index].value
 	dealer_hand_value = table.dealer.value
 	if player_hand_value == dealer_hand_value:
-		print(f'{msg} Push')
+		print(f'{msg} Push. Returned ${push_payout(hand):.2f}')
 		return PUSH
 	elif player_hand_value > dealer_hand_value:
-		print(f'{msg} Win')
+		print(f'{msg} Win. You Won ${standard_payout(hand):.2f}')
 		return PLAYER_WIN
 	elif player_hand_value < dealer_hand_value:
 		print(f'{msg} Lost')
@@ -157,7 +158,7 @@ def print_player_hands(table: Table, buffers: Buffers):
 		if table.player.hands[i].is_active:
 			buffers.player.append(' <- Active\n')
 		else:
-			print()
+			buffers.player.append('\n')
 		for card in hand.cards:
 			buffers.player.append(f'{card.to_string()}\n')
 		buffers.player.append('--------------------\n')

@@ -88,6 +88,7 @@ def initial_round_deal(table: Table):
  
 	for i in range(4):
 		if not table.deck:
+			print('Deck is empty. Adding cards.')
 			copy_deck(table.deck, create_and_shuffle())
 		card = table.deck.pop()
 		if i % 2 == 0:
