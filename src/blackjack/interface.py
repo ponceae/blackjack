@@ -58,14 +58,12 @@ def compare_hands(table: Table, hand: PlayerHand, index: int):
 	player_hand_value = get_hand_value(hand)
 	dealer_hand_value = get_hand_value(table.dealer)
 	if player_hand_value == dealer_hand_value:
-		print(f'{msg} Push. Returned ${push_payout(hand):.2f}')
-		return PUSH
+		return (f'{msg} Push, Returned ${push_payout(hand):.2f}\n'), PUSH
 	elif player_hand_value > dealer_hand_value:
-		print(f'{msg} Win. You Won ${standard_payout(hand):.2f}')
-		return PLAYER_WIN
+		return (f'{msg} Win, You Won ${standard_payout(hand):.2f}\n'), PLAYER_WIN
 	elif player_hand_value < dealer_hand_value:
-		print(f'{msg} Lost')
-		return DEALER_WIN
+		return (f'{msg} Lost\n'), DEALER_WIN
+	return '', 0
 
 def clear_and_print(table: Table):
 	"""
@@ -218,9 +216,9 @@ def _add_chips(player: Player):
 	"""
 	if request_chips() == YES:
 		while True:
-			chip_count = float(input('Enter the amount of chips to add.\n'))
-			if verify_chip_bounds(chip_count):
-				player.bank.add_chips(chip_count)
+			chips = float(input('Enter the amount of chips to add.\n'))
+			if verify_chip_bounds(chips):
+				player.bank.add_chips(chips)
 				break
 			print('Invalid Input, Must be a number between 15 - 1000.')
 
@@ -287,7 +285,7 @@ def wager_prompt(player: Player):
 				return wager
 			elif not valid_bet:
 				print('Not Enough Chips.')
-				_add_chips(player.bank)
+				_add_chips(player)
 				clear_terminal()
 				print(_print_min_bet(player.bank))
 			elif not verified_bet:

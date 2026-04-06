@@ -46,6 +46,7 @@ def compare_initial_hands(table: Table):
 		return PLAYER_WIN
 	elif not player_blackjack and dealer_blackjack:
 		return DEALER_WIN
+	return 0
 
 def is_bust(hand: Hand):
 	"""
@@ -101,7 +102,7 @@ def is_valid_wager(player: Player, wager: float | int):
 
 	Args: 
 		player (Player): The player whose bank is being checked.
-		hand (PlayerHand): The hand containing the wager.
+		wager (float | int): The wager to verify.
 
 	Returns:
 		bool: True if the player has enough chips, False otherwise.
@@ -145,7 +146,7 @@ def verify_insurance_bet(player: Player, hand: PlayerHand):
 	Returns:
 		bool: True if the player can afford insurance, False otherwise.
 	"""
-	return get_insurance_cost(hand.wager) <= player.bank.get_chip_count()
+	return get_insurance_cost(hand) <= player.bank.get_chip_count()
 
 def verify_min_bet(hand: PlayerHand):
 	"""

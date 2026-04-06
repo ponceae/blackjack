@@ -23,7 +23,7 @@ def blackjack_payout(hand: PlayerHand):
 	"""
 	return hand.wager * 2.5
 
-def insurance_logic(insurance: Insurance, wager: float | int, player: Player):
+def insurance_logic(insurance: Insurance, player: Player):
 	"""
 	Payout the insurance wager to the player, and update their bank.
 
@@ -35,23 +35,22 @@ def insurance_logic(insurance: Insurance, wager: float | int, player: Player):
 	Returns:
 		None
 	"""
-	insurance.payout = insurance_payout(insurance.cost, wager)
+	insurance.payout = insurance_payout(insurance.cost)
 	player.bank.add_chips(insurance.payout)
 
-def insurance_payout(insurance_cost: float | int, wager: float | int):
+def insurance_payout(insurance_cost: float | int):
 	"""
 	Return the insurance payout (half the wager) if the dealer has blackjack.
 
 	Args:
 		insurance_cost (float | int): The cost for purchasing insurance
-		hand (PlayerHand): The hand containing the wager.
 
 	Returns:
 		float | int: The insurance payout.
 	"""
 	return insurance_cost * 2.0
 
-def get_insurance_cost(wager: float | int):
+def get_insurance_cost(hand: PlayerHand):
 	"""
 	Return the cost for purchasing insurance (half the wager).
 	Usage: round down and then divide by 1/2. (Ex. 5.5 -> 5 -> 2.5))
@@ -62,7 +61,7 @@ def get_insurance_cost(wager: float | int):
 	Returns:
 		float | int: The cost for insurance.
 	"""
-	return math.floor(wager) * 0.5
+	return math.floor(hand.wager) * 0.5
 
 def push_payout(hand: PlayerHand):
 	"""

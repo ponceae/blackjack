@@ -10,8 +10,7 @@ from .card import Card
 from .bank import Bank
 from . import constants
 from .datatypes import (
-	DealerHand, 
-	Hand, 
+    Buffers,
 	Insurance, 
 	Outcome, 
 	Player,
@@ -75,7 +74,7 @@ def handle_insurance(insurance: Insurance, table: Table):
 	Returns:
 		None
 	"""
-	insurance.cost = payout_calculator.get_insurance_cost(table.player.hands[0].wager)
+	insurance.cost = payout_calculator.get_insurance_cost(table.player.hands[0])
 	player_hand = table.player.hands[0]
 	if (
 		table.dealer.cards[0].rank == 'Ace'  
@@ -135,11 +134,7 @@ def insurance_helper(insurance: Insurance, table: Table):
 	"""
 	if insurance.active:
 		insurance.win = True
-		payout_calculator.insurance_logic(
-			insurance, 
-			table.player.hands[0].wager, 
-			table.player
-		)
+		payout_calculator.insurance_logic(insurance, table.player)
 
 # ==================================================
 # PLAYER TURN ACTIONS
@@ -174,7 +169,7 @@ def exe_player_control(table: Table):
 				interface.double_or_not() == constants.YES 
 				and conditions.verify_doubled_wager(table.player, table.player.hands[0])
 			):
-				action = handle_double_down(table, i)
+				action = handle_double_down(table, i, split)
 				if action == PlayerAction.NEXT_HAND:
 					continue
 				else:
@@ -185,7 +180,7 @@ def exe_player_control(table: Table):
 				if action == PlayerAction.NEXT_HAND:
 					continue
 				if prev_action not in (constants.BUST, constants.STAND): 
-					interface.clear_and_print()
+					interface.clear_and_print(table)
 					print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} is Standing\n')
 					if hands_left(split, table.player.hands, i):
 						continue
@@ -211,14 +206,14 @@ def handle_hitting(table: Table, split: SplitHands, hand: PlayerHand, i: int):
 		interface.clear_and_print(table)
 		if conditions.is_bust(hand): 
 			prev_action = constants.BUST
-			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} has Busted\n')
+			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} has Busted')
 			if hands_left(split, table.player.hands, i):
 				return prev_action, PlayerAction.NEXT_HAND
 			else:
 				return prev_action, PlayerAction.END_TURN
 		elif conditions.is_twenty_one(hand):  
 			prev_action = constants.STAND
-			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} is Standing\n')
+			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} is Standing')
 			if hands_left(split, table.player.hands, i):
 				return prev_action, PlayerAction.NEXT_HAND
 			else:
@@ -229,13 +224,13 @@ def handle_hitting(table: Table, split: SplitHands, hand: PlayerHand, i: int):
 	else:
 		return prev_action, PlayerAction.END_TURN
 
-def hands_left(split: SplitHands, player_hands: PlayerHand, i: int):
+def hands_left(split: SplitHands, player_hands: list[PlayerHand], i: int):
 	"""
 	Return True if the player has another hand after doubling down.
 
 	Args:
 		split (SplitHands): The split hands flag container.
-		player_hands (PlayerHand): The current player hand to check.
+		player_hands (list[PlayerHand]): All of the player's current hands.
 		i (int): The current hand pointer.
 
 	Returns:
@@ -344,30 +339,33 @@ def verify_round_end_cond(table: Table):
 	Returns:
 		None
 	"""
+	tmp_buffer = []
+	outcome = Outcome()
 	dealer_bust = conditions.is_bust(table.dealer)
 	table.dealer.is_hidden = False
 	interface.print_hands(table)
 	for i, hand in enumerate(table.player.hands):
 		player_bust = conditions.is_bust(hand)
 		if player_bust:
-			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} Busted & Lost')
-			# Check next hand if applicable or exit on a bust
+			tmp_buffer.append(f'Hand {constants.ROMAN_NUMERALS[i + 1]} Busted & Lost\n')
+			# Check next hand if applicable or exit on a bust.
 			continue 
 		elif not player_bust and dealer_bust:
 			table.player.bank.add_chips(payout_calculator.standard_payout(hand))
-			interface.clear_and_print(table)
-			print(
+			tmp_buffer.append(
 				f'Hand {constants.ROMAN_NUMERALS[i + 1]} Win. ' 
-				f'You Won {payout_calculator.standard_payout(hand):.2f}'
+				f'You Won ${payout_calculator.standard_payout(hand):.2f}\n'
 			)	
 		elif not player_bust and not dealer_bust: 
-			outcome = interface.compare_hands(table, hand, i)
+			msg, outcome.flag = interface.compare_hands(table, hand, i)
+			tmp_buffer.append(msg)
 			if outcome == constants.PUSH:
 				table.player.bank.add_chips(payout_calculator.push_payout(hand))
-				interface.clear_and_print(table)
 			elif outcome == constants.PLAYER_WIN:
 				table.player.bank.add_chips(payout_calculator.standard_payout(hand))
-				interface.clear_and_print(table)
+	interface.clear_and_print(table)
+	for strings in tmp_buffer:
+		print(*strings, sep='', end='')
 	if interface.is_new_round():
 		return True
 
@@ -401,48 +399,18 @@ def blackjack(deck: list, player_bank: Bank):
 	table.deck = deck
 	while True:
 		wager_amount = get_player_wager(table.player)    
-		round_done = False
-		
+		round_done = False		
 		actions.initial_round_deal(table)
-		# TEST VARIABLES. DELETE WHEN DONE
 		table.player.hands[0].wager = wager_amount
-		table.player.hands[0].cards = [Card('Spades', 4), Card('Spades', 4)]
-		# hand2 = PlayerHand(cards=[Card('Spades', 4), Card('Spades', 4)])
-		# table.player.hands.append(hand2)
-		table.dealer.cards = [Card('Spades', 3), Card('Spades', 4)]
-		# ========================================
-		# BUG TO CATCH -> NO ROUND OUTCOME MESSAGE
-		# ========================================
-		# Dealer: 21
-		# ♠3
-		# ♠4
-		# ♣3
-		# ♦5
-		# ♥6
-		# --------------------
-		# Hand I: 15 [$15.00]
-		# ♠4
-		# ♠10
-		# ♦Ace
-		# --------------------
-		# Hand II: 21 [$15.00]
-		# ♠4
-		# ♠7
-		# ♥10
-		# --------------------
-		# Chips $15.00
-		#
-		# New game with the same deck? (Y) / (N)
-		# =========================================
 		interface.print_hands(table)
-		round_done = round_done or exe_initial_cond(table)
-		
+		round_done = round_done or exe_initial_cond(table)	
 		if not round_done: 
 			exe_player_control(table)
 			exe_dealer_control(table)
 			interface.load_timer(constants.CHECK)
 			interface.clear_terminal()
-			round_done = verify_round_end_cond(table)
+		round_done = verify_round_end_cond(table)
+		if round_done:
 			break
   
 def main():
