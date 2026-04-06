@@ -24,7 +24,7 @@ from .payout_calculator import blackjack_payout
 # Hand modification & initialization
 # ==========================================
 
-def copy_deck(old_deck: list[Card], new_deck: list[Card]):
+def _copy_deck(old_deck: list[Card], new_deck: list[Card]):
 	"""
 	Copy the shuffled `new_deck` into `old_deck`.
 	
@@ -71,7 +71,7 @@ def hit_hand(table: Table, hand: Hand):
 			hand.cards.append(table.deck.pop())
 			break
 		print('Deck is empty. Adding cards.')
-		copy_deck(table.deck, create_and_shuffle())
+		_copy_deck(table.deck, create_and_shuffle())
 
 def initial_round_deal(table: Table):
 	"""
@@ -89,7 +89,7 @@ def initial_round_deal(table: Table):
 	for i in range(4):
 		if not table.deck:
 			print('Deck is empty. Adding cards.')
-			copy_deck(table.deck, create_and_shuffle())
+			_copy_deck(table.deck, create_and_shuffle())
 		card = table.deck.pop()
 		if i % 2 == 0:
 			table.player.hands[0].cards.append(card)

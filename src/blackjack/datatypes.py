@@ -1,5 +1,5 @@
 """ 
-Create a container to store player and dealer data.
+Create a container to store player and dealer data and game state information.
 
 Author: Adrien P.
 """
@@ -11,6 +11,9 @@ from dataclasses import dataclass, field
 from .bank import Bank
 from .card import Card    
 
+# ==============================
+# MISCELLANEOUS GAME STATE DATA.
+# ==============================
 class Buffers(NamedTuple):
 	dealer: list
 	player: list
@@ -19,6 +22,10 @@ class Buffers(NamedTuple):
 class PlayerAction(Enum):
     NEXT_HAND = 1
     END_TURN = 2
+
+# =======================
+# GAME STATE INFORMATION.
+# =======================
 
 @dataclass
 class Insurance():
@@ -33,29 +40,33 @@ class Outcome():
      payout: int | float = 0
 
 @dataclass
+class SplitHands:
+    split_hand: bool = False
+    split_aces: bool = False
+
+# ============================================
+# DEALER, PLAYER, AND GAME TABLE INFORMATION.
+# ============================================
+
+@dataclass
 class Hand:
     value: int = 0
     cards: list[Card] = field(default_factory=list)    
+
+@dataclass
+class DealerHand(Hand):
+    is_hidden: bool = True
 
 @dataclass
 class PlayerHand(Hand):
     wager: float = 0.0
     insurance_wager: float = 0.0
     is_active: bool = False
-
-@dataclass
-class DealerHand(Hand):
-    is_hidden: bool = True
  
 @dataclass
 class Player:
     bank: Bank = field(default_factory=lambda: Bank(0))
     hands: list[PlayerHand] = field(default_factory=list)
-
-@dataclass
-class SplitHands:
-    split_hand: bool = False
-    split_aces: bool = False
 
 @dataclass
 class Table:

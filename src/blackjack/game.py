@@ -386,15 +386,16 @@ def get_player_wager(player: Player):
 	player.bank.remove_chips(wager) # Initial bet, remove chips
 	return wager
 						
-"""
-Main blackjack game loop.
-"""
 def blackjack(deck: list, player_bank: Bank):
 	"""
 	Execute the main blackjack game loop.
 
 	Args:
-		
+		deck (list): The table deck of cards.
+		player_bank (Bank): The player's bank containing their chip count.
+	
+	Returns:
+		None
 	"""
 	table = Table(Player(bank=player_bank))
 	table.deck = deck
@@ -445,6 +446,10 @@ def blackjack(deck: list, player_bank: Bank):
 			break
   
 def main():
+	"""
+	Start the Blackjack game. Initialize the player bank and begin the main 
+	game loop.
+	"""
 	print('Blackjack Pays 3:2\n' + 
 		'Dealer Stands on Soft 17\n' +
 		  'Insurance Pays 2:1\n')

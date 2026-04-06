@@ -91,14 +91,14 @@ def print_hands(table: Table):
 		None
 	"""
 	buffers = Buffers([], [], [])
-	print_dealer_hands(table, buffers)
-	print_player_hands(table, buffers)
+	_print_dealer_hands(table, buffers)
+	_print_player_hands(table, buffers)
 
 	for strings in buffers.main:
 		print(*strings, sep='', end='')
 	print()
 
-def print_dealer_hands(table: Table, buffers: Buffers):
+def _print_dealer_hands(table: Table, buffers: Buffers):
 	"""
 	Display the dealer hands or the dealer's first card depending on the game state.
 	Display insurance if purchased by the player.
@@ -133,7 +133,7 @@ def print_dealer_hands(table: Table, buffers: Buffers):
 	buffers.dealer.append('--------------------\n')
 	buffers.main.append(buffers.dealer)
 
-def print_player_hands(table: Table, buffers: Buffers):
+def _print_player_hands(table: Table, buffers: Buffers):
 	"""
 	Display the player's hands and wager. If player hands are split, display the
 	active hand.
@@ -154,7 +154,7 @@ def print_player_hands(table: Table, buffers: Buffers):
 			buffers.player.append(f'{player_soft_values[i]} / ')
 		buffers.player.append(
 			f'{player_hand_values[i]}'
-			f'{print_wager(table.player.hands[i].wager)}'
+			f'{_print_wager(table.player.hands[i].wager)}'
 		) 
 		if table.player.hands[i].is_active:
 			buffers.player.append(' <- Active\n')
@@ -205,7 +205,7 @@ def print_initial_insurance_outcome(insurance: Insurance):
 # Prompt user for input.
 # ==========================================
 
-def add_chips(player: Player):
+def _add_chips(player: Player):
 	"""
 	Prompt the user if they wish to add chips to their bank and updates the
 	chip count.
@@ -277,7 +277,7 @@ def wager_prompt(player: Player):
 	Returns:
 		None
 	"""
-	print(print_min_bet(player.bank))
+	print(_print_min_bet(player.bank))
 	while True:
 		try:
 			wager = float(input('Enter Wager:\n'))
@@ -287,9 +287,9 @@ def wager_prompt(player: Player):
 				return wager
 			elif not valid_bet:
 				print('Not Enough Chips.')
-				add_chips(player.bank)
+				_add_chips(player.bank)
 				clear_terminal()
-				print(print_min_bet(player.bank))
+				print(_print_min_bet(player.bank))
 			elif not verified_bet:
 				print('Wager is Too Small.')
 		except ValueError:
@@ -361,7 +361,7 @@ def clear_terminal():
 	"""
 	subprocess.run('cls', shell=True)
 
-def print_min_bet(player_bank: Bank):
+def _print_min_bet(player_bank: Bank):
 	"""
 	Display the player's bank and the table's minimum bet.
 
@@ -395,7 +395,7 @@ def load_timer(timer_flag_key: int=-1):
 		print(timer_message.format(i), end='\r')
 		time.sleep(1)
 
-def print_wager(wager: float | int):
+def _print_wager(wager: float | int):
 	"""
 	Display the player wager in two-decimal format.
 

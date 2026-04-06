@@ -5,6 +5,9 @@ Author: Adrien P.
 """
 from pathlib import Path
 
+# ==================
+# CARD VARIABLES
+# ==================
 ACE_ALT_VALUE = 1
 DEFAULT_ACE_VALUE = 11
 FACE_CARD_VALUE = 10
@@ -19,6 +22,9 @@ CARD_SUIT_SYMBOLS = {
     'Spades': '♠',
 }
 
+# ==================
+# I/O FLAGS
+# ==================
 HIT = 'H'
 STAND = 'S'
 NO = 'N'
@@ -26,12 +32,16 @@ YES = 'Y'
 BUST = 'B'
 DOUBLE = 'D'
 
+# ==================
+# OUTCOME FLAGS
+# ==================
 PLAYER_WIN = 1
 DEALER_WIN = 2
 PUSH = 3
 
-ROMAN_NUMERALS = {1: 'I', 2: 'II'}
-
+# ==================
+# TIMER FLAGS
+# ==================
 INITIAL = 1
 PLAYER = 2
 SWITCH_TURN = 3
@@ -49,7 +59,12 @@ TIMER_MESSAGES = {
     7: 'You cannot afford that... {}',
 }
 
+# ==================
+# JSON FILE INFO
+# ==================
 PLAYER_CHIPS = 'player_chips'
-MIN_BET = 15
-
 FILE_PATH = Path(__file__).parent / 'save_data.json'
+
+# Miscellaneous constants
+MIN_BET = 15
+ROMAN_NUMERALS = {1: 'I', 2: 'II'}
