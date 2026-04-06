@@ -1,16 +1,30 @@
 """
-This file contains the functionality for creating a standard 52-card deck.
+Define the Card class for representing a single playing card.
 
-@author Adrien P.
-@version 3.16.26
+Author: Adrien P.
 """
 
-from .constants import DEFAULT_ACE_VALUE, CARD_SUITS, CARD_SUIT_SYMBOLS, FACE_CARD_VALUE, NAMED_CARD_RANKS
+from .constants import (
+    DEFAULT_ACE_VALUE, 
+    CARD_SUITS, 
+    CARD_SUIT_SYMBOLS, 
+    FACE_CARD_VALUE, 
+    NAMED_CARD_RANKS
+)
 
 class Card:
-	
-	def __init__ (self, suit, rank):
-		if isinstance(suit, str) and suit.capitalize() in CARD_SUITS: # Verify suit value
+	"""Represent a single playing card with rank and suit."""
+
+	def __init__ (self, suit: str, rank: int | str):
+		"""
+		Initialize a Card with a given rank and suit.
+
+		Args:
+			suit (str): The suit of the card ('Clubs', 'Diamonds', 'Hearts', 'Spades').
+			rank (int | str): The rank of the card. (2-10, 'Jack', 'Queen', 'King', 
+				'Ace').
+		"""
+		if isinstance(suit, str) and suit.capitalize() in CARD_SUITS:
 			self.suit = suit.capitalize()
 		else:
 			raise ValueError('Invalid Suit. Clubs, Diamonds, Hearts, Spades')
@@ -19,9 +33,15 @@ class Card:
 		elif isinstance(rank, str) and rank.capitalize() in NAMED_CARD_RANKS:
 			self.rank = rank.capitalize()
 		else:
-			raise ValueError('Invalid Rank. 2-11, Jack, King, Queen, Ace')
+			raise ValueError('Invalid Rank. 2-10, Jack, King, Queen, Ace')
 	
 	def get_rank_value(self):
+		"""
+		Return the rank value of the Card.
+
+		Returns:
+			int: The card's rank value.
+		"""
 		if isinstance(self.rank, int):
 			return self.rank
 		elif isinstance(self.rank, str):
@@ -32,8 +52,20 @@ class Card:
 		return 0
 
 	def get_suit(self):
+		"""
+		Return the suit of the card.
+
+		Returns:
+			str: The card's suit.
+		"""
 		return self.suit
 
 	def to_string(self):
-		return CARD_SUIT_SYMBOLS[self.suit] + str(self.rank) 
+		"""
+		Return the string representation of the card.
+
+		Returns:
+			str: The string representation (e.g., ♦5).
+		"""
+		return f'{CARD_SUIT_SYMBOLS[self.suit]}{str(self.rank)}'
 		

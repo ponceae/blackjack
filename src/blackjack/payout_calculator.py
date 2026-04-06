@@ -1,0 +1,89 @@
+""" 
+Blackjack payout functions.
+
+This module contains functions for calculating the payout for a blackjack win, an 
+insurance win, double down and splits, and pushes.
+
+Author: Adrien P.
+"""
+
+import math
+
+from .datatypes import Insurance, Player, PlayerHand
+
+def blackjack_payout(hand: PlayerHand):
+	"""
+	Return the payout for a natural blackjack win (3:2 odds)
+
+	Args: 
+		hand (PlayerHand): The hand containing the wager.
+
+	Returns:
+		float | int: The blackjack payout.
+	"""
+	return hand.wager * 2.5
+
+def insurance_logic(insurance: Insurance, hand: PlayerHand, player: Player):
+	"""
+	Payout the insurance wager to the player, and update their bank.
+
+	Args:
+		insurance (Insurance): Contains the insurance information.
+		hand (PlayerHand): The hand containing the wager.
+		player (Player): The player to payout the wager to.
+
+	Returns:
+		None
+	"""
+	insurance.payout = insurance_payout(insurance.cost, hand.wager)
+	player.bank.add_chips(insurance.payout)
+
+def insurance_payout(insurance_cost: float | int, hand: PlayerHand):
+	"""
+	Return the insurance payout (half the wager) if the dealer has blackjack.
+
+	Args:
+		insurance_cost (float | int): The cost for purchasing insurance
+		hand (PlayerHand): The hand containing the wager.
+
+	Returns:
+		float | int: The insurance payout.
+	"""
+	return insurance_cost + hand.wager
+
+def get_insurance_cost(wager: float | int):
+	"""
+	Return the cost for purchasing insurance (half the wager).
+	Usage: round down and then divide by 1/2. (Ex. 5.5 -> 5 -> 2.5))
+
+	Args:
+		hand (PlayerHand): The hand containing the wager.
+	
+	Returns:
+		float | int: The cost for insurance.
+	"""
+	return math.floor(wager) * 0.5
+
+def push_payout(hand: PlayerHand):
+	"""
+	Return the original wager back to the player.
+
+	Args:
+		hand (PlayerHand): The hand containing the wager.
+
+	Returns:
+		float | int: The original wager.
+	"""
+	return hand.wager
+
+def standard_payout(hand: PlayerHand):
+	"""
+	Return the standard payout for a win (1:1 odds).
+
+	Args:
+		hand (PlayerHand): The hand containing the wager.
+
+	Returns:
+		float | int: The standard payout.
+	"""
+	return hand.wager * 2.0

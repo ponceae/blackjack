@@ -1,10 +1,9 @@
 """
-This file stores any needed immutable global variables.
-Does not contain any functions.
+Constants for configuring game information. Does not contain any functions.
 
-@author: Adrien P.
-@version: 3.28.26
+Author: Adrien P.
 """
+from pathlib import Path
 
 ACE_ALT_VALUE = 1
 DEFAULT_ACE_VALUE = 11
@@ -52,3 +51,5 @@ TIMER_MESSAGES = {
 
 PLAYER_CHIPS = 'player_chips'
 MIN_BET = 15
+
+FILE_PATH = Path(__file__).parent / 'save_data.json'

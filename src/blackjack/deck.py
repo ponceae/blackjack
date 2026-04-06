@@ -3,7 +3,7 @@ This file creates a standard 52-card deck represented as a list. It also contain
 functionality for shuffling a deck with the same characteristics.
 
 @author: Adrien P.
-@version: 3.16.26
+@version: 4.3.26
 """
 
 import random

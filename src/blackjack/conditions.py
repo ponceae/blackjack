@@ -1,28 +1,45 @@
 """
-Contains the main boolean logic for blackjack.
+Blackjack game state verifiers.
 
-Also contains CLI output functions.
+This module contains functions for checking hand states, game states, and 
+player bank statuses.
 
-@author Adrien P.
-@version 3.23.26
+Author: Adrien P.
 """
 
-from .datatypes import Hand, Player, PlayerHand, DealerHand, Table 
-from .constants import HIT, NO, ROMAN_NUMERALS, STAND, YES, PLAYER_WIN, DEALER_WIN, PUSH
 from .actions import get_hand_value, get_soft_value
+from .constants import MIN_BET, PLAYER_WIN, DEALER_WIN, PUSH
+from .datatypes import Hand, Player, PlayerHand, Table 
+from.payout_calculator import get_insurance_cost
 
-"""
-Returns true if the hand can be split.
-"""
-def can_split(hand):
-	return hand[0].rank == hand[1].rank
+def can_split(hand: Hand):
+	"""
+	Return True if the first two cards in the hand have the same rank.
+	
+	Args:
+		hand (Hand): The hand to check.
+	
+	Returns:
+		bool: True if the hand can be split, False otherwise.
+	"""
+	return hand.cards[0].rank == hand.cards[1].rank
 
-"""
-Compares the hands at the start of the round and returns the outcome.
-"""
-def compare_initial_hands(player_hand, dealer_hand):
-	player_blackjack = is_twenty_one(player_hand)
-	dealer_blackjack = is_twenty_one(dealer_hand)
+def compare_initial_hands(table: Table):
+	"""
+	Compare the hands at the start of the round and return the outcome flag if 
+	applicable.
+	
+	Args:
+		table (Table): The current game table containing the player and dealer hands.
+	
+	Returns:
+		int: Outcome flag of the round.
+			 PLAYER_WIN if the player has blackjack, 
+			 DEALER_WIN if the dealer has blackjack, 
+			 PUSH if both have blackjack.
+	"""
+	player_blackjack = is_twenty_one(table.player.hands[0])
+	dealer_blackjack = is_twenty_one(table.dealer)
 	if player_blackjack and dealer_blackjack:
 		return PUSH
 	elif player_blackjack and not dealer_blackjack:
@@ -30,50 +47,114 @@ def compare_initial_hands(player_hand, dealer_hand):
 	elif not player_blackjack and dealer_blackjack:
 		return DEALER_WIN
 
-"""
-Returns true if the current hand value is greater than 21.
-"""	
-def is_bust(hand):
+def is_bust(hand: Hand):
+	"""
+	Return True if the hand's total value exceeds 21.
+	
+	Args:
+		hand (Hand): The hand to check.
+	
+	Returns:
+		bool: True if bust, False otherwise.
+	"""	
 	return get_hand_value(hand) > 21
 
-"""
-Returns true if the current hand is considered soft.
-"""
-def is_soft(hand):
+def is_soft(hand: Hand):
+	"""
+	Return True if the hand treats any Ace as 1 (soft hand).
+	
+	Args:
+		hand (Hand): The hand to check.
+	
+	Returns:
+		bool: True if soft, False otherwise.
+	"""
 	return get_soft_value(hand) != get_hand_value(hand)
+	
+def is_split_aces(hand: Hand):
+	"""
+	Return True if the hand contains 2 Aces.
 
-"""
-Returns true if the hand contains 2 aces.
-"""		
-def is_split_aces(hand):
-	return hand[0].rank == "Ace" and hand[1].rank == "Ace"
-		
-"""
-Returns true if the current hand value equals 21.
-"""	
-def is_twenty_one(hand):
+	Args:
+		hand (Hand): The hand to check.
+	
+	Returns:
+		bool: True if split Aces, False otherwise.
+	"""	
+	return hand.cards[0].rank == 'Ace' and hand.cards[1] == 'Ace'
+
+def is_twenty_one(hand: Hand):
+	"""
+	Return True if the hand's total value equals 21.
+
+	Args:
+		hand (Hand): The hand to check.
+	
+	Returns:
+		bool: True if the hand value is 21, False otherwise.
+	"""	
 	return get_hand_value(hand) == 21
 
-""" 
-Returns true if the player has enough chips for the requested bet. 
-"""
-def is_valid_bet_helper(player_bank, wager):
-	return wager <= player_bank.get_chip_count()
+def is_valid_wager(player: Player, wager: float | int):
+	"""
+	Return True if the player has enough chips to cover the hand's wager.
 
-""" 
-Returns true if the chip count is between 15 - 1000 AND is an int or float.
-"""            
-def verify_chip_bounds(chip_count):
-	return isinstance(chip_count, (int, float)) and 15 <= chip_count <= 1000
+	Args: 
+		player (Player): The player whose bank is being checked.
+		hand (PlayerHand): The hand containing the wager.
 
-""" 
-Returns true if the player has enough chips to double down/split.
-"""
-def verify_double_bet(player_bank, wager):
-	return wager <= player_bank.get_chip_count()
+	Returns:
+		bool: True if the player has enough chips, False otherwise.
+	"""
+	return wager <= player.bank.get_chip_count()
+          
+def verify_chip_bounds(chips: float | int):
+	"""
+	Return True if `chips` is a number between 15 - 1000 (inclusive).
 
-""" 
-Returns true if the player has enough chips for insurance.
-"""
-def verify_insurance_bet(player_bank, wager): 
-	return get_insurance_cost(wager) <= player_bank.get_chip_count()
+	Args:
+		chips (float | int): The amount of chips to validate
+	
+	Returns:
+		bool: True if the `chips` is within bounds, False otherwise.
+	"""
+	return isinstance(chips, (int, float)) and 15 <= chips <= 1000
+
+def verify_doubled_wager(player: Player, hand: PlayerHand):
+	""" 
+	Return True if the player has enough chips to double down or split (match the 
+	current wager).
+
+	Args:
+		player (Player): The player whose bank is being checked.
+		hand (PlayerHand): The hand containing the wager.
+	
+	Returns:
+		bool: True if the player can afford to double the wager, False otherwise.
+	"""
+	return hand.wager <= player.bank.get_chip_count()
+
+def verify_insurance_bet(player: Player, hand: PlayerHand): 
+	"""
+	Return True if the player can afford insurance (half the current wager).
+
+	Args:
+		player (Player): The player whose bank is being checked.
+		hand (PlayerHand): The hand containing the wager.
+
+	Returns:
+		bool: True if the player can afford insurance, False otherwise.
+	"""
+	return get_insurance_cost(hand.wager) <= player.bank.get_chip_count()
+
+def verify_min_bet(hand: PlayerHand):
+	"""
+	Return True if the current wager meets the required minimum bet.
+
+	Args:
+		hand (PlayerHand): The hand containing the wager.
+	
+	Returns:
+		bool: True if the player meets the minimum bet, False otherwise.
+	"""
+	return hand.wager >= MIN_BET
