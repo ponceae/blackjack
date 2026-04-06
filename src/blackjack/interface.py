@@ -13,7 +13,13 @@ import time
 
 from .actions import get_hand_value, get_soft_value
 from .bank import Bank
-from .conditions import is_soft, is_twenty_one, is_valid_wager, verify_chip_bounds
+from .conditions import (
+    is_soft, 
+    is_twenty_one, 
+    is_valid_wager, 
+    verify_chip_bounds, 
+    verify_chip_count
+)
 from .constants import (
 	DEALER_WIN, 
 	HIT, 
@@ -35,7 +41,7 @@ from .datatypes import (
 	Table
 )
 from .payout_calculator import push_payout, standard_payout
-from .actions import get_hand_value
+from .storage import load_user_data, save_chips
 
 # ==========================================
 # DISPLAY
@@ -249,7 +255,7 @@ def hit_or_stand():
 			return choice.upper()
 		print('Invalid Choice, (H) HIT / (S) STAND')
 
-def is_new_round():
+def is_new_round(table: Table):
 	"""
 	Prompt the user if they wish to continue the round with the same game deck and
 	return their choice.
@@ -259,7 +265,8 @@ def is_new_round():
 	"""
 	input = request_new_round()
 	if input == NO:
-		print('\nExiting Blackjack')
+		print('\nExiting Blackjack & Saving Data.')
+		save_chips(table.player.username, table.player.bank.chips, load_user_data())
 		sys.exit()
 	elif input == YES:
 		clear_terminal()
@@ -278,20 +285,34 @@ def wager_prompt(player: Player):
 	print(_print_min_bet(player.bank))
 	while True:
 		try:
+			if not verify_chip_count(player.bank.chips):
+				_wager_prompt_helper(player)
 			wager = float(input('Enter Wager:\n'))
 			valid_bet = is_valid_wager(player, wager)
 			verified_bet = verify_chip_bounds(wager)
 			if valid_bet and verified_bet:
 				return wager
 			elif not valid_bet:
-				print('Not Enough Chips.')
-				_add_chips(player)
-				clear_terminal()
-				print(_print_min_bet(player.bank))
+				_wager_prompt_helper(player)
 			elif not verified_bet:
 				print('Wager is Too Small.')
 		except ValueError:
 			print('Please Enter a Valid Number.')
+
+def _wager_prompt_helper(player: Player):
+	"""
+	Add chips to the player's bank if they do not have enough for the minimum bet.
+
+	Args:
+		player (Player): The player containing the bank of chips.
+
+	Returns:
+		None
+	"""
+	print('Not Enough Chips.')
+	_add_chips(player)
+	clear_terminal()
+	print(_print_min_bet(player.bank))
 
 def request_chips():
 	"""
@@ -328,7 +349,7 @@ def request_new_round():
 		str: The user's yes or no decision.
 	"""
 	while True:
-		choice = input('\nNew game with the same deck? (Y) / (N)\n')
+		choice = input('\nContinue? (Y) / (N)\n')
 		if choice.upper() in (YES, NO):
 			return choice.upper()
 		print('Invalid Choice, (Y) YES / (N) NO')

@@ -114,12 +114,24 @@ def verify_chip_bounds(chips: float | int):
 	Return True if `chips` is a number between 15 - 1000 (inclusive).
 
 	Args:
-		chips (float | int): The amount of chips to validate
+		chips (float | int): The amount of chips to validate.
 	
 	Returns:
 		bool: True if the `chips` is within bounds, False otherwise.
 	"""
 	return isinstance(chips, (int, float)) and 15 <= chips <= 1000
+
+def verify_chip_count(chips: int | float):
+	"""
+	Return True if `chips` is greater than or equal to the MIN_BET.
+
+	Args:
+		chips (float | int): The amount of chips to validate.
+
+	Returns:
+		bool: True if `chips` is greater than the MIN_BET.
+	"""
+	return chips >= MIN_BET
 
 def verify_doubled_wager(player: Player, hand: PlayerHand):
 	""" 

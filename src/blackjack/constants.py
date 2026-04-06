@@ -3,11 +3,13 @@ Constants for configuring game information. Does not contain any functions.
 
 Author: Adrien P.
 """
+
 from pathlib import Path
 
 # ==================
 # CARD VARIABLES
 # ==================
+
 ACE_ALT_VALUE = 1
 DEFAULT_ACE_VALUE = 11
 FACE_CARD_VALUE = 10
@@ -25,6 +27,7 @@ CARD_SUIT_SYMBOLS = {
 # ==================
 # I/O FLAGS
 # ==================
+
 HIT = 'H'
 STAND = 'S'
 NO = 'N'
@@ -35,6 +38,7 @@ DOUBLE = 'D'
 # ==================
 # OUTCOME FLAGS
 # ==================
+
 PLAYER_WIN = 1
 DEALER_WIN = 2
 PUSH = 3
@@ -42,6 +46,7 @@ PUSH = 3
 # ==================
 # TIMER FLAGS
 # ==================
+
 INITIAL = 1
 PLAYER = 2
 SWITCH_TURN = 3
@@ -62,6 +67,7 @@ TIMER_MESSAGES = {
 # ==================
 # JSON FILE INFO
 # ==================
+
 PLAYER_CHIPS = 'player_chips'
 FILE_PATH = Path(__file__).parent / 'save_data.json'
 

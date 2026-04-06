@@ -8,16 +8,9 @@ Author: Adrien P.
 """
 
 from .card import Card
-from .constants import ACE_ALT_VALUE, DEFAULT_ACE_VALUE, PLAYER_WIN, PUSH
-from .datatypes import (
-    DealerHand, 
-    Hand, 
-    Player, 
-    PlayerHand, 
-    Table
-)
+from .constants import ACE_ALT_VALUE, DEFAULT_ACE_VALUE
+from .datatypes import (DealerHand, Hand, PlayerHand, Table)
 from .deck import create_deck, shuffle_deck
-from .payout_calculator import blackjack_payout
 
 # ==========================================
 # GAME ACTIONS
@@ -50,7 +43,6 @@ def create_split_hands(table: Table):
 	"""
 	popped_card = table.player.hands[0].cards.pop()
 	new_hand = PlayerHand(cards=[popped_card])
- 
 	table.player.hands.append(new_hand)
 	for hand in table.player.hands:
 		hit_hand(table, hand)
@@ -114,13 +106,15 @@ def get_hand_value(hand: Hand):
 	value, ace_count = 0, 0
 	for card in hand.cards:
 		if card.rank == 'Ace':	
-			value += DEFAULT_ACE_VALUE # Default ace value is 11
+			# Default ace value is 11
+			value += DEFAULT_ACE_VALUE 
 			ace_count += 1 
 		else:
 			value += card.get_rank_value()
 	while ace_count > 0 and value > 21: 
 		value -= DEFAULT_ACE_VALUE
-		value += ACE_ALT_VALUE # Alternate ace value is 1
+		# Alternate ace value is 1
+		value += ACE_ALT_VALUE 
 		ace_count -= 1
 	return value
 	
@@ -137,7 +131,8 @@ def get_soft_value(hand: Hand):
 	soft_value = 0
 	for card in hand.cards:
 		if card.rank == 'Ace':
-			soft_value += ACE_ALT_VALUE # Alternate ace value is 1
+			# Alternate ace value is 1
+			soft_value += ACE_ALT_VALUE 
 		else:
 			soft_value += card.get_rank_value()
 	return soft_value

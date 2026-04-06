@@ -18,8 +18,8 @@ class Bank:
             chips = float(chips)
         except ValueError:
             raise ValueError('Invalid Chip Count. Must be a number')
-        if not (15 <= chips <= 1000):
-            raise ValueError('Invalid Chip Count. Must be a number between 15 - 1000')
+        if not (0 <= chips <= 1000):
+            raise ValueError('Invalid Chip Count. Must be a number between 0 - 1000')
         self.chips = chips
         
     def get_chip_count(self):

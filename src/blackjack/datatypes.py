@@ -14,6 +14,7 @@ from .card import Card
 # ==============================
 # MISCELLANEOUS GAME STATE DATA.
 # ==============================
+
 class Buffers(NamedTuple):
 	dealer: list
 	player: list
@@ -65,6 +66,7 @@ class PlayerHand(Hand):
  
 @dataclass
 class Player:
+    username: str
     bank: Bank = field(default_factory=lambda: Bank(0))
     hands: list[PlayerHand] = field(default_factory=list)
 

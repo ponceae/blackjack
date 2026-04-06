@@ -46,9 +46,11 @@ class Card:
 			return self.rank
 		elif isinstance(self.rank, str):
 			if self.rank != 'Ace':
-				return FACE_CARD_VALUE # Value of 10
+				# Value of 10
+				return FACE_CARD_VALUE 
 			else:
-				return DEFAULT_ACE_VALUE # Value of 11
+				# Value of 11
+				return DEFAULT_ACE_VALUE 
 		return 0
 
 	def get_suit(self):

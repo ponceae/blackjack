@@ -41,10 +41,6 @@ def load_user_data():
 		data = json.load(data_file)
 	return data
 
-""" 
-Get information from the user in order to pull or modify
-the JSON file.
-""" 
 def pull_user_info():
 	"""
 	Prompt the user for a username and pull or modify data from the JSON file and 
@@ -59,7 +55,7 @@ def pull_user_info():
 		create_new_user(data, username)
 	chip_count = data[username][PLAYER_CHIPS]
 	save_chips(username, chip_count, data)
-	return chip_count
+	return chip_count, username
 
 def save_chips(username: str, chips: float | int, data: dict):
 	"""
