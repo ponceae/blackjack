@@ -82,7 +82,7 @@ def is_split_aces(hand: Hand):
 	Returns:
 		bool: True if split Aces, False otherwise.
 	"""	
-	return hand.cards[0].rank == 'Ace' and hand.cards[1] == 'Ace'
+	return hand.cards[0].rank == 'Ace' and hand.cards[1].rank == 'Ace'
 
 def is_twenty_one(hand: Hand):
 	"""
@@ -107,6 +107,8 @@ def is_valid_wager(player: Player, wager: float | int):
 	Returns:
 		bool: True if the player has enough chips, False otherwise.
 	"""
+	if not (0 < wager >= MIN_BET):
+		return False
 	return wager <= player.bank.get_chip_count()
           
 def verify_chip_bounds(chips: float | int):

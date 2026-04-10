@@ -1,8 +1,7 @@
 """
-Tests for deck.py
+Tests for the deck module.
 
-@author: Adrien P
-@version: 3.5.26
+Author: Adrien P
 """
 
 from blackjack.deck import create_deck, shuffle_deck

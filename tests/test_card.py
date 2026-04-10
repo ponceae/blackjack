@@ -1,78 +1,77 @@
 """
-Tests for card.py
+Tests for the card class module.
 
-@author: Adrien P.
-@version: 3.5.26
+Author: Adrien P.
 """
 
 import pytest
 from blackjack.card import Card
-from blackjack.constants import FACE_CARD, ACE_VAL
+from blackjack.constants import FACE_CARD_VALUE, DEFAULT_ACE_VALUE
 
-a = Card('spaDEs', 5)
-b = Card('heArTs', 2)
-c = Card('CLUbs', 10)
-d = Card('DiaMONds', 'acE')
-e = Card('SPadEs', 'jaCk')
-f = Card('HEArtS', 'queen')
-g = Card('Clubs', 'King')
+C1 = Card('spaDEs', 5)
+C2 = Card('heArTs', 2)
+C3 = Card('CLUbs', 10)
+C4 = Card('DiaMONds', 'acE')
+C5 = Card('SPadEs', 'jaCk')
+C6 = Card('HEArtS', 'queen')
+C7 = Card('Clubs', 'King')
 
 def test_init_mismatch():	
-	assert a.suit == 'Spades'
-	assert a.rank == 5
+	assert C1.suit == 'Spades'
+	assert C1.rank == 5
 	
-	assert b.suit == 'Hearts'
-	assert b.rank == 2
+	assert C2.suit == 'Hearts'
+	assert C2.rank == 2
 	
-	assert c.suit == 'Clubs'
-	assert c.rank == 10
+	assert C3.suit == 'Clubs'
+	assert C3.rank == 10
 	
-	assert d.suit == 'Diamonds'
-	assert d.rank == 'Ace'
+	assert C4.suit == 'Diamonds'
+	assert C4.rank == 'Ace'
 	
-	assert e.suit == 'Spades'
-	assert e.rank == 'Jack'
+	assert C5.suit == 'Spades'
+	assert C5.rank == 'Jack'
 	
-	assert f.suit == 'Hearts'
-	assert f.rank == 'Queen'
+	assert C6.suit == 'Hearts'
+	assert C6.rank == 'Queen'
 	
-	assert g.suit == 'Clubs'
-	assert g.rank == 'King'
+	assert C7.suit == 'Clubs'
+	assert C7.rank == 'King'
 	
-def test_init_typeerror_exception():
-	with pytest.raises(TypeError):
-		Card(5, 8)
-	with pytest.raises(TypeError):
+def test_init_valueerror_exception():
+	with pytest.raises(ValueError):
+		Card(5, 8) # type: ignore 
+	with pytest.raises(ValueError):
 		Card('Spades', '5')
-	with pytest.raises(TypeError):
+	with pytest.raises(ValueError):
 		Card('Hearts', 12)
-	with pytest.raises(TypeError):
+	with pytest.raises(ValueError):
 		Card('Diamonds', 1)
 
 def test_get_suit():
-	assert a.get_suit() == 'Spades'
-	assert b.get_suit() == 'Hearts'
-	assert c.get_suit() == 'Clubs'
-	assert d.get_suit() == 'Diamonds'
-	assert e.get_suit() == 'Spades'
-	assert f.get_suit() == 'Hearts'
-	assert g.get_suit() == 'Clubs'
+	assert C1.get_suit() == 'Spades'
+	assert C2.get_suit() == 'Hearts'
+	assert C3.get_suit() == 'Clubs'
+	assert C4.get_suit() == 'Diamonds'
+	assert C5.get_suit() == 'Spades'
+	assert C6.get_suit() == 'Hearts'
+	assert C7.get_suit() == 'Clubs'
 	
-def test_get_rank_val():
-	assert a.get_rank_val() == 5
-	assert b.get_rank_val() == 2
-	assert c.get_rank_val() == FACE_CARD
-	assert d.get_rank_val() == ACE_VAL
-	assert e.get_rank_val() == FACE_CARD
-	assert f.get_rank_val() == FACE_CARD
-	assert g.get_rank_val() == FACE_CARD
+def test_get_rank_value():
+	assert C1.get_rank_value() == 5
+	assert C2.get_rank_value() == 2
+	assert C3.get_rank_value() == FACE_CARD_VALUE
+	assert C4.get_rank_value() == DEFAULT_ACE_VALUE
+	assert C5.get_rank_value() == FACE_CARD_VALUE
+	assert C6.get_rank_value() == FACE_CARD_VALUE
+	assert C7.get_rank_value() == FACE_CARD_VALUE
 
 def test_to_string():
-	assert a.to_string() == '5 of Spades'
-	assert b.to_string() == '2 of Hearts'
-	assert c.to_string() == '10 of Clubs'
-	assert d.to_string() == 'Ace of Diamonds'
-	assert e.to_string() == 'Jack of Spades'
-	assert f.to_string() == 'Queen of Hearts'
-	assert g.to_string() == 'King of Clubs'
+	assert C1.to_string() == '♠5'
+	assert C2.to_string() == '♥2'
+	assert C3.to_string() == '♣10'
+	assert C4.to_string() == '♦Ace'
+	assert C5.to_string() == '♠Jack'
+	assert C6.to_string() == '♥Queen'
+	assert C7.to_string() == '♣King'
 	
