@@ -22,7 +22,7 @@ def test_can_split():
     assert conditions.can_split(hand3) == False
     assert conditions.can_split(hand4) == False
 
-def test_initial_hands():
+def test_initial_hands_outcome():
     table = Table(
         player=Player(
             username='Test', 
@@ -48,21 +48,21 @@ def test_initial_hands():
     
     assert conditions.compare_initial_hands(table) == 0
     
-def test_is_bust():
+def test_is_bust_hand():
     hand1 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 8), Card('Diamonds', 8)])
     hand2 = Hand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 5)])
     
     assert conditions.is_bust(hand1) == True
     assert conditions.is_bust(hand2) == False
     
-def test_is_soft():
+def test_is_soft_hand():
     hand1 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 4)])
     hand2 = Hand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 5)])
     
     assert conditions.is_soft(hand1) == False
     assert conditions.is_soft(hand2) == True
     
-def test_is_split_aces():
+def test_is_split_aces_hand():
     hand1 = Hand(cards=[Card('Clubs', 'Ace'), Card('Hearts', 'Ace')])
     hand2 = Hand(cards=[Card('Spades', 5), Card('Diamonds', 5)])
     hand3 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 10)])
@@ -71,7 +71,7 @@ def test_is_split_aces():
     assert conditions.is_split_aces(hand2) == False
     assert conditions.is_split_aces(hand3) == False
     
-def test_is_twenty_one():
+def test_is_twenty_one_hand():
     hand1 = Hand(cards=[Card('Clubs', 7), Card('Hearts', 8), Card('Clubs', 6)])
     hand2 = Hand(cards=[Card('Spades', 5), Card('Diamonds', 10)])
 

@@ -12,7 +12,7 @@ from .constants import MIN_BET, PLAYER_WIN, DEALER_WIN, PUSH
 from .datatypes import Hand, Player, PlayerHand, Table 
 from.payout_calculator import get_insurance_cost
 
-def can_split(hand: Hand):
+def can_split(hand: Hand) -> bool:
 	"""
 	Return True if the first two cards in the hand have the same rank.
 	
@@ -24,7 +24,7 @@ def can_split(hand: Hand):
 	"""
 	return hand.cards[0].rank == hand.cards[1].rank
 
-def compare_initial_hands(table: Table):
+def compare_initial_hands(table: Table) -> int:
 	"""
 	Compare the hands at the start of the round and return the outcome flag if 
 	applicable.
@@ -48,7 +48,7 @@ def compare_initial_hands(table: Table):
 		return DEALER_WIN
 	return 0
 
-def is_bust(hand: Hand):
+def is_bust(hand: Hand) -> bool:
 	"""
 	Return True if the hand's total value exceeds 21.
 	
@@ -60,7 +60,7 @@ def is_bust(hand: Hand):
 	"""	
 	return get_hand_value(hand) > 21
 
-def is_soft(hand: Hand):
+def is_soft(hand: Hand) -> bool:
 	"""
 	Return True if the hand treats any Ace as 1 (soft hand).
 	
@@ -72,7 +72,7 @@ def is_soft(hand: Hand):
 	"""
 	return get_soft_value(hand) != get_hand_value(hand)
 	
-def is_split_aces(hand: Hand):
+def is_split_aces(hand: Hand) -> bool:
 	"""
 	Return True if the hand contains 2 Aces.
 
@@ -84,7 +84,7 @@ def is_split_aces(hand: Hand):
 	"""	
 	return hand.cards[0].rank == 'Ace' and hand.cards[1].rank == 'Ace'
 
-def is_twenty_one(hand: Hand):
+def is_twenty_one(hand: Hand) -> bool:
 	"""
 	Return True if the hand's total value equals 21.
 
@@ -96,7 +96,7 @@ def is_twenty_one(hand: Hand):
 	"""	
 	return get_hand_value(hand) == 21
 
-def is_valid_wager(player: Player, wager: float | int):
+def is_valid_wager(player: Player, wager: float | int) -> bool:
 	"""
 	Return True if the player has enough chips to cover the hand's wager.
 
@@ -111,7 +111,7 @@ def is_valid_wager(player: Player, wager: float | int):
 		return False
 	return wager <= player.bank.get_chip_count()
           
-def verify_chip_bounds(chips: float | int):
+def verify_chip_bounds(chips: float | int) -> bool:
 	"""
 	Return True if `chips` is a number between 15 - 1000 (inclusive).
 
@@ -123,7 +123,7 @@ def verify_chip_bounds(chips: float | int):
 	"""
 	return isinstance(chips, (int, float)) and 15 <= chips <= 1000
 
-def verify_chip_count(chips: int | float):
+def verify_chip_count(chips: int | float) -> bool:
 	"""
 	Return True if `chips` is greater than or equal to the MIN_BET.
 
@@ -135,7 +135,7 @@ def verify_chip_count(chips: int | float):
 	"""
 	return chips >= MIN_BET
 
-def verify_doubled_wager(player: Player, hand: PlayerHand):
+def verify_doubled_wager(player: Player, hand: PlayerHand) -> bool:
 	""" 
 	Return True if the player has enough chips to double down or split (match the 
 	current wager).
@@ -149,7 +149,7 @@ def verify_doubled_wager(player: Player, hand: PlayerHand):
 	"""
 	return hand.wager <= player.bank.get_chip_count()
 
-def verify_insurance_bet(player: Player, hand: PlayerHand): 
+def verify_insurance_bet(player: Player, hand: PlayerHand) -> bool: 
 	"""
 	Return True if the player can afford insurance (half the current wager).
 
@@ -162,7 +162,7 @@ def verify_insurance_bet(player: Player, hand: PlayerHand):
 	"""
 	return get_insurance_cost(hand) <= player.bank.get_chip_count()
 
-def verify_min_bet(hand: PlayerHand):
+def verify_min_bet(hand: PlayerHand) -> bool:
 	"""
 	Return True if the current wager meets the required minimum bet.
 
