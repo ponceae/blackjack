@@ -75,7 +75,7 @@ def handle_insurance(insurance: Insurance, table: Table):
 	"""
 	insurance.cost = payout_calculator.get_insurance_cost(table.player.hands[0])
 	player_hand = table.player.hands[0]
-	if table.dealer.cards[0].rank == 'Ace':
+	if table.dealer.cards[0].rank == constants.ACE:
 		interface.load_timer(constants.INITIAL)
 		# Verify player has enough chips for insurance.
 		if (interface.request_insurance(insurance.cost) == constants.YES):
@@ -180,7 +180,8 @@ def exe_player_control(table: Table):
 					continue
 				if prev_action not in (constants.BUST, constants.STAND): 
 					interface.clear_and_print(table)
-					print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} is Standing\n')
+					interface.print_stand_or_bust(i, constants.STAND)
+					print()
 					if hands_left(split, table.player.hands, i):
 						continue
 					else:
@@ -205,14 +206,14 @@ def handle_hitting(table: Table, split: SplitHands, hand: PlayerHand, i: int):
 		interface.clear_and_print(table)
 		if conditions.is_bust(hand): 
 			prev_action = constants.BUST
-			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} has Busted')
+			interface.print_stand_or_bust(i, constants.BUST)
 			if hands_left(split, table.player.hands, i):
 				return prev_action, PlayerAction.NEXT_HAND
 			else:
 				return prev_action, PlayerAction.END_TURN
 		elif conditions.is_twenty_one(hand):  
 			prev_action = constants.STAND
-			print(f'Hand {constants.ROMAN_NUMERALS[i + 1]} is Standing')
+			interface.print_stand_or_bust(i, constants.STAND)
 			if hands_left(split, table.player.hands, i):
 				return prev_action, PlayerAction.NEXT_HAND
 			else:
@@ -329,12 +330,12 @@ def exe_dealer_control(table: Table):
 		actions.hit_hand(table, table.dealer) 
 		interface.clear_and_print(table)
 		if conditions.is_bust(table.dealer):
-			print('Dealer has Busted')
+			interface.print_dealer_state(constants.BUST)
 			return
 		elif conditions.is_twenty_one(table.dealer):
-			print('Dealer is Standing')
+			interface.print_dealer_state(constants.STAND)
 			return
-	print('Dealer is Standing')
+	interface.print_dealer_state(constants.STAND)
 
 # ==================
 # ROUND END CHECK.
@@ -359,15 +360,13 @@ def verify_round_end_cond(table: Table):
 	for i, hand in enumerate(table.player.hands):
 		player_bust = conditions.is_bust(hand)
 		if player_bust:
-			tmp_buffer.append(f'Hand {constants.ROMAN_NUMERALS[i + 1]} Busted & Lost\n')
+			tmp_buffer.append(interface.get_round_outcome_msg(i, constants.BUST))
 			# Check next hand if applicable or exit on a bust.
 			continue 
 		elif not player_bust and dealer_bust:
 			table.player.bank.add_chips(payout_calculator.standard_payout(hand))
-			tmp_buffer.append(
-				f'Hand {constants.ROMAN_NUMERALS[i + 1]} Win. ' 
-				f'You Won ${payout_calculator.standard_payout(hand):.2f}\n'
-			)	
+			tmp_buffer.append(interface.get_round_outcome_msg(i, constants.WIN))
+			tmp_buffer.append(interface.get_round_outcome_payout_msg(hand))
 		elif not player_bust and not dealer_bust: 
 			msg, outcome.flag = interface.compare_hands(table, hand, i)
 			tmp_buffer.append(msg)

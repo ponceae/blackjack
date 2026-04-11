@@ -14,13 +14,14 @@ import time
 from .actions import get_hand_value, get_soft_value
 from .bank import Bank
 from .conditions import (
-    is_soft, 
-    is_twenty_one, 
-    is_valid_wager, 
-    verify_chip_bounds, 
-    verify_chip_count
+	is_soft, 
+	is_twenty_one, 
+	is_valid_wager, 
+	verify_chip_bounds, 
+	verify_chip_count
 )
 from .constants import (
+	BUST,
 	DEALER_WIN, 
 	HIT, 
 	MIN_BET,
@@ -58,7 +59,9 @@ def compare_hands(table: Table, hand: PlayerHand, index: int):
 		index (int): The index of the current player hand.
 	
 	Returns:
-		int: The flag determining the round outcome.
+		tuple[str, int]: A tuple containing:
+			- A string containing the display message.
+  			- The flag determining the round outcome.
 	"""
 	msg = 'Hand ' + ROMAN_NUMERALS[index + 1]
 	player_hand_value = get_hand_value(hand)
@@ -413,6 +416,61 @@ def load_timer(timer_flag_key: int=-1):
 	for i in range(3, 0, -1):
 		print(timer_message.format(i), end='\r')
 		time.sleep(1)
+  
+def print_dealer_state(flag: str) -> None:
+	""" 
+	Display if the dealer turn resulted in a bust or stand.
+	
+	Arguments:
+		flag (str): The flag that determines the state of the hand.
+	Returns:
+		None
+	"""
+	if flag == STAND:
+		print('Dealer is Standing')
+	elif flag == BUST:
+		print('Dealer has Busted')
+
+def get_round_outcome_msg(index: int, flag: str):
+	""" 
+	Get round outcome message based off of the flag and return the message.
+	
+	Arguments:
+		index (int): The index of the hand.
+		flag (str): The flag that determines the game state.
+	Returns:
+		str: The outcome message.
+	"""
+	if flag == BUST:
+		return f'Hand {ROMAN_NUMERALS[index + 1]} Busted & Lost\n'
+	elif flag == PLAYER_WIN:
+		return f'Hand {ROMAN_NUMERALS[index + 1]} Win. ' 
+
+def get_round_outcome_payout_msg(hand: PlayerHand) -> str:
+	""" 
+	Get and return the display message for a standard blackjack win.
+	
+	Arguments:
+		hand (PlayerHand): The hand containing the wager.
+	Returns:
+		The display message for a win.
+	"""
+	return f'You Won ${standard_payout(hand):.2f}\n'
+
+def print_stand_or_bust(index: int, flag: str) -> None:
+	""" 
+	Display which hand is standing or if it has already busted.
+	
+	Arguments:
+		index (int): The index of the hand.
+		flag (str): The flag that determines the state of the hand.
+ 	Returns:
+		None
+	"""
+	if flag == STAND:
+		print(f'Hand {ROMAN_NUMERALS[index + 1]} is Standing')
+	elif flag == BUST:
+		print(f'Hand {ROMAN_NUMERALS[index + 1]} has Busted')
 
 def _print_wager(wager: float | int):
 	"""

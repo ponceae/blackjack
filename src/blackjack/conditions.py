@@ -96,13 +96,13 @@ def is_twenty_one(hand: Hand) -> bool:
 	"""	
 	return get_hand_value(hand) == 21
 
-def is_valid_wager(player: Player, wager: float | int) -> bool:
+def is_valid_wager(player: Player, wager: float) -> bool:
 	"""
 	Return True if the player has enough chips to cover the hand's wager.
 
 	Args: 
 		player (Player): The player whose bank is being checked.
-		wager (float | int): The wager to verify.
+		wager (float): The wager to verify.
 
 	Returns:
 		bool: True if the player has enough chips, False otherwise.
@@ -111,24 +111,24 @@ def is_valid_wager(player: Player, wager: float | int) -> bool:
 		return False
 	return wager <= player.bank.get_chip_count()
           
-def verify_chip_bounds(chips: float | int) -> bool:
+def verify_chip_bounds(chips: float) -> bool:
 	"""
 	Return True if `chips` is a number between 15 - 1000 (inclusive).
 
 	Args:
-		chips (float | int): The amount of chips to validate.
+		chips (float): The amount of chips to validate.
 	
 	Returns:
 		bool: True if the `chips` is within bounds, False otherwise.
 	"""
 	return isinstance(chips, (int, float)) and 15 <= chips <= 1000
 
-def verify_chip_count(chips: int | float) -> bool:
+def verify_chip_count(chips: float) -> bool:
 	"""
 	Return True if `chips` is greater than or equal to the MIN_BET.
 
 	Args:
-		chips (float | int): The amount of chips to validate.
+		chips (float): The amount of chips to validate.
 
 	Returns:
 		bool: True if `chips` is greater than the MIN_BET.

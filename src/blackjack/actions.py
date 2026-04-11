@@ -17,7 +17,7 @@ from .deck import create_deck, shuffle_deck
 # Hand modification & initialization
 # ==========================================
 
-def _copy_deck(old_deck: list[Card], new_deck: list[Card]):
+def _copy_deck(old_deck: list[Card], new_deck: list[Card]) -> None:
 	"""
 	Copy the shuffled `new_deck` into `old_deck`.
 	
@@ -30,7 +30,7 @@ def _copy_deck(old_deck: list[Card], new_deck: list[Card]):
 	"""
 	old_deck[:] = new_deck
 
-def create_split_hands(table: Table):
+def create_split_hands(table: Table) -> None:
 	"""
 	Create a new split hand for the player by popping a card from the first initial 
 	hand and hitting both hands.
@@ -47,7 +47,7 @@ def create_split_hands(table: Table):
 	for hand in table.player.hands:
 		hit_hand(table, hand)
   
-def hit_hand(table: Table, hand: Hand):
+def hit_hand(table: Table, hand: Hand) -> None:
 	"""
 	Add a card from the table deck to `hand`. Create and shuffle a new deck if empty.
 	
@@ -65,7 +65,7 @@ def hit_hand(table: Table, hand: Hand):
 		print('Deck is empty. Adding cards.')
 		_copy_deck(table.deck, create_and_shuffle())
 
-def initial_round_deal(table: Table):
+def initial_round_deal(table: Table) -> None:
 	"""
 	Create a new player and dealer hand, then deal two cards each.
 
@@ -93,7 +93,7 @@ def initial_round_deal(table: Table):
 # Evaluates hand values.
 # ==========================================
 
-def get_hand_value(hand: Hand):
+def get_hand_value(hand: Hand) -> int:
 	"""
 	Return the total numeric value of `hand`, contextually counting Aces as a 1 or 11.
 
@@ -118,7 +118,7 @@ def get_hand_value(hand: Hand):
 		ace_count -= 1
 	return value
 	
-def get_soft_value(hand: Hand):
+def get_soft_value(hand: Hand) -> int:
 	"""
 	Return the hand value, treating all Aces as 1 (soft value).
 	
@@ -141,7 +141,7 @@ def get_soft_value(hand: Hand):
 # DECK GENERATION
 # ==========================================
 
-def create_and_shuffle():
+def create_and_shuffle() -> list[Card]:
 	"""
 	Create a new 52-card deck, shuffle it, and return it.
 	

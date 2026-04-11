@@ -72,7 +72,7 @@ class Bank:
         Return the string representation of the bank.
 
         Returns:
-            The string representation (e.g., Chips $15.00).
+            The string representation (e.g., Chips: $15.00).
         """
-        return f'Chips ${self.chips:.2f}'
+        return f'Chips: ${self.chips:.2f}'
     

@@ -11,6 +11,7 @@ from pathlib import Path
 # ==================
 
 ACE_ALT_VALUE = 1
+ACE = 'Ace'
 DEFAULT_ACE_VALUE = 11
 FACE_CARD_VALUE = 10
 
@@ -34,6 +35,7 @@ NO = 'N'
 YES = 'Y'
 BUST = 'B'
 DOUBLE = 'D'
+WIN = 'W'
 
 # ==================
 # OUTCOME FLAGS
