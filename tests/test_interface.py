@@ -11,29 +11,20 @@ from blackjack.datatypes import DealerHand, Player, PlayerHand, Table
 from blackjack import interface
 
 def test_compare_hands_output():
+    player_hand1 = PlayerHand(
+        cards=[Card('Spades', 5), Card('Clubs', 5)],
+        wager=15.0
+    )
+    player_hand2 = PlayerHand(
+        cards=[Card('Diamonds', 4), Card('Spades', 6), Card('Hearts', 'Ace')],
+        wager=30.0
+    )
+    dealer_hand = DealerHand(
+        cards=[Card('Diamonds', 4), Card('Hearts', 6), Card('Spades', 7)]
+    )
     table = Table(
-        player=Player(
-            username='Test',
-            hands=[PlayerHand(
-                        cards=[Card('Spades', 5), Card('Clubs', 5)],
-                        wager=15.0
-                    ),
-                    PlayerHand(
-                        cards=[
-                                Card('Diamonds', 4), 
-                                Card('Spades', 6), 
-                                Card('Hearts', 'Ace')
-                            ],
-                        wager=30.0
-                    )
-                ]
-        ),
-        dealer=DealerHand(cards=[
-                Card('Diamonds', 4), 
-                Card('Hearts', 6), 
-                Card('Spades', 7)
-            ]
-        )
+        player=Player(username='Test', hands=[player_hand1, player_hand2]), 
+        dealer=dealer_hand
     )
 
     msg, flag = interface.compare_hands(table, table.player.hands[0], 0)
@@ -58,16 +49,14 @@ def test_compare_hands_output():
     assert flag == constants.PUSH
 
 def test_print_player_hands_init_deal(capsys):
-    # Test initial deal no insurance display.
+    # Test initial deal no insurance display. 
     table = Table (
         player=Player(
             username='Test',
             bank=Bank(30.0),
-            hands=[PlayerHand(
-                cards=[Card('Spades', 4), Card('Hearts', 6)],
-                wager=15.0
-            )]
-        ),
+            hands=[
+                PlayerHand(cards=[Card('Spades', 4), Card('Hearts', 6)], wager=15.0)]
+            ),
         dealer=DealerHand(cards=[Card('Clubs', 7), Card('Diamonds', 3)])
     )
     interface.clear_and_print(table)
@@ -102,4 +91,120 @@ def test_print_player_hands_init_deal(capsys):
         '--------------------\n'
         'Chips: $22.50\n'
     )
-        
+
+def test_print_player_hands_dealer_showing(capsys):
+    # Test dealer showing both cards, non-soft.
+    player_hand1 = PlayerHand(
+        cards=[Card('Clubs', 4), Card('Spades', 6), Card('Hearts', 9)],
+        wager=30.0
+    )
+    dealer_hand = DealerHand(
+        cards=[Card('Diamonds', 4), Card('Hearts', 6), Card('Spades', 7)],
+        is_hidden=False
+    )
+    table = Table(
+        player=Player(username='Test', hands=[player_hand1], bank = Bank(50.0)), 
+        dealer=dealer_hand
+    )
+    interface.clear_and_print(table)
+    console = capsys.readouterr()   
+    assert console.out == (
+        'Dealer: 17\n'
+        '♦4\n'
+        '♥6\n'
+        '♠7\n'
+        '--------------------\n'
+        'Hand I: 19 [$30.00]\n'
+        '♣4\n'
+        '♠6\n'
+        '♥9\n'
+        '--------------------\n'
+        'Chips: $50.00\n'
+    )
+
+    # Test dealer showing both cards, soft.
+    table.dealer.cards = [Card('Diamonds', 4), Card('Spades', 'Ace')]
+    interface.clear_and_print(table)
+    console = capsys.readouterr()   
+    assert console.out == (
+        'Dealer: 5 / 15\n'
+        '♦4\n'
+        '♠Ace\n'
+        '--------------------\n'
+        'Hand I: 19 [$30.00]\n'
+        '♣4\n'
+        '♠6\n'
+        '♥9\n'
+        '--------------------\n'
+        'Chips: $50.00\n'
+    )
+
+def test_print_split_player_hands(capsys):
+    # Split when hand I is active.
+    player_hand1 = PlayerHand(
+        cards=[Card('Clubs', 6), Card('Spades', 'Jack')],
+        wager=40.0,
+        is_active=True
+    )
+    player_hand2 = PlayerHand(
+        cards=[Card('Spades', 6), Card('Spades', 'Ace')],
+        wager=40.0
+    )
+    dealer_hand = DealerHand(
+        cards=[Card('Diamonds', 4), Card('Hearts', 6), Card('Spades', 7)],
+        is_hidden=False
+    )
+    table = Table(
+        player=Player(
+            username='Test', 
+            hands=[player_hand1, player_hand2], 
+            bank = Bank(50.0)
+        ), 
+        dealer=dealer_hand
+    )
+    interface.clear_and_print(table)
+    console = capsys.readouterr()   
+    assert console.out == (
+        'Dealer: 17\n'
+        '♦4\n'
+        '♥6\n'
+        '♠7\n'
+        '--------------------\n'
+        'Hand I: 16 [$40.00] <- Active\n'
+        '♣6\n'
+        '♠Jack\n'
+        '--------------------\n'
+        'Hand II: 7 / 17 [$40.00]\n'
+        '♠6\n'
+        '♠Ace\n'
+        '--------------------\n'
+        'Chips: $50.00\n'
+    )
+
+    # Split when hand II is active.
+    table.player.hands[1].is_active = True
+    table.player.hands[0].is_active = False
+    interface.clear_and_print(table)
+    console = capsys.readouterr()   
+    assert console.out == (
+        'Dealer: 17\n'
+        '♦4\n'
+        '♥6\n'
+        '♠7\n'
+        '--------------------\n'
+        'Hand I: 16 [$40.00]\n'
+        '♣6\n'
+        '♠Jack\n'
+        '--------------------\n'
+        'Hand II: 7 / 17 [$40.00] <- Active\n'
+        '♠6\n'
+        '♠Ace\n'
+        '--------------------\n'
+        'Chips: $50.00\n'
+    )
+
+def test_initial_outcome_display():
+    pass
+
+def test_initial_insurance_outcome_display():
+    pass
