@@ -49,7 +49,7 @@ from .storage import load_user_data, save_chips
 # Main CLI display functions.
 # ==========================================
 
-def compare_hands(table: Table, hand: PlayerHand, index: int):
+def compare_hands(table: Table, hand: PlayerHand, index: int) -> tuple[str, int]:
 	"""
 	Compare the player and dealer hands at the end of the round and displays the 
 	outcome. Return the round outcome flag.
@@ -74,7 +74,7 @@ def compare_hands(table: Table, hand: PlayerHand, index: int):
 		return (f'{msg} Lost\n'), DEALER_WIN
 	return '', 0
 
-def clear_and_print(table: Table):
+def clear_and_print(table: Table) -> None:
 	"""
 	Clears the CLI display and then displays the game hands.
 
@@ -87,7 +87,7 @@ def clear_and_print(table: Table):
 	clear_terminal()
 	print_hands(table)
 
-def print_hands(table: Table):
+def print_hands(table: Table) -> None:
 	"""
 	Display the player and dealer hands to the CLI.
 
@@ -105,7 +105,7 @@ def print_hands(table: Table):
 		print(*strings, sep='', end='')
 	print()
 
-def _print_dealer_hands(table: Table, buffers: Buffers):
+def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 	"""
 	Display the dealer hands or the dealer's first card depending on the game state.
 	Display insurance if purchased by the player.
@@ -140,7 +140,7 @@ def _print_dealer_hands(table: Table, buffers: Buffers):
 	buffers.dealer.append('--------------------\n')
 	buffers.main.append(buffers.dealer)
 
-def _print_player_hands(table: Table, buffers: Buffers):
+def _print_player_hands(table: Table, buffers: Buffers) -> None:
 	"""
 	Display the player's hands and wager. If player hands are split, display the
 	active hand.
@@ -173,7 +173,7 @@ def _print_player_hands(table: Table, buffers: Buffers):
 	buffers.player.append(table.player.bank.to_string())
 	buffers.main.append(buffers.player)
 
-def print_initial_outcome(outcome: Outcome, hand: PlayerHand):
+def print_initial_outcome(outcome: Outcome, hand: PlayerHand) -> None:
 	"""
 	Display the outcome at the beginning of the round if a player or dealer
 	blackjack occured.
@@ -192,7 +192,7 @@ def print_initial_outcome(outcome: Outcome, hand: PlayerHand):
 	elif outcome.flag == DEALER_WIN:
 		print('Dealer Blackjack, You Lose')
 
-def print_initial_insurance_outcome(insurance: Insurance):
+def print_initial_insurance_outcome(insurance: Insurance) -> None:
 	"""
 	Display the insurance outcome if purchased by the player.
 
@@ -212,7 +212,7 @@ def print_initial_insurance_outcome(insurance: Insurance):
 # Prompt user for input.
 # ==========================================
 
-def _add_chips(player: Player):
+def _add_chips(player: Player) -> None:
 	"""
 	Prompt the user if they wish to add chips to their bank and updates the
 	chip count.
@@ -231,7 +231,7 @@ def _add_chips(player: Player):
 				break
 			print('Invalid Input, Must be a number between 15 - 1000.')
 
-def double_or_not():
+def double_or_not() -> str:
 	"""
 	Prompt the user if they wish to double down (match the wager) and return their 
 	choice.
@@ -245,7 +245,7 @@ def double_or_not():
 			return choice.upper()
 		print('Invalid Choice, (Y) YES / (N) NO')
 
-def hit_or_stand():
+def hit_or_stand() -> None:
 	"""
 	Prompt the user if they wish to hit or stand and return their choice.
 
@@ -258,7 +258,7 @@ def hit_or_stand():
 			return choice.upper()
 		print('Invalid Choice, (H) HIT / (S) STAND')
 
-def is_new_round(table: Table):
+def is_new_round(table: Table) -> bool:
 	"""
 	Prompt the user if they wish to continue the round with the same game deck and
 	return their choice.

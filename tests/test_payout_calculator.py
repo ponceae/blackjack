@@ -8,7 +8,7 @@ from blackjack.bank import Bank
 from blackjack import payout_calculator
 from blackjack.datatypes import Insurance, Player, PlayerHand
 
-def test_blackjack_payout():
+def test_blackjack_payouts():
     hand = PlayerHand(wager=15.0)
     assert payout_calculator.blackjack_payout(hand) == 37.5
     hand.wager = 1000
@@ -16,7 +16,7 @@ def test_blackjack_payout():
     hand.wager = 534.25
     assert payout_calculator.blackjack_payout(hand) == 1335.625
 
-def test_insurance_logic_and_bank_update():
+def test_insurance_logic_and_bank_update_low_cost():
     insurance = Insurance(cost=7.5)
     player = Player(username='Test', bank=Bank(15.0))
 
@@ -25,8 +25,9 @@ def test_insurance_logic_and_bank_update():
     assert insurance.payout == 15.0
     assert player.bank.chips == 30.0
 
-    insurance.cost = 27.5
-    player.bank = Bank(25.0)
+def test_insurance_logic_and_bank_update_high_cost():
+    insurance = Insurance(cost=27.5)
+    player = Player(username='Test', bank=Bank(25.0))
 
     payout_calculator.insurance_logic(insurance, player)
 
