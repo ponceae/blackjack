@@ -82,7 +82,7 @@ def handle_insurance(insurance: Insurance, table: Table):
 			if conditions.verify_insurance_bet(table.player, player_hand):  
 				insurance.active = True
 				player_hand.insurance_wager = insurance.cost
-				table.player.bank.remove_chips(insurance.cost)
+				table.player.bank.chips -= insurance.cost
 				interface.clear_and_print(table)
 			else:
 				interface.clear_and_print(table)
@@ -110,12 +110,12 @@ def handle_outcomes(outcome: Outcome, insurance: Insurance, table: Table):
 	# Return initial wager to the player.
 	elif outcome.flag == constants.PUSH:
 		outcome.payout = payout_calculator.push_payout(player_hand)
-		table.player.bank.add_chips(outcome.payout)
+		table.player.bank.chips += outcome.payout
 		# Even money payout.
 		insurance_helper(insurance, table)
 	elif outcome.flag == constants.PLAYER_WIN:
 		outcome.payout = payout_calculator.blackjack_payout(player_hand)
-		table.player.bank.add_chips(outcome.payout)
+		table.player.bank.chips += outcome.payout
 
 def insurance_helper(insurance: Insurance, table: Table):
 	"""
@@ -261,7 +261,7 @@ def handle_double_down(table: Table, i: int, split: SplitHands):
 			 1: NEXT_HAND
 			 2: END_TURN
 	"""
-	table.player.bank.remove_chips(table.player.hands[i].wager)
+	table.player.bank.chips -= table.player.hands[i].wager
 	table.player.hands[i].wager += table.player.hands[i].wager
 	actions.hit_hand(table, table.player.hands[i]) 
 	interface.clear_and_print(table)
@@ -295,7 +295,7 @@ def handle_split(table: Table, split: SplitHands):
 		split.split_hand = True 
 		split_aces = conditions.is_split_aces(table.player.hands[0])
 		actions.create_split_hands(table)
-		table.player.bank.remove_chips(table.player.hands[0].wager)
+		table.player.bank.chips -= table.player.hands[0].wager
 		table.player.hands[1].wager = table.player.hands[0].wager
 		if split_aces:
 			split.split_aces = True
@@ -364,16 +364,16 @@ def verify_round_end_cond(table: Table):
 			# Check next hand if applicable or exit on a bust.
 			continue 
 		elif not player_bust and dealer_bust:
-			table.player.bank.add_chips(payout_calculator.standard_payout(hand))
+			table.player.bank.chips += payout_calculator.standard_payout(hand)
 			tmp_buffer.append(interface.get_round_outcome_msg(i, constants.WIN))
 			tmp_buffer.append(interface.get_round_outcome_payout_msg(hand))
 		elif not player_bust and not dealer_bust: 
 			msg, outcome.flag = interface.compare_hands(table, hand, i)
 			tmp_buffer.append(msg)
 			if outcome.flag == constants.PUSH:
-				table.player.bank.add_chips(payout_calculator.push_payout(hand))
+				table.player.bank.chips += payout_calculator.push_payout(hand)
 			elif outcome.flag == constants.PLAYER_WIN:
-				table.player.bank.add_chips(payout_calculator.standard_payout(hand))
+				table.player.bank.chips += payout_calculator.standard_payout(hand)
 	interface.clear_and_print(table)
 	for strings in tmp_buffer:
 		print(*strings, sep='', end='')
@@ -392,7 +392,7 @@ def get_player_wager(player: Player):
 	"""
 	wager = interface.wager_prompt(player) 
 	interface.clear_terminal()
-	player.bank.remove_chips(wager) 
+	player.bank.chips -= wager 
 	return wager
 						
 def blackjack(deck: list, player_bank: Bank, username: str):

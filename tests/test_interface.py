@@ -40,7 +40,7 @@ def mock_inputs(monkeypatch):
 	]
 )
 def test_yes_flow(mock_inputs, capsys, func, args, expected):
-	mock_inputs(['yes', '0', 'sadf', 'n'])
+	mock_inputs(['yes', '0', 'sadf', 'y'])
 
 	choice = func(*args)
 
@@ -49,7 +49,7 @@ def test_yes_flow(mock_inputs, capsys, func, args, expected):
 	assert choice == expected
 
 @pytest.mark.parametrize(
-	'func,args,expected',
+	'func, args, expected',
 	[
 		(interface.double_or_not, [], 'N'),
 		(interface.request_chips, [], 'N'),
@@ -58,7 +58,7 @@ def test_yes_flow(mock_inputs, capsys, func, args, expected):
 		(interface.split_or_not, [], 'N'),
 	]
 )
-def test_yes_flow(mock_inputs, capsys, func, args, expected):
+def test_no_flow(mock_inputs, capsys, func, args, expected):
 	mock_inputs(['no', '0', 'sadf', 'n'])
 
 	choice = func(*args)
@@ -132,7 +132,7 @@ def test_print_player_hands_init_deal(capsys):
 	
 	# Test initial deal with insurance display.
 	table.player.hands[0].insurance_wager = 7.5
-	table.player.bank.set_chip_count(22.5)
+	table.player.bank.chips = 22.5
 	table.dealer.cards = [Card('Clubs', 'Ace'), Card('Diamonds', 3)]
 	interface.clear_and_print(table)
 	console = capsys.readouterr() 

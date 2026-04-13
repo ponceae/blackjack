@@ -14,58 +14,42 @@ class Bank:
         Args:
             chips (float): The amount of chips in the player's bank.
         """
-        try:
-            chips = float(chips)
-        except ValueError:
-            raise ValueError('Invalid Chip Count. Must be a number')
+        chips = self._to_float(chips)
         if not (0 <= chips <= 1000):
-            raise ValueError('Invalid Chip Count. Must be a number between 0 - 1000')
-        self.chips = chips
-        
-    def get_chip_count(self):
-        """
-        Return the bank chip count.
-
-        Returns:
-            float | int: The bank's chip count.
-        """
-        return self.chips
+            raise ValueError('Invalid Chip Count, must be a number between 0 - 1000')
+        self._chips = chips
     
-    def set_chip_count(self, value: float | int):
-        """
-        Set the `chips` to the given value.
-
+    @staticmethod
+    def _to_float(value) -> float:
+        """ 
+        Helper, validate value type and float conversion.
+        
         Args:
-            value (float | int): The value to set `chips` to.
-
+            value (float): The value to validate and convert.
         Returns:
-            None
+            float: The converted value.
         """
-        self.chips = value
-
-    def add_chips(self, value: float | int):
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            raise ValueError('Invalid Chip Count, must be a number.')
+    
+    @property
+    def chips(self) -> float:
         """
-        Add the value to `chips`.
-
-        Args:
-            value (float | int): The value to add to `chips`.
-
+        The current chip balance of the bank.
+        
         Returns:
-            None
+            The current chip balance.
         """
-        self.chips += value
-
-    def remove_chips(self, value: float | int):
-        """
-        Remove the value from `chips`.
-
-        Args:
-            value (float | int): The value to remove from `chips`.
-
-        Returns:
-            None
-        """
-        self.chips -= value
+        return self._chips
+    
+    @chips.setter
+    def chips(self, value: float) -> None:
+        value = self._to_float(value)
+        if value < 0:
+            raise ValueError('Invalid Value, `value` is less than 0.')
+        self._chips = value
     
     def to_string(self):
         """

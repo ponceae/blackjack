@@ -4,9 +4,99 @@ Tests for the actions module.
 Author: Adrien P.
 """
 
+import pytest
+
 from blackjack.card import Card
 from blackjack import actions
 from blackjack.datatypes import Hand, Player, PlayerHand, Table
+
+@pytest.mark.parametrize(
+    'cards, expected_value',
+    [
+        ([Card('Clubs', 2), Card('Hearts', 3), Card('Spades', 4)], 9),
+        ([Card('Clubs', 10), Card('Hearts', 'Jack')], 20),
+        ([Card('Clubs', 7), Card('Hearts', 8), Card('Spades', 9)], 24),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 5)], 16),
+        ([Card('Clubs', 'Ace'), Card('Spades', 'King')], 21),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 2), Card('Spades', 3)], 16),
+        ([Card('Clubs', 2), Card('Hearts', 9), Card('Spades', 'Ace')], 12),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace')], 12),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace'), Card('Spades', 9)], 21),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace'), Card('Spades', 'King')], 12),
+        (
+            [
+                Card('Clubs', 'Ace'), 
+                Card('Hearts', 'Ace'), 
+                Card('Spades', 'Ace'), 
+                Card('Diamonds', 'Ace')
+            ], 
+            14
+        ),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 9)], 20),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 4), Card('Spades', 6)], 21),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 5), Card('Spades', 6)], 12),
+    ],   
+    ids=[
+        'two_pip_cards',
+        'one_pip_one_face_card',
+        'three_pips',
+        'ace_one_pip_card_a',
+        'ace_one_pip_one_face_card',
+        'ace_two_pip_cards_a',
+        'ace_two_pip_cards_b',
+        'two_aces',
+        'two_aces_one_pip_card',
+        'two_aces_one_face_card',
+        'four_aces',
+        'ace_one_pip_card_b',
+        'ace_two_pip_cards_c',
+        'ace_two_pip_cards_d',
+    ]
+)
+def test_hard_hand_values(cards, expected_value):
+    hand = Hand(cards=cards)
+    assert actions.get_hand_value(hand) == expected_value
+
+@pytest.mark.parametrize(
+    'cards, expected_value',
+    [
+        ([Card('Clubs', 'Ace'), Card('Hearts', 5)], 6),
+        ([Card('Clubs', 'Ace'), Card('Spades', 'King')], 11),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 2), Card('Spades', 3)], 6),
+        ([Card('Clubs', 2), Card('Hearts', 9), Card('Spades', 'Ace')], 12),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace')], 2),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace'), Card('Spades', 9)], 11),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace'), Card('Spades', 'King')], 12),
+        (
+            [
+                Card('Clubs', 'Ace'), 
+                Card('Hearts', 'Ace'), 
+                Card('Spades', 'Ace'), 
+                Card('Diamonds', 'Ace')
+            ], 
+            4
+        ),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 9)], 10),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 4), Card('Spades', 6)], 11),
+        ([Card('Clubs', 'Ace'), Card('Hearts', 5), Card('Spades', 6)], 12),
+    ],
+    ids=[
+        'ace_one_pip_card_a',
+        'ace_one_face_card',
+        'ace_two_pip_cards_a',
+        'ace_two_pip_cards_b',
+        'two_aces',
+        'two_aces_one_pip_card',
+        'two_aces_one_face_card',
+        'four_aces',
+        'ace_one_pip_card_b',
+        'ace_two_pip_cards_c',
+        'ace_two_pip_cards_d',
+    ]
+)
+def test_soft_hand_values(cards, expected_value):
+    hand = Hand(cards=cards)
+    assert actions.get_soft_value(hand) == expected_value
 
 def test_copy_deck():
     deck1 = actions.create_and_shuffle()
@@ -67,54 +157,6 @@ def test_initial_round_deal_empty_deck():
     assert len(table.player.hands) == 1
     assert len(table.player.hands[0].cards) == 2
     assert len(table.dealer.cards) == 2
-
-def test_hand_value_base():
-    hand1 = Hand(cards=[Card('Clubs', 2), Card('Hearts', 3), Card('Spades', 4)])
-    assert actions.get_hand_value(hand1) == 9
-    hand1 = Hand(cards=[Card('Clubs', 10), Card('Hearts', 'Jack')])
-    assert actions.get_hand_value(hand1) == 20
-    hand1 = Hand(cards=[Card('Clubs', 7), Card('Hearts', 8), Card('Spades', 9)])
-    assert actions.get_hand_value(hand1) == 24
-
-def test_hard_and_soft_hand_values():
-    hand1 = Hand(cards=[Card('Clubs', 'Ace'), Card('Hearts', 5)])
-    assert actions.get_hand_value(hand1) == 16
-    assert actions.get_soft_value(hand1) == 6
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Spades', 'King')]
-    assert actions.get_hand_value(hand1) == 21
-    assert actions.get_soft_value(hand1) == 11
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 2), Card('Spades', 3)]
-    assert actions.get_hand_value(hand1) == 16
-    assert actions.get_soft_value(hand1) == 6
-    hand1.cards = [Card('Clubs', 2), Card('Hearts', 9), Card('Spades', 'Ace')]
-    assert actions.get_hand_value(hand1) == 12
-    assert actions.get_soft_value(hand1) == 12
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 'Ace')]
-    assert actions.get_hand_value(hand1) == 12
-    assert actions.get_soft_value(hand1) == 2
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 'Ace'), Card('Spades', 9)]
-    assert actions.get_hand_value(hand1) == 21
-    assert actions.get_soft_value(hand1) == 11
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 'Ace'), Card('Spades', 'King')]
-    assert actions.get_hand_value(hand1) == 12
-    assert actions.get_soft_value(hand1) == 12
-    hand1.cards = [
-        Card('Clubs', 'Ace'), 
-        Card('Hearts', 'Ace'), 
-        Card('Spades', 'Ace'), 
-        Card('Diamonds', 'Ace')
-    ]
-    assert actions.get_hand_value(hand1) == 14
-    assert actions.get_soft_value(hand1) == 4
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 9)]
-    assert actions.get_hand_value(hand1) == 20
-    assert actions.get_soft_value(hand1) == 10
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 4), Card('Spades', 6)]
-    assert actions.get_hand_value(hand1) == 21
-    assert actions.get_soft_value(hand1) == 11
-    hand1.cards = [Card('Clubs', 'Ace'), Card('Hearts', 5), Card('Spades', 6)]
-    assert actions.get_hand_value(hand1) == 12
-    assert actions.get_soft_value(hand1) == 12
 
 def test_create_and_shuffle():
     deck = actions.create_and_shuffle()

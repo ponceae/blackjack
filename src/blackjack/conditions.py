@@ -109,7 +109,7 @@ def is_valid_wager(player: Player, wager: float) -> bool:
 	"""
 	if not (0 < wager >= MIN_BET):
 		return False
-	return wager <= player.bank.get_chip_count()
+	return wager <= player.bank.chips
           
 def verify_chip_bounds(chips: float) -> bool:
 	"""
@@ -147,7 +147,7 @@ def verify_doubled_wager(player: Player, hand: PlayerHand) -> bool:
 	Returns:
 		bool: True if the player can afford to double the wager, False otherwise.
 	"""
-	return hand.wager <= player.bank.get_chip_count()
+	return hand.wager <= player.bank.chips
 
 def verify_insurance_bet(player: Player, hand: PlayerHand) -> bool: 
 	"""
@@ -160,7 +160,7 @@ def verify_insurance_bet(player: Player, hand: PlayerHand) -> bool:
 	Returns:
 		bool: True if the player can afford insurance, False otherwise.
 	"""
-	return get_insurance_cost(hand) <= player.bank.get_chip_count()
+	return get_insurance_cost(hand) <= player.bank.chips
 
 def verify_min_bet(hand: PlayerHand) -> bool:
 	"""

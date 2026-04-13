@@ -36,7 +36,7 @@ def insurance_logic(insurance: Insurance, player: Player) -> None:
 		None
 	"""
 	insurance.payout = insurance_payout(insurance.cost)
-	player.bank.add_chips(insurance.payout)
+	player.bank.chips += insurance.payout
 
 def insurance_payout(insurance_cost: float) -> float:
 	"""

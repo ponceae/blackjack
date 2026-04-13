@@ -227,7 +227,7 @@ def _add_chips(player: Player) -> None:
 		while True:
 			chips = float(input('Enter the amount of chips to add.\n'))
 			if verify_chip_bounds(chips):
-				player.bank.add_chips(chips)
+				player.bank.chips += chips
 				break
 			print('Invalid Input, Must be a number between 15 - 1000.')
 
@@ -245,7 +245,7 @@ def double_or_not() -> str:
 			return choice.upper()
 		print('Invalid Choice, (Y) YES / (N) NO')
 
-def hit_or_stand() -> None:
+def hit_or_stand() -> str:
 	"""
 	Prompt the user if they wish to hit or stand and return their choice.
 
@@ -274,6 +274,7 @@ def is_new_round(table: Table) -> bool:
 	elif input == YES:
 		clear_terminal()
 		return True
+	return False
 
 def wager_prompt(player: Player):
 	"""
