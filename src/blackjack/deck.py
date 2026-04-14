@@ -17,12 +17,7 @@ def create_deck() -> list[Card]:
 	Returns:
 		list[Card]: The deck of cards.
 	"""
-	deck = []		
-	for suit in CARD_SUITS:
-		for rank in CARD_RANKS:
-			deck.append(Card(suit, rank))
-	return deck
-	# return [Card(rank, suit) for suit in CARD_SUITS for rank in CARD_RANKS]
+	return [Card(suit, rank) for suit in CARD_SUITS for rank in CARD_RANKS]
 		
 def shuffle_deck(deck: list) -> list[Card]:
 	"""

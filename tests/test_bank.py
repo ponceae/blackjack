@@ -25,13 +25,13 @@ def test_initial_bank_state(chips, expected_amount):
     assert test_bank.chips == expected_amount
 
 @pytest.mark.parametrize(
-    'invalid_input',
+    'invalid_input, expected_err_msg',
     [
-        1000.01,
-        -3,
-        -2.56,
-        '4a',
-        '4.56num',
+        (1000.01, 'Invalid Chip Count, must be a number between 0 - 1000'),
+        (-3, 'Invalid Chip Count, must be a number between 0 - 1000'),
+        (-2.56, 'Invalid Chip Count, must be a number between 0 - 1000'),
+        ('4a', 'Invalid Chip Count, must be a number.'),
+        ('4.56num', 'Invalid Chip Count, must be a number.'),
     ],
     ids=[
         'one_over_hundredth_place',
@@ -41,8 +41,8 @@ def test_initial_bank_state(chips, expected_amount):
         'string_invalid_b',
     ]
 )
-def test_init_raises_valueerror_on_invalid_input(invalid_input):
-    with pytest.raises(ValueError):
+def test_init_raises_valueerror_on_invalid_input(invalid_input, expected_err_msg):
+    with pytest.raises(ValueError, match=expected_err_msg):
         Bank(invalid_input)
 
 @pytest.fixture

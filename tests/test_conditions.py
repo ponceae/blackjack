@@ -4,56 +4,93 @@ Tests for the conditions module.
 Author: Adrien P.
 """
 
+import pytest
+
 from blackjack.bank import Bank
 from blackjack import conditions
 from blackjack import constants
 from blackjack.datatypes import DealerHand, Hand, Player, PlayerHand, Table
 from blackjack.card import Card
 
-def test_can_split():
-    hand1 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 8)])
-    hand2 = Hand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 'Ace')])
-    
-    hand3 = Hand(cards=[Card('Hearts', 'King'), Card('Clubs', 'Queen')])
-    hand4 = Hand(cards=[Card('Hearts', 9), Card('Clubs', 4)])
-    
-    assert conditions.can_split(hand1) == True
-    assert conditions.can_split(hand2) == True
-    assert conditions.can_split(hand3) == False
-    assert conditions.can_split(hand4) == False
+@pytest.mark.parametrize(
+        'cards, expected_bool',
+        [
+            ([Card('Clubs', 8), Card('Hearts', 8)], True),
+            ([Card('Spades', 'Ace'), Card('Diamonds', 'Ace')], True),
+            ([Card('Hearts', 'King'), Card('Clubs', 'Queen')], False),
+            ([Card('Hearts', 9), Card('Clubs', 4)], False),
+        ]
+)
+def test_can_split_hand(cards, expected_bool):
+    test_hand = Hand(cards=cards)
+    assert conditions.can_split(test_hand) == expected_bool
 
-def test_initial_hands_outcome():
-    table = Table(
+@pytest.mark.parametrize(
+        'player_cards, dealer_cards, expected_flag',
+        [
+            (
+                [Card('Clubs', 'Ace'), Card('Hearts', 10)], 
+                [Card('Spades', 'Ace'), Card('Diamonds', 10)], 
+                constants.PUSH
+            ),
+            (
+                [Card('Clubs', 'Ace'), Card('Hearts', 10)],
+                [Card('Spades', 2), Card('Diamonds', 10)],
+                constants.PLAYER_WIN,
+            ),
+            (
+                [Card('Clubs', 2), Card('Hearts', 10)],
+                [Card('Spades', 'Ace'), Card('Diamonds', 10)],
+                constants.DEALER_WIN,
+            ),
+            (
+                [Card('Clubs', 2), Card('Hearts', 10)],
+                [Card('Spades', 4), Card('Diamonds', 10)],
+                0,
+            ),
+        ],
+        ids=[
+            'test_initial_push',
+            'test_initial_player_win',
+            'test_initial_dealer_win',
+            'test_no_initial_winner'
+        ]
+)
+def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
+    test_table = Table(
         player=Player(
-            username='Test', 
-            hands=[PlayerHand(cards=[Card('Clubs', 'Ace'), Card('Hearts', 10)])]
+            username='Test',
+            hands=[PlayerHand(cards=player_cards)]
         ),
-        dealer=DealerHand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 10)])
+        dealer=DealerHand(cards=dealer_cards)
     )
-    
-    assert conditions.compare_initial_hands(table) == constants.PUSH
-    
-    table.player.hands=[PlayerHand(cards=[Card('Clubs', 'Ace'), Card('Hearts', 10)])]
-    table.dealer.cards=[Card('Spades', 2), Card('Diamonds', 10)]
-    
-    assert conditions.compare_initial_hands(table) == constants.PLAYER_WIN
-    
-    table.player.hands=[PlayerHand(cards=[Card('Clubs', 2), Card('Hearts', 10)])]
-    table.dealer.cards=[Card('Spades', 'Ace'), Card('Diamonds', 10)]
-    
-    assert conditions.compare_initial_hands(table) == constants.DEALER_WIN
-    
-    table.player.hands=[PlayerHand(cards=[Card('Clubs', 2), Card('Hearts', 10)])]
-    table.dealer.cards=[Card('Spades', 4), Card('Diamonds', 10)]
-    
-    assert conditions.compare_initial_hands(table) == 0
-    
-def test_is_bust_hand():
-    hand1 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 8), Card('Diamonds', 8)])
-    hand2 = Hand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 5)])
-    
-    assert conditions.is_bust(hand1) == True
-    assert conditions.is_bust(hand2) == False
+    assert conditions.compare_initial_hands(test_table) == expected_flag
+
+@pytest.mark.parametrize(
+        'cards, expected_bool',
+        [
+            ([Card('Clubs', 8), Card('Hearts', 8), Card('Diamonds', 8)], True),
+            ([Card('Spades', 'Ace'), Card('Diamonds', 5)], False),
+            ([Card('Spades', 10), Card('Clubs', 5), Card('Hearts', 10)], True),
+            ([Card('Hearts', 'Ace'), Card('Clubs', 'Ace'), Card('Spades', 10)], False),
+            ([
+                Card('Clubs', 3), 
+                Card('Hearts', 4), 
+                Card('Spades', 7), 
+                Card('Clubs', 4)
+            ], False),
+        ],
+        ids=[
+            'three_card_bust_a',
+            'ace_two_card_nonbust',
+            'three_card_bust_b',
+            'two_ace_three_card_nonbust',
+            'four_card_nonbust',
+        ]
+)
+def test_is_bust_hand(cards, expected_bool):
+    test_hand = Hand(cards=cards)
+    assert conditions.is_bust(test_hand) == expected_bool
     
 def test_is_soft_hand():
     hand1 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 4)])
