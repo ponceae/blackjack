@@ -24,11 +24,16 @@ def create_new_user(data: dict, username: str):
 	if not data or username not in data.keys():
 		print('Creating new user.')
 		while True:
-			chip_count = float(input('Enter the amount of chips to add.\n'))
-			if verify_chip_bounds(chip_count):
-				data[username] = {PLAYER_CHIPS: chip_count}
-				break
-			print('Invalid Input, Must be a number between 15 - 1000.')
+			raw_chip_count = input('Enter the amount of chips to add.\n')
+			try:
+				chip_count = float(raw_chip_count)
+				if verify_chip_bounds(chip_count):
+					data[username] = {PLAYER_CHIPS: chip_count}
+					break
+				else:
+					print('Invalid Input, Must be a number between 15 - 1000.')
+			except ValueError:
+				print('Invalid Input, Must be a number')		
 
 def load_user_data():
 	"""

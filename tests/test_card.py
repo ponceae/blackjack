@@ -31,7 +31,7 @@ def test_init_mismatch_conversion(raw_suit, raw_rank, expected_suit, expected_ra
 		(rank, suit) for rank in CARD_RANKS for suit in CARD_SUITS
 	]
 )
-def test_all_cards(rank, suit):
+def test_all_cards_correct_rank_and_suit(rank, suit):
 	card = Card(suit, rank)
 	
 	assert card.rank == rank

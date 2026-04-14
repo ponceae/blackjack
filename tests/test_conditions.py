@@ -172,39 +172,55 @@ def test_is_valid_wager(player, wager, expected_bool):
 )
 def test_verify_chip_bounds(chips, expected_bool):
     assert conditions.verify_chip_bounds(chips) == expected_bool
-    
-def test_verify_chip_count():
-    assert conditions.verify_chip_count(15) == True
-    assert conditions.verify_chip_count(27.5) == True
-    assert conditions.verify_chip_count(14.99) == False
-    assert conditions.verify_chip_count(0) == False
-    assert conditions.verify_chip_count(-4.3) == False
-    assert conditions.verify_chip_count(5) == False
-    
-def test_verify_doubled_wager():
-    player = Player(username='Test', bank=Bank(50.0))
-    player_hand = PlayerHand(wager=25.0)
-    
-    assert conditions.verify_doubled_wager(player, player_hand) == True  
-    player.bank = Bank(25.0)
-    player_hand.wager = 50.0
-    assert conditions.verify_doubled_wager(player, player_hand) == False
-    player.bank = Bank(0.0)
-    assert conditions.verify_doubled_wager(player, player_hand) == False
-    
-def test_verify_insurance_bet():
-    player = Player(username='Test', bank=Bank(25.0))
-    player_hand = PlayerHand(wager=15.0)
-    
-    assert conditions.verify_insurance_bet(player, player_hand) == True   
-    player.bank = Bank(5.0) 
-    assert conditions.verify_insurance_bet(player, player_hand) == False
-    
-def test_verify_min_bet():
-    player_hand = PlayerHand(wager=15.0)  
-    assert conditions.verify_min_bet(player_hand) == True   
-    player_hand.wager = 10   
-    assert conditions.verify_min_bet(player_hand) == False   
-    player_hand.wager = 16 
-    assert conditions.verify_min_bet(player_hand) == True
+
+@pytest.mark.parametrize(
+    'chips, expected_bool',
+    [
+        (15, True),
+        (27.5, True),
+        (14.99, False),
+        (0, False),
+        (-4.3, False),
+        (5, False),
+    ]
+)
+def test_verify_chip_count(chips, expected_bool):
+    assert conditions.verify_chip_count(chips) == expected_bool
+
+@pytest.mark.parametrize(
+    'bank, wager, expected_bool',
+    [
+        (50.0, 25.0, True),
+        (25.0, 50.0, False),
+        (0.0, 50.0, False),
+    ]
+)   
+def test_verify_doubled_wager(bank, wager, expected_bool):
+    player = Player(username='Test', bank=Bank(bank))
+    player_hand = PlayerHand(wager=wager)   
+    assert conditions.verify_doubled_wager(player, player_hand) == expected_bool 
+
+@pytest.mark.parametrize(
+    'bank, wager, expected_bool',
+    [
+        (25.0, 15.0, True),
+        (5.0, 15.0, False),
+    ]
+)  
+def test_verify_insurance_bet(bank, wager, expected_bool):
+    player = Player(username='Test', bank=Bank(bank))
+    player_hand = PlayerHand(wager=wager)
+    assert conditions.verify_insurance_bet(player, player_hand) == expected_bool
+
+@pytest.mark.parametrize(
+    'wager, expected_bool',
+    [
+        (15.0, True),
+        (10, False),
+        (16, True),
+    ]
+)  
+def test_verify_min_bet(wager, expected_bool):
+    player_hand = PlayerHand(wager=wager)  
+    assert conditions.verify_min_bet(player_hand) == expected_bool
     

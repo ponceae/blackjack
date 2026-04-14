@@ -57,7 +57,7 @@ def start_bank_balance():
         (32.5, 258.0),
     ]
 )
-def test_adding_chips(start_bank_balance, add_amount, expected_balance):
+def test_adding_chips_to_bank(start_bank_balance, add_amount, expected_balance):
     start_bank_balance.chips += add_amount
     assert start_bank_balance.chips == expected_balance
 
@@ -69,7 +69,7 @@ def test_adding_chips(start_bank_balance, add_amount, expected_balance):
         (225.5, 0.0),
     ]
 )
-def test_removing_chips(start_bank_balance, remove_amount, expected_balance):
+def test_removing_chips_from_bank(start_bank_balance, remove_amount, expected_balance):
     start_bank_balance.chips -= remove_amount
     assert start_bank_balance.chips == expected_balance
 
@@ -81,7 +81,7 @@ def test_removing_chips(start_bank_balance, remove_amount, expected_balance):
         (105.5, 105.5),
     ]
 )
-def test_setting_chips(start_bank_balance, set_amount, expected_balance):
+def test_setting_chips_to_bank(start_bank_balance, set_amount, expected_balance):
     start_bank_balance.chips = set_amount
     assert start_bank_balance.chips == expected_balance
 

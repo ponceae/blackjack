@@ -6,13 +6,13 @@ Author: Adrien P
 
 from blackjack.deck import create_deck, shuffle_deck
 
-def test_create_deck():   
+def test_create_deck_success():   
     test_deck = create_deck()
 
     for i in range(len(test_deck)):
         assert test_deck[i].to_string() == test_deck[i].to_string()
 
-def test_shuffle_deck():
+def test_shuffle_deck_is_valid():
     test_deck = create_deck()
     shuffled = shuffle_deck(test_deck)
     assert len(shuffled) == 52

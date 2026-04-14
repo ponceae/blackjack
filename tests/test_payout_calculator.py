@@ -10,13 +10,17 @@ from blackjack.bank import Bank
 from blackjack import payout_calculator
 from blackjack.datatypes import Insurance, Player, PlayerHand
 
-def test_blackjack_payouts():
-    hand = PlayerHand(wager=15.0)
-    assert payout_calculator.blackjack_payout(hand) == 37.5
-    hand.wager = 1000
-    assert payout_calculator.blackjack_payout(hand) == 2500.0
-    hand.wager = 534.25
-    assert payout_calculator.blackjack_payout(hand) == 1335.625
+@pytest.mark.parametrize(
+    'wager, expected_payout',
+    [
+        (15.0, 37.5),
+        (1000, 2500.0),
+        (534.25, 1335.625),
+    ]
+)
+def test_blackjack_payouts(wager, expected_payout):
+    hand = PlayerHand(wager=wager)
+    assert payout_calculator.blackjack_payout(hand) == expected_payout
 
 def test_insurance_logic_and_bank_update_low_cost():
     insurance = Insurance(cost=7.5)
@@ -36,21 +40,38 @@ def test_insurance_logic_and_bank_update_high_cost():
     assert insurance.payout == 55.0
     assert player.bank.chips == 80.0
 
-def test_get_insurance_cost():
-    hand = PlayerHand(wager=15)
-    assert payout_calculator.get_insurance_cost(hand) == 7.5
-    hand.wager = 27.5
-    assert payout_calculator.get_insurance_cost(hand) == 13.5
+@pytest.mark.parametrize(
+    'wager, expected_cost',
+    [
+        (15, 7.5),
+        (27.5, 13.5),
+        (346.34, 173.0),
+        (4635.32, 2317.5), 
+    ]
+)
+def test_get_insurance_cost(wager, expected_cost):
+    hand = PlayerHand(wager=wager)
+    assert payout_calculator.get_insurance_cost(hand) == expected_cost
 
-def test_push_payout():
-    hand = PlayerHand(wager=15)
-    assert payout_calculator.push_payout(hand) == 15.0
-    hand.wager = 345.75
-    assert payout_calculator.push_payout(hand) == 345.75
+@pytest.mark.parametrize(
+    'wager, expected_payout',
+    [
+        (15, 15.0),
+        (345.75, 345.75),
+    ]
+)
+def test_push_payout(wager, expected_payout):
+    hand = PlayerHand(wager=wager)
+    assert payout_calculator.push_payout(hand) == expected_payout
 
-def test_standard_win_payout():
-    hand = PlayerHand(wager=15)
-    assert payout_calculator.standard_payout(hand) == 30.0
-    hand.wager = 345.75
-    assert payout_calculator.standard_payout(hand) == 691.50
+@pytest.mark.parametrize(
+    'wager, expected_payout',
+    [
+        (15, 30.0),
+        (345.75, 691.5),
+    ]
+)
+def test_standard_win_payout(wager, expected_payout):
+    hand = PlayerHand(wager=wager)
+    assert payout_calculator.standard_payout(hand) == expected_payout
     

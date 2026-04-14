@@ -98,7 +98,7 @@ def test_soft_hand_values(cards, expected_value):
     hand = Hand(cards=cards)
     assert actions.get_soft_value(hand) == expected_value
 
-def test_copy_deck():
+def test_copy_deck_has_valid_length():
     deck1 = actions.create_and_shuffle()
     deck2 = []
     actions._copy_deck(deck2, deck1)
