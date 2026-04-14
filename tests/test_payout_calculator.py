@@ -4,6 +4,8 @@ Tests for the payout calculator module.
 Author: Adrien P.
 """
 
+import pytest
+
 from blackjack.bank import Bank
 from blackjack import payout_calculator
 from blackjack.datatypes import Insurance, Player, PlayerHand

@@ -73,12 +73,15 @@ def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
             ([Card('Spades', 'Ace'), Card('Diamonds', 5)], False),
             ([Card('Spades', 10), Card('Clubs', 5), Card('Hearts', 10)], True),
             ([Card('Hearts', 'Ace'), Card('Clubs', 'Ace'), Card('Spades', 10)], False),
-            ([
-                Card('Clubs', 3), 
-                Card('Hearts', 4), 
-                Card('Spades', 7), 
-                Card('Clubs', 4)
-            ], False),
+            (
+                [
+                    Card('Clubs', 3), 
+                    Card('Hearts', 4), 
+                    Card('Spades', 7), 
+                    Card('Clubs', 4)
+                ], 
+            False
+            ),
         ],
         ids=[
             'three_card_bust_a',
@@ -91,47 +94,84 @@ def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
 def test_is_bust_hand(cards, expected_bool):
     test_hand = Hand(cards=cards)
     assert conditions.is_bust(test_hand) == expected_bool
-    
-def test_is_soft_hand():
-    hand1 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 4)])
-    hand2 = Hand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 5)])
-    
-    assert conditions.is_soft(hand1) == False
-    assert conditions.is_soft(hand2) == True
-    
-def test_is_split_aces_hand():
-    hand1 = Hand(cards=[Card('Clubs', 'Ace'), Card('Hearts', 'Ace')])
-    hand2 = Hand(cards=[Card('Spades', 5), Card('Diamonds', 5)])
-    hand3 = Hand(cards=[Card('Clubs', 8), Card('Hearts', 10)])
-    
-    assert conditions.is_split_aces(hand1) == True
-    assert conditions.is_split_aces(hand2) == False
-    assert conditions.is_split_aces(hand3) == False
-    
-def test_is_twenty_one_hand():
-    hand1 = Hand(cards=[Card('Clubs', 7), Card('Hearts', 8), Card('Clubs', 6)])
-    hand2 = Hand(cards=[Card('Spades', 5), Card('Diamonds', 10)])
 
-    assert conditions.is_twenty_one(hand1) == True
-    assert conditions.is_twenty_one(hand2) == False
-    
-def test_is_valid_wager():
-    player = Player(username='Test', bank=Bank(25.0))
-    
-    assert conditions.is_valid_wager(player, 15.0) == True
-    assert conditions.is_valid_wager(player, 35) == False
-    assert conditions.is_valid_wager(player, -3.20) == False
-    assert conditions.is_valid_wager(player, 0) == False
-    assert conditions.is_valid_wager(player, 14.99) == False
-    
-def test_verify_chip_bounds():
-    assert conditions.verify_chip_bounds(15) == True
-    assert conditions.verify_chip_bounds(1000.0) == True
-    assert conditions.verify_chip_bounds(14.99) == False
-    assert conditions.verify_chip_bounds(1000.01) == False
-    assert conditions.verify_chip_bounds(500) == True
-    assert conditions.verify_chip_bounds(27.5) == True
-    assert conditions.verify_chip_bounds(-33.6) == False
+@pytest.mark.parametrize(
+    'cards, expected_bool',
+    [
+        ([Card('Clubs', 8), Card('Hearts', 4)], False),
+        ([Card('Spades', 'Ace'), Card('Diamonds', 5)], True),
+    ],
+    ids=[
+        'is_not_soft_a',
+        'is_soft_a',
+    ]
+)
+def test_is_soft_hand(cards, expected_bool):
+    test_hand = Hand(cards=cards)
+    assert conditions.is_soft(test_hand) == expected_bool
+
+@pytest.mark.parametrize(
+        'cards, expected_bool',
+        [
+            ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace')], True),
+            ([Card('Spades', 5), Card('Diamonds', 5)], False),
+            ([Card('Clubs', 8), Card('Hearts', 10)], False),
+        ],
+        ids=[
+            'is_split_ace_hand_a',
+            'not_split_ace_hand_a',
+            'not_split_ace_hand_b',
+        ]
+)
+def test_hand_is_split_aces(cards, expected_bool):
+    test_hand = Hand(cards=cards)
+    assert conditions.is_split_aces(test_hand) == expected_bool
+
+@pytest.mark.parametrize(
+        'cards, expected_bool',
+        [
+            ([Card('Clubs', 7), Card('Hearts', 8), Card('Clubs', 6)], True),
+            ([Card('Spades', 5), Card('Diamonds', 10)], False),
+        ],
+        ids=[
+            'hand_is_twenty_one_a',
+            'hand_not_twenty_one_b',
+        ]
+)  
+def test_is_twenty_one_hand(cards, expected_bool):
+    test_hand = Hand(cards=cards)
+    assert conditions.is_twenty_one(test_hand) == expected_bool
+
+@pytest.fixture
+def player():
+    return Player(username='Test', bank=Bank(25.0)) 
+@pytest.mark.parametrize(
+        'wager, expected_bool',
+        [
+            (15.0, True),
+            (35, False),
+            (-3.2, False),
+            (0, False),
+            (14.99, False),
+        ],
+)
+def test_is_valid_wager(player, wager, expected_bool):
+    assert conditions.is_valid_wager(player, wager) == expected_bool
+
+@pytest.mark.parametrize(
+        'chips, expected_bool',
+        [
+            (15, True),
+            (1000.0, True),
+            (14.99, False),
+            (1000.01, False),
+            (500, True),
+            (27.5, True),
+            (-33.6, False),
+        ],
+)
+def test_verify_chip_bounds(chips, expected_bool):
+    assert conditions.verify_chip_bounds(chips) == expected_bool
     
 def test_verify_chip_count():
     assert conditions.verify_chip_count(15) == True

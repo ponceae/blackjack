@@ -74,7 +74,7 @@ def test_hard_hand_values(cards, expected_value):
                 Card('Spades', 'Ace'), 
                 Card('Diamonds', 'Ace')
             ], 
-            4
+            4,
         ),
         ([Card('Clubs', 'Ace'), Card('Hearts', 9)], 10),
         ([Card('Clubs', 'Ace'), Card('Hearts', 4), Card('Spades', 6)], 11),

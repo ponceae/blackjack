@@ -30,7 +30,7 @@ def mock_inputs(monkeypatch):
 	return _mock_inputs
 
 @pytest.mark.parametrize(
-	'func,args,expected',
+	'func, args, expected_choice',
 	[
 		(interface.double_or_not, [], 'Y'),
 		(interface.request_chips, [], 'Y'),
@@ -39,17 +39,17 @@ def mock_inputs(monkeypatch):
 		(interface.split_or_not, [], 'Y'),
 	]
 )
-def test_yes_flow(mock_inputs, capsys, func, args, expected):
+def test_yes_flow(mock_inputs, capsys, func, args, expected_choice):
 	mock_inputs(['yes', '0', 'sadf', 'y'])
 
 	choice = func(*args)
 
 	console = capsys.readouterr()
 	assert console.out.count('Invalid Choice, (Y) YES / (N) NO\n') == 3
-	assert choice == expected
+	assert choice == expected_choice
 
 @pytest.mark.parametrize(
-	'func, args, expected',
+	'func, args, expected_choice',
 	[
 		(interface.double_or_not, [], 'N'),
 		(interface.request_chips, [], 'N'),
@@ -58,14 +58,14 @@ def test_yes_flow(mock_inputs, capsys, func, args, expected):
 		(interface.split_or_not, [], 'N'),
 	]
 )
-def test_no_flow(mock_inputs, capsys, func, args, expected):
+def test_no_flow(mock_inputs, capsys, func, args, expected_choice):
 	mock_inputs(['no', '0', 'sadf', 'n'])
 
 	choice = func(*args)
 
 	console = capsys.readouterr()
 	assert console.out.count('Invalid Choice, (Y) YES / (N) NO\n') == 3
-	assert choice == expected
+	assert choice == expected_choice
 
 def test_compare_hands_output():
 	player_hand1 = PlayerHand(
