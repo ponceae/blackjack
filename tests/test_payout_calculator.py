@@ -25,18 +25,14 @@ def test_blackjack_payouts(wager, expected_payout):
 def test_insurance_logic_and_bank_update_low_cost():
     insurance = Insurance(cost=7.5)
     player = Player(username='Test', bank=Bank(15.0))
-
     payout_calculator.insurance_logic(insurance, player)
-
     assert insurance.payout == 15.0
     assert player.bank.chips == 30.0
 
 def test_insurance_logic_and_bank_update_high_cost():
     insurance = Insurance(cost=27.5)
     player = Player(username='Test', bank=Bank(25.0))
-
     payout_calculator.insurance_logic(insurance, player)
-
     assert insurance.payout == 55.0
     assert player.bank.chips == 80.0
 

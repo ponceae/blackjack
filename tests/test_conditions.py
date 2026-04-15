@@ -145,6 +145,7 @@ def test_is_twenty_one_hand(cards, expected_bool):
 @pytest.fixture
 def player():
     return Player(username='Test', bank=Bank(25.0)) 
+
 @pytest.mark.parametrize(
         'wager, expected_bool',
         [

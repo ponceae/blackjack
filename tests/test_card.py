@@ -32,8 +32,7 @@ def test_init_mismatch_conversion(raw_suit, raw_rank, expected_suit, expected_ra
 	]
 )
 def test_all_cards_correct_rank_and_suit(rank, suit):
-	card = Card(suit, rank)
-	
+	card = Card(suit, rank)	
 	assert card.rank == rank
 	assert card.suit == suit
 
@@ -53,32 +52,34 @@ def test_init_raises_valueerror_on_invalid_input(
 	with pytest.raises(ValueError, match=expected_err_msg):
 		Card(invalid_suit, invalid_rank)
 
+def _generate_cards():
+	return [
+		Card('Spades', 5),
+		Card('Hearts', 2),
+		Card('Clubs', 10),
+		Card('Diamonds', 'Ace'),
+		Card('Spades', 'Jack'),
+		Card('Clubs', 'Queen'),
+		Card('Hearts', 'King'),
+	]
+
+def _generate_expected_values(type):
+	if type == 'rank_values':
+		return [5, 2, 10, 11, 10, 10, 10]
+	elif type == 'to_string':
+		return ['♠5', '♥2', '♣10', '♦Ace', '♠Jack', '♣Queen','♥King']
+	return []
+
 @pytest.mark.parametrize(
 	'card, expected_rank_value',
-	[
-		(Card('Spades', 5), 5),
-		(Card('Hearts', 2), 2),
-		(Card('Clubs', 10), 10),
-		(Card('Diamonds', 'Ace'), 11),
-		(Card('Spades', 'Jack'), 10),
-		(Card('Clubs', 'Queen'), 10),
-		(Card('Hearts', 'King'), 10),
-	]
+	zip(_generate_cards(), _generate_expected_values('rank_values'))
 )
 def test_get_card_rank_value(card, expected_rank_value):
 	assert card.get_rank_value() == expected_rank_value
 
 @pytest.mark.parametrize(
 	'card, expected_string',
-	[
-		(Card('Spades', 5), '♠5'),
-		(Card('Hearts', 2), '♥2'),
-		(Card('Clubs', 10), '♣10'),
-		(Card('Diamonds', 'Ace'), '♦Ace'),
-		(Card('Spades', 'Jack'), '♠Jack'),
-		(Card('Hearts', 'Queen'), '♥Queen'),
-		(Card('Clubs', 'King'), '♣King'),
-	]
+	zip(_generate_cards(), _generate_expected_values('to_string'))
 )
 def test_card_to_string(card, expected_string):
 	assert card.to_string() == expected_string

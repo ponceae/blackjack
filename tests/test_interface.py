@@ -19,7 +19,6 @@ from blackjack.datatypes import (
 	Table
 )
 from blackjack import interface
-from blackjack import storage
 
 @pytest.fixture
 def mock_inputs(monkeypatch):
@@ -29,19 +28,23 @@ def mock_inputs(monkeypatch):
 			try:
 				return next(inputs)
 			except StopIteration:
-				pytest.fail(f'Test ran out of mock inputs.\nPrompt: {prompt}\n'
-				)
+				pytest.fail(f'Test ran out of mock inputs.\nLast Prompt: {prompt}\n')
 		monkeypatch.setattr('builtins.input', mock_input)
 	return _mock_inputs
+
+def _generate_basic_input_arg_params(flag):
+	return [
+		(interface.double_or_not, [], flag),
+		(interface.request_chips, [], flag),
+		(interface.request_insurance, [7.5], flag),
+		(interface.request_new_round, [], flag),
+		(interface.split_or_not, [], flag),
+	]
 
 @pytest.mark.parametrize(
 	'function, args, expected_choice',
 	[
-		(interface.double_or_not, [], 'Y'),
-		(interface.request_chips, [], 'Y'),
-		(interface.request_insurance, [7.5], 'Y'),
-		(interface.request_new_round, [], 'Y'),
-		(interface.split_or_not, [], 'Y'),
+		*_generate_basic_input_arg_params(constants.YES)
 	]
 )
 def test_yes_flow(mock_inputs, capsys, function, args, expected_choice):
@@ -54,11 +57,7 @@ def test_yes_flow(mock_inputs, capsys, function, args, expected_choice):
 @pytest.mark.parametrize(
 	'function, args, expected_choice',
 	[
-		(interface.double_or_not, [], 'N'),
-		(interface.request_chips, [], 'N'),
-		(interface.request_insurance, [7.5], 'N'),
-		(interface.request_new_round, [], 'N'),
-		(interface.split_or_not, [], 'N'),
+		*_generate_basic_input_arg_params(constants.NO)
 	]
 )
 def test_no_flow(mock_inputs, capsys, function, args, expected_choice):
@@ -114,22 +113,26 @@ def test_compare_hands_output(
 	assert msg == expected_msg
 	assert flag == expected_flag
 
-def test_print_player_hands_init_deal(capsys):
-	# Test initial deal no insurance display. 
-	table = Table (
+@pytest.fixture
+def base_table():
+	return Table (
 		player=Player(
 			username='Test',
-			bank=Bank(30.0),
 			hands=[
-				PlayerHand(cards=[Card('Spades', 4), Card('Hearts', 6)], wager=15.0)]
-			),
-		dealer=DealerHand(cards=[Card('Clubs', 7), Card('Diamonds', 3)])
+				PlayerHand(cards=[Card('Spades', 4), Card('Hearts', 6)], wager=15.0)
+			]
+		),
+		dealer=DealerHand(cards=[Card('Clubs', 'Ace'), Card('Diamonds', 3)])
 	)
-	interface.clear_and_print(table)
+	
+def test_print_player_hands_init_deal(capsys, base_table):
+	# Test initial deal no insurance display. 
+	base_table.player.bank = Bank(30.0)
+	interface.clear_and_print(base_table)
 	console = capsys.readouterr()   
 	assert console.out == (
-		'Dealer: 7\n'
-		'♣7\n'
+		'Dealer: 11\n'
+		'♣Ace\n'
 		'?\n'
 		'--------------------\n'
 		'Hand I: 10 [$15.00]\n'
@@ -138,23 +141,12 @@ def test_print_player_hands_init_deal(capsys):
 		'--------------------\n'
 		'Chips: $30.00\n'
 	)
-def test_print_player_hands_init_deal_with_insurance(capsys):
+
+def test_print_player_hands_init_deal_with_insurance(capsys, base_table):
 	# Test initial deal with insurance display.
-	table = Table (
-		player=Player(
-			username='Test',
-			bank=Bank(22.5),
-			hands=[
-					PlayerHand(
-						cards=[Card('Spades', 4), Card('Hearts', 6)], 
-						wager=15.0,
-						insurance_wager=7.5,
-					)
-				]
-			),
-		dealer=DealerHand(cards=[Card('Clubs', 'Ace'), Card('Diamonds', 3)])
-	)
-	interface.clear_and_print(table)
+	base_table.player.bank = Bank(22.5)
+	base_table.player.hands[0].insurance_wager = 7.5
+	interface.clear_and_print(base_table)
 	console = capsys.readouterr() 
 	assert console.out == (
 		'Dealer: 11\n'
@@ -169,143 +161,68 @@ def test_print_player_hands_init_deal_with_insurance(capsys):
 		'Chips: $22.50\n'
 	)
 
-@pytest.mark.parametrize(
-	'cards, bank, wager, dealer_cards, expected_display',
-	[
-		(
-			[Card('Clubs', 4), Card('Spades', 6), Card('Hearts', 9)],
-			50.0,
-			30.0,
-			[Card('Diamonds', 4), Card('Hearts', 6), Card('Spades', 7)],
-			'Dealer: 17\n'
-			'♦4\n'
-			'♥6\n'
-			'♠7\n'
-			'--------------------\n'
-			'Hand I: 19 [$30.00]\n'
-			'♣4\n'
-			'♠6\n'
-			'♥9\n'
-			'--------------------\n'
-			'Chips: $50.00\n',
-		),
-		(
-			[Card('Clubs', 6), Card('Spades', 4), Card('Hearts', 9)],
-			50.0,
-			30.0,
-			[Card('Diamonds', 4), Card('Hearts', 'Ace')],
-			'Dealer: 5 / 15\n'
-			'♦4\n'
-			'♥Ace\n'
-			'--------------------\n'
-			'Hand I: 19 [$30.00]\n'
-			'♣6\n'
-			'♠4\n'
-			'♥9\n'
-			'--------------------\n'
-			'Chips: $50.00\n'
-		),
-	],
-	ids=[
-		'dealer_non_soft_hand',
-		'dealer_soft_hand',
-	]
-)
-def test_print_player_hands_dealer_showing_soft_and_non_soft(
-		capsys, cards, bank, wager, dealer_cards, expected_display
-):
-	# Test dealer showing both cards, non-soft.
-	player_hand1 = PlayerHand(
-		cards=cards,
-		wager=wager
-	)
-	table = Table(
-		player=Player(username='Test', hands=[player_hand1], bank = Bank(bank)), 
-		dealer=DealerHand(cards=dealer_cards, is_hidden=False)
-	)
-	interface.clear_and_print(table)
-	console = capsys.readouterr()   
-	assert console.out == expected_display
-
-def test_print_split_player_hands_hand_one_active(capsys):
-	# Split when hand I is active.
-	player_hand1 = PlayerHand(
-		cards=[Card('Clubs', 6), Card('Spades', 'Jack')],
-		wager=40.0,
-		is_active=True
-	)
-	player_hand2 = PlayerHand(
-		cards=[Card('Spades', 6), Card('Spades', 'Ace')],
-		wager=40.0
-	)
-	dealer_hand = DealerHand(
-		cards=[Card('Diamonds', 4), Card('Hearts', 6), Card('Spades', 7)],
-		is_hidden=False
-	)
-	table = Table(
+@pytest.fixture
+def base_split_table():
+	return Table(
 		player=Player(
-			username='Test', 
-			hands=[player_hand1, player_hand2], 
-			bank = Bank(50.0)
-		), 
-		dealer=dealer_hand
+			  username='Test',
+			bank=Bank(50.0),
+			hands=[
+				PlayerHand(
+					cards=[Card('Clubs', 4), Card('Spades', 6), Card('Hearts', 6)],
+					wager=30.0,
+				 ),
+				PlayerHand(
+					cards=[Card('Hearts', 'Jack'), Card('Spades', 4)],
+					wager=30.0,
+				 ),
+			],
+		),
+		dealer=(DealerHand(is_hidden=False))
 	)
-	interface.clear_and_print(table)
-	console = capsys.readouterr()   
+
+def test_print_player_hands_dealer_showing_both_soft(capsys, base_split_table):
+	# Test dealer showing both cards, non-soft.
+	base_split_table.player.hands[0].is_active = True
+	base_split_table.dealer.cards = [Card('Spades', 'Ace'), Card('Hearts', 4)]
+	interface.print_hands(base_split_table)
+	console = capsys.readouterr() 
 	assert console.out == (
-		'Dealer: 17\n'
-		'♦4\n'
-		'♥6\n'
-		'♠7\n'
-		'--------------------\n'
-		'Hand I: 16 [$40.00] <- Active\n'
-		'♣6\n'
-		'♠Jack\n'
-		'--------------------\n'
-		'Hand II: 7 / 17 [$40.00]\n'
-		'♠6\n'
+		'Dealer: 5 / 15\n'
 		'♠Ace\n'
+		'♥4\n'
+		'--------------------\n'
+		'Hand I: 16 [$30.00] <- Active\n'
+		'♣4\n'
+		'♠6\n'
+		'♥6\n'
+		'--------------------\n'
+		'Hand II: 14 [$30.00]\n'
+		'♥Jack\n'
+		'♠4\n'
 		'--------------------\n'
 		'Chips: $50.00\n'
 	)
-def test_print_split_player_hands_hand_two_active(capsys):
-	# Split when hand II is active.
-	player_hand1 = PlayerHand(
-		cards=[Card('Clubs', 6), Card('Spades', 'Jack')],
-		wager=40.0,
-	)
-	player_hand2 = PlayerHand(
-		cards=[Card('Spades', 6), Card('Spades', 'Ace')],
-		wager=40.0,
-		is_active=True,
-	)
-	dealer_hand = DealerHand(
-		cards=[Card('Diamonds', 4), Card('Hearts', 6), Card('Spades', 7)],
-		is_hidden=False,
-	)
-	table = Table(
-		player=Player(
-			username='Test', 
-			hands=[player_hand1, player_hand2], 
-			bank = Bank(50.0),
-		), 
-		dealer=dealer_hand
-	)
-	interface.clear_and_print(table)
-	console = capsys.readouterr()   
+
+def test_print_player_hands_dealer_showing_both_non_soft(capsys, base_split_table):
+    # Test dealer showing both cards, non-soft.
+	base_split_table.player.hands[1].is_active = True
+	base_split_table.dealer.cards = [Card('Spades', 8), Card('Hearts', 4)]
+	interface.print_hands(base_split_table)
+	console = capsys.readouterr() 
 	assert console.out == (
-		'Dealer: 17\n'
-		'♦4\n'
-		'♥6\n'
-		'♠7\n'
+		'Dealer: 12\n'
+		'♠8\n'
+		'♥4\n'
 		'--------------------\n'
-		'Hand I: 16 [$40.00]\n'
-		'♣6\n'
-		'♠Jack\n'
-		'--------------------\n'
-		'Hand II: 7 / 17 [$40.00] <- Active\n'
+		'Hand I: 16 [$30.00]\n'
+		'♣4\n'
 		'♠6\n'
-		'♠Ace\n'
+		'♥6\n'
+		'--------------------\n'
+		'Hand II: 14 [$30.00] <- Active\n'
+		'♥Jack\n'
+		'♠4\n'
 		'--------------------\n'
 		'Chips: $50.00\n'
 	)

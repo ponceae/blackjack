@@ -46,7 +46,7 @@ def test_init_raises_valueerror_on_invalid_input(invalid_input, expected_err_msg
         Bank(invalid_input)
 
 @pytest.fixture
-def start_bank_balance():
+def start_bank():
     return Bank(225.50)
 
 @pytest.mark.parametrize(
@@ -57,9 +57,9 @@ def start_bank_balance():
         (32.5, 258.0),
     ]
 )
-def test_adding_chips_to_bank(start_bank_balance, add_amount, expected_balance):
-    start_bank_balance.chips += add_amount
-    assert start_bank_balance.chips == expected_balance
+def test_adding_chips_to_bank(start_bank, add_amount, expected_balance):
+    start_bank.chips += add_amount
+    assert start_bank.chips == expected_balance
 
 @pytest.mark.parametrize(
     'remove_amount, expected_balance',
@@ -69,9 +69,9 @@ def test_adding_chips_to_bank(start_bank_balance, add_amount, expected_balance):
         (225.5, 0.0),
     ]
 )
-def test_removing_chips_from_bank(start_bank_balance, remove_amount, expected_balance):
-    start_bank_balance.chips -= remove_amount
-    assert start_bank_balance.chips == expected_balance
+def test_removing_chips_from_bank(start_bank, remove_amount, expected_balance):
+    start_bank.chips -= remove_amount
+    assert start_bank.chips == expected_balance
 
 @pytest.mark.parametrize(
     'set_amount, expected_balance',
@@ -81,9 +81,9 @@ def test_removing_chips_from_bank(start_bank_balance, remove_amount, expected_ba
         (105.5, 105.5),
     ]
 )
-def test_setting_chips_to_bank(start_bank_balance, set_amount, expected_balance):
-    start_bank_balance.chips = set_amount
-    assert start_bank_balance.chips == expected_balance
+def test_setting_chips_to_bank(start_bank, set_amount, expected_balance):
+    start_bank.chips = set_amount
+    assert start_bank.chips == expected_balance
 
 @pytest.mark.parametrize(
     'invalid_value, expected_err_msg',
@@ -96,12 +96,12 @@ def test_setting_chips_to_bank(start_bank_balance, set_amount, expected_balance)
     ]
 )
 def test_bank_chips_setter_raises_valueerror_on_invalid_value(
-        start_bank_balance, 
-        invalid_value, 
-        expected_err_msg
+    start_bank, 
+    invalid_value, 
+    expected_err_msg
 ):
     with pytest.raises(ValueError, match=expected_err_msg):
-        start_bank_balance.chips = invalid_value
+        start_bank.chips = invalid_value
 
 @pytest.mark.parametrize(
     'chips, expected_display',
