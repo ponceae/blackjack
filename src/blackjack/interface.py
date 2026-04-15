@@ -276,15 +276,16 @@ def is_new_round(table: Table) -> bool:
 		return True
 	return False
 
-def wager_prompt(player: Player):
+def wager_prompt(player: Player) -> float:
 	"""
-	Prompt the user for a wager amount and update the player bank.
+	Prompt and verify the user for a wager amount. If there are not enough chips,
+	prompt the user for more chips.
 
 	Args:
-		player (Player): The player whose bank to update.
+		player (Player): The player whose bank to check or update.
 
 	Returns:
-		None
+		float: The validated wager
 	"""
 	print(_print_min_bet(player.bank))
 	while True:
@@ -399,9 +400,6 @@ def _print_min_bet(player_bank: Bank):
 		f'Minimum Bet is: $' + f'{MIN_BET:.2f}\n'
 	)
 
-"""
-Utility timer function for the CLI display.
-"""
 def load_timer(timer_flag_key: int=-1):
 	"""
 	Display the timer functions for the CLI depending on the game state.

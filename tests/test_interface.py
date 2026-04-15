@@ -5,6 +5,7 @@ Author: Adrien P.
 """
 
 import pytest
+import time 
 
 from blackjack.bank import Bank
 from blackjack.card import Card
@@ -18,6 +19,7 @@ from blackjack.datatypes import (
 	Table
 )
 from blackjack import interface
+from blackjack import storage
 
 @pytest.fixture
 def mock_inputs(monkeypatch):
@@ -388,28 +390,88 @@ def test_is_new_round_continue(mock_inputs):
 	mock_inputs(['y'])
 	assert interface.is_new_round(table) == True
 	
-def test_exit_round_and_save_to_json(mock_inputs, monkeypatch):
+def test_is_new_round_exit_branch(mock_inputs, monkeypatch):
 	table = Table(Player(username='Test'))
-	mock_inputs(['n', '50'])
-	monkeypatch.setattr('json.dumps', lambda data, **kwargs: '{}')
+	mock_inputs(['n'])
+	monkeypatch.setattr(interface, 'save_chips', lambda *args, **kwargs: None)
 	with pytest.raises(SystemExit) as exe_info:
 		interface.is_new_round(table)
 	assert exe_info.value.code is None
 
-# def test_new_round_decision(mock_inputs, capsys):
+@pytest.mark.parametrize(
+		'bank, input_list, expected_wager',
+		[
+			(25, ['15'], 15.0),
+			(30.0, ['14', 'n', '20'], 20.0),
+			(1.0, ['15', '20', 'y', '20', '15'], 15.0),
+			(15.0, ['asdf', '15'], 15.0),
+		],
+		ids=[
+			'wager_prompt_has_enough_chips',
+			'wager_prompt_not_enough_chips_for_min_bet',
+			'wager_prompt_player_bank_is_broke',
+			'wager_invalid_input_caught_gracefully',
+		]
+)
+def test_wager_prompt(mock_inputs, bank, input_list, expected_wager):
+	test_player = Player(username='Test', bank=Bank(bank))
+	mock_inputs(input_list)
+	assert interface.wager_prompt(test_player) == expected_wager
 
-# def test_wager_prompt(mock_inputs, capsys):
+@pytest.mark.parametrize(
+		'key, expected_output',
+		[
+			(1, 'Dealer is peeking...'),
+			(2, 'Switching active hand...'),
+			(3, 'Switching to dealer...'),
+			(4, 'Dealer is hitting...'),
+			(5, 'Comparing hand values...'),
+			(6, 'Dealer is flipping card...'),
+			(7, 'You cannot afford that...'),
+			(-1, ''),
+			(999, ''),
+		]
+)
+def test_load_timer(capsys, monkeypatch, key, expected_output):
+	monkeypatch.setattr(time, 'sleep', lambda x: None)
+	interface.load_timer(key)
+	console = capsys.readouterr()
+	assert expected_output in console.out
 
-# def test_wager_prompt_helper():
+@pytest.mark.parametrize(
+		'flag, expected_display',
+		[
+			(constants.STAND, 'Dealer is Standing\n'),
+			(constants.BUST, 'Dealer has Busted\n'),
+		]
+)
+def test_display_dealer_state(capsys, flag, expected_display):
+	interface.print_dealer_state(flag)
+	console = capsys.readouterr()
+	assert expected_display in console.out
 
-# def test_clear_terminal():
+@pytest.mark.parametrize(
+		'flag, index, expected_display',
+		[
+			(constants.BUST, 0, 'Hand I Busted & Lost\n'),
+			(constants.BUST, 1, 'Hand II Busted & Lost\n'),
+			(constants.PLAYER_WIN, 0, 'Hand I Win. '),
+			(constants.PLAYER_WIN, 1, 'Hand II Win. '),
+		]
+)
+def test_get_round_outcome_msg(flag, index, expected_display):
+	assert interface.get_round_outcome_msg(index, flag) == expected_display
 
-# def test_load_timer():
-
-# def test_display_dealer_state
-
-# def test_get_round_outcome_msg
-
-# def test_get_round_outcome_payout_msg
-
-# def test_print_stand_or_bust():
+@pytest.mark.parametrize(
+		'flag, index, expected_display',
+		[
+			(constants.STAND, 0, 'Hand I is Standing\n'),
+			(constants.STAND, 1, 'Hand II is Standing\n'),
+			(constants.BUST, 0, 'Hand I has Busted\n'),
+			(constants.BUST, 1, 'Hand II has Busted\n')
+		]
+)
+def test_print_stand_or_bust(capsys, index, flag, expected_display):
+	interface.print_stand_or_bust(index, flag)
+	console = capsys.readouterr()
+	assert expected_display in console.out
