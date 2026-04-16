@@ -9,7 +9,7 @@ from .constants import (
     CARD_SUITS, 
     CARD_SUIT_SYMBOLS, 
     FACE_CARD_VALUE, 
-    NAMED_CARD_RANKS
+    NAMED_CARD_RANKS,
 )
 
 class Card:

@@ -1,5 +1,6 @@
 """ 
-Read, write, and pull data from a JSON file.
+This module contains functionality for reading, writing, and pulling data from a 
+JSON file.
 
 Author: Adrien P.
 """
@@ -9,7 +10,7 @@ import json
 from .conditions import verify_chip_bounds
 from .constants import FILE_PATH, PLAYER_CHIPS
 
-def create_new_user(data: dict, username: str):
+def create_new_user(data: dict, username: str) -> None:
 	"""
 	Create a new user if they do not exist in the JSON file. Immediately adds data
 	to the JSON when prompting the user for chips.
@@ -35,7 +36,7 @@ def create_new_user(data: dict, username: str):
 			except ValueError:
 				print('Invalid Input, Must be a number')		
 
-def load_user_data():
+def load_user_data() -> dict:
 	"""
 	Read the JSON file and return the JSON object as a dictionary.
 
@@ -46,23 +47,26 @@ def load_user_data():
 		data = json.load(data_file)
 	return data
 
-def pull_user_info():
+def pull_user_info() -> tuple[float, str]:
 	"""
 	Prompt the user for a username and pull or modify data from the JSON file and 
 	return the chip count from the JSON.
 
 	Returns:
-		int | float: The chip count from the JSON.
+		tuple[float, str]: The chip count from the JSON and the associated username.
 	"""
 	username = input('Enter a username to store/pull your chips: \n')
 	data = load_user_data()
+ 
 	if not data or username not in data.keys():
 		create_new_user(data, username)
+  
 	chip_count = data[username][PLAYER_CHIPS]
 	save_chips(username, chip_count, data)
+
 	return chip_count, username
 
-def save_chips(username: str, chips: float | int, data: dict):
+def save_chips(username: str, chips: float | int, data: dict) -> None:
 	"""
 	Verify that the username exists and store the data in the JSON. Create a new
 	user if the username does not exist by creating a new JSON entry.
@@ -81,7 +85,7 @@ def save_chips(username: str, chips: float | int, data: dict):
 		create_new_user(data, username)
 	write_user_data(data)  
 
-def write_user_data(data: dict):
+def write_user_data(data: dict) -> None:
 	"""
 	Initialize a JSON object from the data dictionary and write to the JSON.
 

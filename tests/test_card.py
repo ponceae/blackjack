@@ -18,7 +18,7 @@ from blackjack.constants import CARD_RANKS, CARD_SUITS
 		  ('DiaMONds', 'acE', 'Diamonds', 'Ace'),
 		('SPadEs', 'jaCk', 'Spades', 'Jack'),
 		('HEArtS', 'queen', 'Hearts', 'Queen'),
-	]
+	],
 )
 def test_init_mismatch_conversion(raw_suit, raw_rank, expected_suit, expected_rank):
 	test_card = Card(raw_suit, raw_rank)
@@ -29,7 +29,7 @@ def test_init_mismatch_conversion(raw_suit, raw_rank, expected_suit, expected_ra
 	'rank, suit',
 	[
 		(rank, suit) for rank in CARD_RANKS for suit in CARD_SUITS
-	]
+	],
 )
 def test_all_cards_correct_rank_and_suit(rank, suit):
 	card = Card(suit, rank)	
@@ -44,7 +44,7 @@ def test_all_cards_correct_rank_and_suit(rank, suit):
 		('Hearts', 12, 'Invalid Rank, Usage: 2-10, Jack, King, Queen, Ace'),
 		('Diamonds', 1, 'Invalid Rank, Usage: 2-10, Jack, King, Queen, Ace'),
 		('Card', 'Ace', 'Invalid Suit, Usage: Clubs, Diamonds, Hearts, Spades'),
-	]
+	],
 )
 def test_init_raises_valueerror_on_invalid_input(
 	invalid_suit, invalid_rank, expected_err_msg

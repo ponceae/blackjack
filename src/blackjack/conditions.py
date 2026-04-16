@@ -40,6 +40,7 @@ def compare_initial_hands(table: Table) -> int:
 	"""
 	player_blackjack = is_twenty_one(table.player.hands[0])
 	dealer_blackjack = is_twenty_one(table.dealer)
+ 
 	if player_blackjack and dealer_blackjack:
 		return PUSH
 	elif player_blackjack and not dealer_blackjack:

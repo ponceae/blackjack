@@ -7,7 +7,7 @@ Author: Adrien P.
 import json
 import pytest
 
-from blackjack.constants import FILE_PATH, PLAYER_CHIPS
+from blackjack.constants import PLAYER_CHIPS
 from blackjack import storage
 
 @pytest.fixture
@@ -59,10 +59,14 @@ def _generate_test_data_params():
 ) 
 def test_load_data_from_json_success(monkeypatch, tmp_path, test_data, expected_chips):
     test_file = tmp_path / 'test_file.json'
+    
+    # Write to the test_file so we can extract the test_data.
     with open(test_file, 'w') as data_file:
         json.dump(test_data, data_file)
+        
     monkeypatch.setattr('blackjack.storage.FILE_PATH', str(test_file))
     loaded_data = storage.load_user_data()
+    
     assert loaded_data == test_data
     assert loaded_data['Test'][PLAYER_CHIPS] == expected_chips
 
@@ -75,10 +79,93 @@ def test_load_data_from_json_success(monkeypatch, tmp_path, test_data, expected_
 def test_write_user_data_success(monkeypatch, tmp_path, test_data, expected_chips):
     test_file = tmp_path / 'test_file.json'
     monkeypatch.setattr('blackjack.storage.FILE_PATH', str(test_file))
+    
     storage.write_user_data(test_data)
     assert test_file.exists()
+    
+    # Open the test file in order to pull the test_data.
     with open(test_file, 'r') as data_file:
         loaded_data = json.load(data_file)
+        
     assert loaded_data == test_data
     assert loaded_data['Test'][PLAYER_CHIPS] == expected_chips
+
+def test_save_chips_existing_user(monkeypatch):
+    username = 'Test'
+    data = {'Test': {PLAYER_CHIPS: 15.0}}
+    chips = 37.5
+    
+    monkeypatch.setattr(storage, 'write_user_data', lambda *args, **kwargs: None)
+    monkeypatch.setattr(storage, 'create_new_user', lambda *args, **kwargs: None)
+    
+    storage.save_chips(username, chips, data)
+    assert data[username][PLAYER_CHIPS] == 37.5
+    
+def test_save_chips_new_user(monkeypatch):
+    username = 'New Test'
+    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    chips = 37.5
+
+    monkeypatch.setattr(storage, 'write_user_data', lambda *args, **kwargs: None)
+    
+    # Intercept the storage.create_new_user() function call.
+    args = []
+    def dummy_func_call(a, b):
+        args.append((a, b))
+        
+    monkeypatch.setattr(storage, 'create_new_user', dummy_func_call)
+    storage.save_chips(username, chips, test_data)
+    
+    assert len(args) == 1
+    assert args[0] == (test_data, 'New Test')
+        
+def test_pull_user_info_existing_user_success(monkeypatch, mock_inputs):
+    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    
+    # Force load_user_data() to return my test_data.
+    monkeypatch.setattr(storage, 'load_user_data', lambda: test_data)    
+    monkeypatch.setattr(storage, 'create_new_user', lambda *args, **kwargs: None)
+    
+    # Intercept the storage.save_chips() function call.
+    args = []
+    def dummy_save(a, b, c):
+        args.append((a, b, c))
+    
+    mock_inputs(['Test'])
+    monkeypatch.setattr(storage, 'save_chips', dummy_save)
+    chips, username = storage.pull_user_info()
+    
+    assert len(args) == 1
+    assert args[0] == ('Test', 15.0, test_data)
+    assert chips == 15.0
+    assert username == 'Test'
+
+def test_pull_user_info_new_user_creation(monkeypatch, mock_inputs):
+    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    
+    # Force load_user_data() to return my test_data.
+    monkeypatch.setattr(storage, 'load_user_data', lambda: test_data)
+    
+    # Intercept the storage.create_new_user() function call and create
+    # a dummy dictionary entry.
+    args_create = []
+    def dummy_create(a, b):
+        args_create.append((a, b))
+        a[b] = {PLAYER_CHIPS: 20.0}
+    monkeypatch.setattr(storage, 'create_new_user', dummy_create)
+    mock_inputs(['New Test'])
+    
+    # Intercept the storage.save_chips() function call.
+    args_save = []
+    def dummy_save(a, b, c):
+        args_save.append((a, b, c))  
+    monkeypatch.setattr(storage, 'save_chips', dummy_save)
+    
+    chips, username = storage.pull_user_info()
+    assert len(args_create) == 1
+    assert args_create[0] == (test_data, 'New Test')
+    assert len(args_save) == 1
+    assert args_save[0] == ('New Test', 20.0, test_data)
+    assert chips == 20.0
+    assert username == 'New Test'
     

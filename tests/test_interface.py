@@ -16,7 +16,7 @@ from blackjack.datatypes import (
 	Outcome, 
 	Player, 
 	PlayerHand, 
-	Table
+	Table,
 )
 from blackjack import interface
 
@@ -45,12 +45,13 @@ def _generate_basic_input_arg_params(flag):
 	'function, args, expected_choice',
 	[
 		*_generate_basic_input_arg_params(constants.YES)
-	]
+	],
 )
 def test_yes_flow(mock_inputs, capsys, function, args, expected_choice):
 	mock_inputs(['yes', '0', 'sadf', 'y'])
 	choice = function(*args)
 	console = capsys.readouterr()
+ 
 	assert console.out.count('Invalid Choice, (Y) YES / (N) NO\n') == 3
 	assert choice == expected_choice
 
@@ -58,12 +59,13 @@ def test_yes_flow(mock_inputs, capsys, function, args, expected_choice):
 	'function, args, expected_choice',
 	[
 		*_generate_basic_input_arg_params(constants.NO)
-	]
+	],
 )
 def test_no_flow(mock_inputs, capsys, function, args, expected_choice):
 	mock_inputs(['no', '0', 'sadf', 'n'])
 	choice = function(*args)
 	console = capsys.readouterr()
+ 
 	assert console.out.count('Invalid Choice, (Y) YES / (N) NO\n') == 3
 	assert choice == expected_choice
 
@@ -94,10 +96,15 @@ def test_no_flow(mock_inputs, capsys, function, args, expected_choice):
 			'Hand II Win, You Won $30.00\n',
 			constants.PLAYER_WIN,	
 		),
-	]
+	],
 )
 def test_compare_hands_output(
-	player_cards, player_wager, index, dealer_cards, expected_msg, expected_flag
+		player_cards, 
+		  player_wager, 
+		index, 
+		 dealer_cards, 
+		  expected_msg, 
+		   expected_flag,
 ):
 	if index == 0:
 		player_hand1 = PlayerHand(cards=player_cards, wager=player_wager)
@@ -109,6 +116,7 @@ def test_compare_hands_output(
 		player=Player(username='Test', hands=[player_hand1, player_hand2]),
 		dealer=DealerHand(cards=dealer_cards)
 	)
+	
 	msg, flag = interface.compare_hands(table, table.player.hands[index], index)
 	assert msg == expected_msg
 	assert flag == expected_flag
@@ -120,16 +128,17 @@ def base_table():
 			username='Test',
 			hands=[
 				PlayerHand(cards=[Card('Spades', 4), Card('Hearts', 6)], wager=15.0)
-			]
+			],
 		),
-		dealer=DealerHand(cards=[Card('Clubs', 'Ace'), Card('Diamonds', 3)])
+		dealer=DealerHand(cards=[Card('Clubs', 'Ace'), Card('Diamonds', 3)]),
 	)
 	
 def test_print_player_hands_init_deal(capsys, base_table):
 	# Test initial deal no insurance display. 
 	base_table.player.bank = Bank(30.0)
+ 
 	interface.clear_and_print(base_table)
-	console = capsys.readouterr()   
+	console = capsys.readouterr()
 	assert console.out == (
 		'Dealer: 11\n'
 		'♣Ace\n'
@@ -146,6 +155,7 @@ def test_print_player_hands_init_deal_with_insurance(capsys, base_table):
 	# Test initial deal with insurance display.
 	base_table.player.bank = Bank(22.5)
 	base_table.player.hands[0].insurance_wager = 7.5
+ 
 	interface.clear_and_print(base_table)
 	console = capsys.readouterr() 
 	assert console.out == (
@@ -178,13 +188,14 @@ def base_split_table():
 				 ),
 			],
 		),
-		dealer=(DealerHand(is_hidden=False))
+		dealer=(DealerHand(is_hidden=False)),
 	)
 
 def test_print_player_hands_dealer_showing_both_soft(capsys, base_split_table):
 	# Test dealer showing both cards, non-soft.
 	base_split_table.player.hands[0].is_active = True
 	base_split_table.dealer.cards = [Card('Spades', 'Ace'), Card('Hearts', 4)]
+	
 	interface.print_hands(base_split_table)
 	console = capsys.readouterr() 
 	assert console.out == (
@@ -205,9 +216,10 @@ def test_print_player_hands_dealer_showing_both_soft(capsys, base_split_table):
 	)
 
 def test_print_player_hands_dealer_showing_both_non_soft(capsys, base_split_table):
-    # Test dealer showing both cards, non-soft.
+	# Test dealer showing both cards, non-soft.
 	base_split_table.player.hands[1].is_active = True
 	base_split_table.dealer.cards = [Card('Spades', 8), Card('Hearts', 4)]
+	
 	interface.print_hands(base_split_table)
 	console = capsys.readouterr() 
 	assert console.out == (
@@ -311,6 +323,7 @@ def test_is_new_round_exit_branch(mock_inputs, monkeypatch):
 	table = Table(Player(username='Test'))
 	mock_inputs(['n'])
 	monkeypatch.setattr(interface, 'save_chips', lambda *args, **kwargs: None)
+	
 	with pytest.raises(SystemExit) as exe_info:
 		interface.is_new_round(table)
 	assert exe_info.value.code is None

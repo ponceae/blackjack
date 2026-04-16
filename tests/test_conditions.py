@@ -19,7 +19,7 @@ from blackjack.card import Card
             ([Card('Spades', 'Ace'), Card('Diamonds', 'Ace')], True),
             ([Card('Hearts', 'King'), Card('Clubs', 'Queen')], False),
             ([Card('Hearts', 9), Card('Clubs', 4)], False),
-        ]
+        ],
 )
 def test_can_split_hand(cards, expected_bool):
     test_hand = Hand(cards=cards)
@@ -53,8 +53,8 @@ def test_can_split_hand(cards, expected_bool):
             'test_initial_push',
             'test_initial_player_win',
             'test_initial_dealer_win',
-            'test_no_initial_winner'
-        ]
+            'test_no_initial_winner',
+        ],
 )
 def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
     test_table = Table(
@@ -78,7 +78,7 @@ def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
                     Card('Clubs', 3), 
                     Card('Hearts', 4), 
                     Card('Spades', 7), 
-                    Card('Clubs', 4)
+                    Card('Clubs', 4),
                 ], 
             False
             ),
@@ -89,7 +89,7 @@ def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
             'three_card_bust_b',
             'two_ace_three_card_nonbust',
             'four_card_nonbust',
-        ]
+        ],
 )
 def test_is_bust_hand(cards, expected_bool):
     test_hand = Hand(cards=cards)
@@ -104,7 +104,7 @@ def test_is_bust_hand(cards, expected_bool):
     ids=[
         'is_not_soft_a',
         'is_soft_a',
-    ]
+    ],
 )
 def test_is_soft_hand(cards, expected_bool):
     test_hand = Hand(cards=cards)
@@ -121,7 +121,7 @@ def test_is_soft_hand(cards, expected_bool):
             'is_split_ace_hand_a',
             'not_split_ace_hand_a',
             'not_split_ace_hand_b',
-        ]
+        ],
 )
 def test_hand_is_split_aces(cards, expected_bool):
     test_hand = Hand(cards=cards)
@@ -136,7 +136,7 @@ def test_hand_is_split_aces(cards, expected_bool):
         ids=[
             'hand_is_twenty_one_a',
             'hand_not_twenty_one_b',
-        ]
+        ],
 )  
 def test_is_twenty_one_hand(cards, expected_bool):
     test_hand = Hand(cards=cards)
@@ -183,7 +183,7 @@ def test_verify_chip_bounds(chips, expected_bool):
         (0, False),
         (-4.3, False),
         (5, False),
-    ]
+    ],
 )
 def test_verify_chip_count(chips, expected_bool):
     assert conditions.verify_chip_count(chips) == expected_bool
@@ -194,7 +194,7 @@ def test_verify_chip_count(chips, expected_bool):
         (50.0, 25.0, True),
         (25.0, 50.0, False),
         (0.0, 50.0, False),
-    ]
+    ],
 )   
 def test_verify_doubled_wager(bank, wager, expected_bool):
     player = Player(username='Test', bank=Bank(bank))
@@ -206,7 +206,7 @@ def test_verify_doubled_wager(bank, wager, expected_bool):
     [
         (25.0, 15.0, True),
         (5.0, 15.0, False),
-    ]
+    ],
 )  
 def test_verify_insurance_bet(bank, wager, expected_bool):
     player = Player(username='Test', bank=Bank(bank))
@@ -219,7 +219,7 @@ def test_verify_insurance_bet(bank, wager, expected_bool):
         (15.0, True),
         (10, False),
         (16, True),
-    ]
+    ],
 )  
 def test_verify_min_bet(wager, expected_bool):
     player_hand = PlayerHand(wager=wager)  

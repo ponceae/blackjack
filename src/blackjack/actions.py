@@ -9,7 +9,7 @@ Author: Adrien P.
 
 from .card import Card
 from .constants import ACE_ALT_VALUE, DEFAULT_ACE_VALUE
-from .datatypes import (DealerHand, Hand, PlayerHand, Table)
+from .datatypes import DealerHand, Hand, PlayerHand, Table
 from .deck import create_deck, shuffle_deck
 
 # ==========================================
@@ -42,8 +42,10 @@ def create_split_hands(table: Table) -> None:
 		None
 	"""
 	popped_card = table.player.hands[0].cards.pop()
+ 
 	new_hand = PlayerHand(cards=[popped_card])
 	table.player.hands.append(new_hand)
+ 
 	for hand in table.player.hands:
 		hit_hand(table, hand)
   
@@ -104,6 +106,7 @@ def get_hand_value(hand: Hand) -> int:
 		int: Total numeric value of `hand`.
 	"""
 	value, ace_count = 0, 0
+ 
 	for card in hand.cards:
 		if card.rank == 'Ace':	
 			# Default ace value is 11
@@ -111,6 +114,7 @@ def get_hand_value(hand: Hand) -> int:
 			ace_count += 1 
 		else:
 			value += card.get_rank_value()
+   
 	while ace_count > 0 and value > 21: 
 		value -= DEFAULT_ACE_VALUE
 		# Alternate ace value is 1
@@ -129,6 +133,7 @@ def get_soft_value(hand: Hand) -> int:
 		int: Numeric value of `hand` when all aces are counted as 1.
 	"""
 	soft_value = 0
+ 
 	for card in hand.cards:
 		if card.rank == 'Ace':
 			# Alternate ace value is 1

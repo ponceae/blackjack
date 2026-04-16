@@ -96,9 +96,9 @@ def test_setting_chips_to_bank(start_bank, set_amount, expected_balance):
     ]
 )
 def test_bank_chips_setter_raises_valueerror_on_invalid_value(
-    start_bank, 
-    invalid_value, 
-    expected_err_msg
+        start_bank, 
+        invalid_value, 
+        expected_err_msg
 ):
     with pytest.raises(ValueError, match=expected_err_msg):
         start_bank.chips = invalid_value

@@ -18,7 +18,7 @@ from .conditions import (
 	is_twenty_one, 
 	is_valid_wager, 
 	verify_chip_bounds, 
-	verify_chip_count
+	verify_chip_count,
 )
 from .constants import (
 	BUST,
@@ -31,7 +31,7 @@ from .constants import (
 	ROMAN_NUMERALS, 
 	STAND, 
 	TIMER_MESSAGES, 
-	YES
+	YES,
 )
 from .datatypes import (
 	Buffers,
@@ -39,7 +39,7 @@ from .datatypes import (
 	Outcome,
 	Player,
 	PlayerHand,
-	Table
+	Table,
 )
 from .payout_calculator import push_payout, standard_payout
 from .storage import load_user_data, save_chips
@@ -66,6 +66,7 @@ def compare_hands(table: Table, hand: PlayerHand, index: int) -> tuple[str, int]
 	msg = 'Hand ' + ROMAN_NUMERALS[index + 1]
 	player_hand_value = get_hand_value(hand)
 	dealer_hand_value = get_hand_value(table.dealer)
+	
 	if player_hand_value == dealer_hand_value:
 		return (f'{msg} Push, Returned ${push_payout(hand):.2f}\n'), PUSH
 	elif player_hand_value > dealer_hand_value:
@@ -121,18 +122,21 @@ def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 	dealer_soft_value = str(get_soft_value(table.dealer))
 	
 	buffers.dealer.append('Dealer: ')
-	if table.dealer.is_hidden: # Dealer showing one card
+	# Dealer showing one card
+	if table.dealer.is_hidden: 
 		buffers.dealer.append(
 			f'{table.dealer.cards[0].get_rank_value()}\n'
 			f'{table.dealer.cards[0].to_string()}\n'
 			'?\n'
 		)
-	else: # Dealer showing both cards
+	# Dealer showing both cards.
+	else: 
 		if is_soft(table.dealer) and not is_twenty_one(table.dealer):
 			buffers.dealer.append(f'{dealer_soft_value} / ')
 		buffers.dealer.append(f'{dealer_hand_value}\n')
 		for card in table.dealer.cards:
 			buffers.dealer.append(f'{card.to_string()}\n')
+	
 	if table.player.hands[0].insurance_wager > 0:
 		buffers.dealer.append(
 			f'Insurance [${table.player.hands[0].insurance_wager:.2f}]\n'
@@ -162,7 +166,8 @@ def _print_player_hands(table: Table, buffers: Buffers) -> None:
 		buffers.player.append(
 			f'{player_hand_values[i]}'
 			f'{_print_wager(table.player.hands[i].wager)}'
-		) 
+		)
+
 		if table.player.hands[i].is_active:
 			buffers.player.append(' <- Active\n')
 		else:
@@ -170,6 +175,7 @@ def _print_player_hands(table: Table, buffers: Buffers) -> None:
 		for card in hand.cards:
 			buffers.player.append(f'{card.to_string()}\n')
 		buffers.player.append('--------------------\n')
+	
 	buffers.player.append(table.player.bank.to_string())
 	buffers.main.append(buffers.player)
 
@@ -292,9 +298,11 @@ def wager_prompt(player: Player) -> float:
 		try:
 			if not verify_chip_count(player.bank.chips):
 				_wager_prompt_helper(player)
+
 			wager = float(input('Enter Wager:\n'))
 			valid_bet = is_valid_wager(player, wager)
 			verified_bet = verify_chip_bounds(wager)
+		
 			if valid_bet and verified_bet:
 				return wager
 			elif not valid_bet:

@@ -28,7 +28,7 @@ from . import storage
 # Player or dealer blackjack and insurance handling.
 # ==================================================
 
-def exe_initial_cond(table: Table):
+def exe_initial_cond(table: Table) -> bool:
 	"""
 	Execute the initial round check. Check for a player or dealer blackjack or a push 
 	after the initial round deal is completed. The user is also able to purchase 
@@ -37,11 +37,14 @@ def exe_initial_cond(table: Table):
 
 	Args:
 		table (Table): The current game table containing the player and dealer hands.
+	Returns:
+		bool: True if the user wishes to start a new round, False otherwise.
 	"""  
 	insurance, outcome = Insurance(), Outcome()
 	player_hand = table.player.hands[0]
 	outcome.flag = conditions.compare_initial_hands(table)
 	handle_insurance(insurance, table)
+ 
 	if outcome.flag in (constants.PLAYER_WIN, constants.DEALER_WIN, constants.PUSH): 
 		handle_outcomes(outcome, insurance, table)
 		interface.load_timer(constants.SHOW)
@@ -51,16 +54,20 @@ def exe_initial_cond(table: Table):
 		interface.clear_and_print(table)
 		interface.print_initial_insurance_outcome(insurance) 
 		interface.print_initial_outcome(outcome, player_hand)
+	
 		if interface.is_new_round(table):
 			return True
+	
 	if insurance.active: 
 		# Player purchased insurance and lost.
 		insurance.win = False 	
 		table.player.hands[0].insurance_wager = 0
+	
 	interface.clear_and_print(table)
 	interface.print_initial_insurance_outcome(insurance)
+	return False
 
-def handle_insurance(insurance: Insurance, table: Table):
+def handle_insurance(insurance: Insurance, table: Table) -> None:
 	"""
 	Prompt the user if they wish to purchase insurance and update the insurance
 	status and player bank.
@@ -75,9 +82,11 @@ def handle_insurance(insurance: Insurance, table: Table):
 	"""
 	insurance.cost = payout_calculator.get_insurance_cost(table.player.hands[0])
 	player_hand = table.player.hands[0]
+	
 	if table.dealer.cards[0].rank == constants.ACE:
 		interface.load_timer(constants.INITIAL)
-		# Verify player has enough chips for insurance.
+		
+		  # Verify player has enough chips for insurance.
 		if (interface.request_insurance(insurance.cost) == constants.YES):
 			if conditions.verify_insurance_bet(table.player, player_hand):  
 				insurance.active = True
@@ -88,7 +97,7 @@ def handle_insurance(insurance: Insurance, table: Table):
 				interface.clear_and_print(table)
 				interface.load_timer(constants.BROKE)
 
-def handle_outcomes(outcome: Outcome, insurance: Insurance, table: Table):
+def handle_outcomes(outcome: Outcome, insurance: Insurance, table: Table) -> None:
 	"""
 	Update the player bank if a win condition was met and pay out insurance
 	if purchased by the player.
@@ -102,6 +111,7 @@ def handle_outcomes(outcome: Outcome, insurance: Insurance, table: Table):
 		None
 	"""
 	player_hand = table.player.hands[0]
+	
 	# Dealer blackjack, hidden card is shown.
 	if outcome.flag == constants.DEALER_WIN:
 		interface.clear_and_print(table)
@@ -117,7 +127,7 @@ def handle_outcomes(outcome: Outcome, insurance: Insurance, table: Table):
 		outcome.payout = payout_calculator.blackjack_payout(player_hand)
 		table.player.bank.chips += outcome.payout
 
-def insurance_helper(insurance: Insurance, table: Table):
+def insurance_helper(insurance: Insurance, table: Table) -> None:
 	"""
 	Pay out the insurance to the player if they had purchased it.
 
@@ -137,7 +147,7 @@ def insurance_helper(insurance: Insurance, table: Table):
 # Player can hit, stand, split, or double down.
 # ==================================================
 
-def exe_player_control(table: Table):
+def exe_player_control(table: Table) -> None:
 	"""
 	Execute the player turn. Here the player can choose to hit, stand, double down,
 	or split their hand. Update the player bank and player hands based on the decision
@@ -151,11 +161,14 @@ def exe_player_control(table: Table):
 	"""
 	split = SplitHands()
 	handle_split(table, split)  
-	# Cannot hit on split aces, advance to the dealer's turn.
+	
+	 # Cannot hit on split aces, advance to the dealer's turn.
 	if split.split_aces:
 		return   
+	
 	interface.clear_terminal()   
 	prev_action = None     
+	
 	for i, hand in enumerate(table.player.hands):
 		table.player.hands[i].is_active = True
 		interface.print_hands(table)
@@ -165,7 +178,7 @@ def exe_player_control(table: Table):
 				interface.double_or_not() == constants.YES 
 				and conditions.verify_doubled_wager(
 					table.player, 
-					table.player.hands[0]
+					table.player.hands[i],
 				)
 			):
 				action = handle_double_down(table, i, split)
@@ -175,13 +188,15 @@ def exe_player_control(table: Table):
 					break
 			else:
 				interface.clear_and_print(table)
-				prev_action, action = handle_hitting(table, split, hand, i)
+				prev_action, action = handle_hitting(table, split, hand, i)		
 				if action == PlayerAction.NEXT_HAND:
 					continue
+				
 				if prev_action not in (constants.BUST, constants.STAND): 
 					interface.clear_and_print(table)
 					interface.print_stand_or_bust(i, constants.STAND)
 					print()
+
 					if hands_left(split, table.player.hands, i):
 						continue
 					else:
@@ -189,7 +204,12 @@ def exe_player_control(table: Table):
 		finally:
 			table.player.hands[i].is_active = False
 
-def handle_hitting(table: Table, split: SplitHands, hand: PlayerHand, i: int):
+def handle_hitting(
+    	table: Table, 
+     	split: SplitHands, 
+      	hand: PlayerHand, 
+       	i: int
+) -> tuple[str, PlayerAction]:
 	"""
 	Main loop when a player decides to hit the current hand. Break out of the loop
 	when the user stops hitting or when a bust or 21 condition is met, and return
@@ -200,31 +220,39 @@ def handle_hitting(table: Table, split: SplitHands, hand: PlayerHand, i: int):
 		split (SplitHands): The split hands flag container.
 		hand (PlayerHand): The current player hand to modify.
 		i (int): The current hand pointer.
+	Returns:
+		tuple[str, PlayerAction]: The previous recorded action and the 
+  								  next player action.
 	"""
 	while interface.hit_or_stand() == constants.HIT:
 		actions.hit_hand(table, hand)
 		interface.clear_and_print(table)
+
 		if conditions.is_bust(hand): 
 			prev_action = constants.BUST
 			interface.print_stand_or_bust(i, constants.BUST)
+
 			if hands_left(split, table.player.hands, i):
 				return prev_action, PlayerAction.NEXT_HAND
 			else:
 				return prev_action, PlayerAction.END_TURN
+
 		elif conditions.is_twenty_one(hand):  
 			prev_action = constants.STAND
 			interface.print_stand_or_bust(i, constants.STAND)
+			
 			if hands_left(split, table.player.hands, i):
 				return prev_action, PlayerAction.NEXT_HAND
 			else:
 				return prev_action, PlayerAction.END_TURN
+	
 	prev_action = constants.STAND
 	if hands_left(split, table.player.hands, i):
 		return prev_action, PlayerAction.NEXT_HAND
 	else:
 		return prev_action, PlayerAction.END_TURN
 
-def hands_left(split: SplitHands, player_hands: list[PlayerHand], i: int):
+def hands_left(split: SplitHands, player_hands: list[PlayerHand], i: int) -> bool:
 	"""
 	Return True if the player has another hand after doubling down.
 
@@ -241,12 +269,13 @@ def hands_left(split: SplitHands, player_hands: list[PlayerHand], i: int):
 		interface.load_timer(constants.PLAYER)
 		interface.clear_terminal()
 		return True
+
 	# Normal flow, player turn is finished.
 	interface.load_timer(constants.SWITCH_TURN) 
 	interface.clear_terminal()
 	return False
 
-def handle_double_down(table: Table, i: int, split: SplitHands):
+def handle_double_down(table: Table, i: int, split: SplitHands) -> PlayerAction:
 	"""
 	Update the player bank and hand wager if the user decides to double down (match
 	orignal wager), and return the player action.
@@ -257,21 +286,23 @@ def handle_double_down(table: Table, i: int, split: SplitHands):
 		split (SplitHands): The split hands flag container.
 
 	Returns:
-		int: The player action. 
-			 1: NEXT_HAND
-			 2: END_TURN
+		PlayerAction: The player action. 
+			 			1: NEXT_HAND 
+			 			2: END_TURN
 	"""
 	table.player.bank.chips -= table.player.hands[i].wager
 	table.player.hands[i].wager += table.player.hands[i].wager
+	
 	actions.hit_hand(table, table.player.hands[i]) 
 	interface.clear_and_print(table)
+ 
 	if hands_left(split, table.player.hands, i): 
 		# Switch player hands if applicable.
 		return PlayerAction.NEXT_HAND 
 	else:
 		return PlayerAction.END_TURN
 	
-def handle_split(table: Table, split: SplitHands):
+def handle_split(table: Table, split: SplitHands) -> None:
 	"""
 	Add another hand to the player if they wish to split, and update the player
 	bank and add a wager (match original wager) to the new hand.
@@ -295,6 +326,7 @@ def handle_split(table: Table, split: SplitHands):
 		split.split_hand = True 
 		split_aces = conditions.is_split_aces(table.player.hands[0])
 		actions.create_split_hands(table)
+
 		table.player.bank.chips -= table.player.hands[0].wager
 		table.player.hands[1].wager = table.player.hands[0].wager
 		if split_aces:
