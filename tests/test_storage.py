@@ -23,7 +23,7 @@ def mock_inputs(monkeypatch):
     return _mock_inputs
 
 @pytest.mark.parametrize(
-    'data, username, inputs, expected_value',
+    'data, username, inputs, expected_chips',
     [
         ({}, 'Test', ['50'], 50.0),
         ({}, 'Test', ['25'], 25.0),
@@ -39,10 +39,10 @@ def mock_inputs(monkeypatch):
         'data_setting_invalid_input_caught'
     ]
 )
-def test_create_new_user(mock_inputs, data, username, inputs, expected_value):
+def test_create_new_user(mock_inputs, data, username, inputs, expected_chips):
     mock_inputs(inputs)
     storage.create_new_user(data, username)
-    assert data[username] == {PLAYER_CHIPS: expected_value}
+    assert data[username] == {PLAYER_CHIPS: expected_chips}
 
 def _generate_test_data_params():
     return [
@@ -52,7 +52,7 @@ def _generate_test_data_params():
     ]
 
 @pytest.mark.parametrize(
-    'test_data, expected_chips',
+    'data, expected_chips',
     [
         *_generate_test_data_params()
     ]
@@ -71,12 +71,12 @@ def test_load_data_from_json_success(monkeypatch, tmp_path, test_data, expected_
     assert loaded_data['Test'][PLAYER_CHIPS] == expected_chips
 
 @pytest.mark.parametrize(
-    'test_data, expected_chips',
+    'test_data, exp_chips',
     [
         *_generate_test_data_params()
     ]
 )
-def test_write_user_data_success(monkeypatch, tmp_path, test_data, expected_chips):
+def test_write_user_data_success(monkeypatch, tmp_path, test_data, exp_chips):
     test_file = tmp_path / 'test_file.json'
     monkeypatch.setattr('blackjack.storage.FILE_PATH', str(test_file))
     
@@ -88,18 +88,18 @@ def test_write_user_data_success(monkeypatch, tmp_path, test_data, expected_chip
         loaded_data = json.load(data_file)
         
     assert loaded_data == test_data
-    assert loaded_data['Test'][PLAYER_CHIPS] == expected_chips
+    assert loaded_data['Test'][PLAYER_CHIPS] == exp_chips
 
 def test_save_chips_existing_user(monkeypatch):
     username = 'Test'
-    data = {'Test': {PLAYER_CHIPS: 15.0}}
+    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
     chips = 37.5
     
     monkeypatch.setattr(storage, 'write_user_data', lambda *args, **kwargs: None)
     monkeypatch.setattr(storage, 'create_new_user', lambda *args, **kwargs: None)
     
-    storage.save_chips(username, chips, data)
-    assert data[username][PLAYER_CHIPS] == 37.5
+    storage.save_chips(username, chips, test_data)
+    assert test_data[username][PLAYER_CHIPS] == chips
     
 def test_save_chips_new_user(monkeypatch):
     username = 'New Test'
@@ -109,15 +109,15 @@ def test_save_chips_new_user(monkeypatch):
     monkeypatch.setattr(storage, 'write_user_data', lambda *args, **kwargs: None)
     
     # Intercept the storage.create_new_user() function call.
-    args = []
-    def dummy_func_call(a, b):
-        args.append((a, b))
+    dummy_create_args = []
+    def dummy_create_new_user(data, username):
+        dummy_create_args.append((data, username))
         
-    monkeypatch.setattr(storage, 'create_new_user', dummy_func_call)
+    monkeypatch.setattr(storage, 'create_new_user', dummy_create_new_user)
     storage.save_chips(username, chips, test_data)
     
-    assert len(args) == 1
-    assert args[0] == (test_data, 'New Test')
+    assert len(dummy_create_args) == 1
+    assert dummy_create_args[0] == (test_data, 'New Test')
         
 def test_pull_user_info_existing_user_success(monkeypatch, mock_inputs):
     test_data = {'Test': {PLAYER_CHIPS: 15.0}}
@@ -127,16 +127,16 @@ def test_pull_user_info_existing_user_success(monkeypatch, mock_inputs):
     monkeypatch.setattr(storage, 'create_new_user', lambda *args, **kwargs: None)
     
     # Intercept the storage.save_chips() function call.
-    args = []
+    dummy_save_args = []
     def dummy_save(a, b, c):
-        args.append((a, b, c))
+        dummy_save_args.append((a, b, c))
     
     mock_inputs(['Test'])
     monkeypatch.setattr(storage, 'save_chips', dummy_save)
     chips, username = storage.pull_user_info()
     
-    assert len(args) == 1
-    assert args[0] == ('Test', 15.0, test_data)
+    assert len(dummy_save_args) == 1
+    assert dummy_save_args[0] == ('Test', 15.0, test_data)
     assert chips == 15.0
     assert username == 'Test'
 

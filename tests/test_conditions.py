@@ -13,17 +13,23 @@ from blackjack.datatypes import DealerHand, Hand, Player, PlayerHand, Table
 from blackjack.card import Card
 
 @pytest.mark.parametrize(
-        'cards, expected_bool',
+        'test_cards, expected_bool',
         [
             ([Card('Clubs', 8), Card('Hearts', 8)], True),
             ([Card('Spades', 'Ace'), Card('Diamonds', 'Ace')], True),
             ([Card('Hearts', 'King'), Card('Clubs', 'Queen')], False),
             ([Card('Hearts', 9), Card('Clubs', 4)], False),
         ],
+        ids=[
+            'can_split_a',
+            'can_split_b',
+            'cannot_split_a',
+            'cannot_split_b',  
+        ],
 )
-def test_can_split_hand(cards, expected_bool):
-    test_hand = Hand(cards=cards)
-    assert conditions.can_split(test_hand) == expected_bool
+def test_can_split_hand(test_cards, expected_bool):
+    hand = Hand(cards=test_cards)
+    assert conditions.can_split(hand) == expected_bool
 
 @pytest.mark.parametrize(
         'player_cards, dealer_cards, expected_flag',
@@ -53,21 +59,21 @@ def test_can_split_hand(cards, expected_bool):
             'test_initial_push',
             'test_initial_player_win',
             'test_initial_dealer_win',
-            'test_no_initial_winner',
+            'test_no_initial_outcome',
         ],
 )
 def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
-    test_table = Table(
+    table = Table(
         player=Player(
             username='Test',
             hands=[PlayerHand(cards=player_cards)]
         ),
         dealer=DealerHand(cards=dealer_cards)
     )
-    assert conditions.compare_initial_hands(test_table) == expected_flag
+    assert conditions.compare_initial_hands(table) == expected_flag
 
 @pytest.mark.parametrize(
-        'cards, expected_bool',
+        'test_cards, expected_bool',
         [
             ([Card('Clubs', 8), Card('Hearts', 8), Card('Diamonds', 8)], True),
             ([Card('Spades', 'Ace'), Card('Diamonds', 5)], False),
@@ -91,12 +97,12 @@ def test_initial_hands_outcome_flags(player_cards, dealer_cards, expected_flag):
             'four_card_nonbust',
         ],
 )
-def test_is_bust_hand(cards, expected_bool):
-    test_hand = Hand(cards=cards)
-    assert conditions.is_bust(test_hand) == expected_bool
+def test_is_bust_hand(test_cards, expected_bool):
+    hand = Hand(cards=test_cards)
+    assert conditions.is_bust(hand) == expected_bool
 
 @pytest.mark.parametrize(
-    'cards, expected_bool',
+    'test_cards, expected_bool',
     [
         ([Card('Clubs', 8), Card('Hearts', 4)], False),
         ([Card('Spades', 'Ace'), Card('Diamonds', 5)], True),
@@ -106,12 +112,12 @@ def test_is_bust_hand(cards, expected_bool):
         'is_soft_a',
     ],
 )
-def test_is_soft_hand(cards, expected_bool):
-    test_hand = Hand(cards=cards)
-    assert conditions.is_soft(test_hand) == expected_bool
+def test_is_soft_hand(test_cards, expected_bool):
+    hand = Hand(cards=test_cards)
+    assert conditions.is_soft(hand) == expected_bool
 
 @pytest.mark.parametrize(
-        'cards, expected_bool',
+        'test_cards, expected_bool',
         [
             ([Card('Clubs', 'Ace'), Card('Hearts', 'Ace')], True),
             ([Card('Spades', 5), Card('Diamonds', 5)], False),
@@ -123,12 +129,12 @@ def test_is_soft_hand(cards, expected_bool):
             'not_split_ace_hand_b',
         ],
 )
-def test_hand_is_split_aces(cards, expected_bool):
-    test_hand = Hand(cards=cards)
-    assert conditions.is_split_aces(test_hand) == expected_bool
+def test_hand_is_split_aces(test_cards, expected_bool):
+    hand = Hand(cards=test_cards)
+    assert conditions.is_split_aces(hand) == expected_bool
 
 @pytest.mark.parametrize(
-        'cards, expected_bool',
+        'test_cards, expected_bool',
         [
             ([Card('Clubs', 7), Card('Hearts', 8), Card('Clubs', 6)], True),
             ([Card('Spades', 5), Card('Diamonds', 10)], False),
@@ -138,9 +144,9 @@ def test_hand_is_split_aces(cards, expected_bool):
             'hand_not_twenty_one_b',
         ],
 )  
-def test_is_twenty_one_hand(cards, expected_bool):
-    test_hand = Hand(cards=cards)
-    assert conditions.is_twenty_one(test_hand) == expected_bool
+def test_is_twenty_one_hand(test_cards, expected_bool):
+    hand = Hand(cards=test_cards)
+    assert conditions.is_twenty_one(hand) == expected_bool
 
 @pytest.fixture
 def player():
@@ -155,6 +161,13 @@ def player():
             (0, False),
             (14.99, False),
         ],
+        ids=[
+            'valid_wager_a',
+            'valid_wager_b',
+            'invalid_wager_a_negative',
+            'invalid_wager_b_zero',
+            'invalid_wager_c_small',
+        ]
 )
 def test_is_valid_wager(player, wager, expected_bool):
     assert conditions.is_valid_wager(player, wager) == expected_bool
@@ -170,6 +183,15 @@ def test_is_valid_wager(player, wager, expected_bool):
             (27.5, True),
             (-33.6, False),
         ],
+        ids=[
+            'valid_bounds_a',
+            'valid_bounds_b',
+            'invalid_bounds_a_small',
+            'invalid_bounds_b_big',
+            'valid_bounds_c',
+            'valid_bounds_d',
+            'invalid_bounds_c_negative'
+        ]
 )
 def test_verify_chip_bounds(chips, expected_bool):
     assert conditions.verify_chip_bounds(chips) == expected_bool
@@ -184,44 +206,66 @@ def test_verify_chip_bounds(chips, expected_bool):
         (-4.3, False),
         (5, False),
     ],
+    ids=[
+        'valid_count_a',
+        'valid_count_b',
+        'invalid_count_a_small',
+        'invalid_count_b_zero',
+        'invalid_count_c_negative',
+        'invalid_count_d_small',
+    ]
 )
 def test_verify_chip_count(chips, expected_bool):
     assert conditions.verify_chip_count(chips) == expected_bool
 
 @pytest.mark.parametrize(
-    'bank, wager, expected_bool',
+    'chips, test_wager, expected_bool',
     [
         (50.0, 25.0, True),
         (25.0, 50.0, False),
         (0.0, 50.0, False),
     ],
+    ids=[
+        'valid_wager_a',
+        'invalid_wager_a_broke',
+        'invalid_wager_b_broke',
+    ]
 )   
-def test_verify_doubled_wager(bank, wager, expected_bool):
-    player = Player(username='Test', bank=Bank(bank))
-    player_hand = PlayerHand(wager=wager)   
+def test_verify_doubled_wager(chips, test_wager, expected_bool):
+    player = Player(username='Test', bank=Bank(chips))
+    player_hand = PlayerHand(wager=test_wager)   
     assert conditions.verify_doubled_wager(player, player_hand) == expected_bool 
 
 @pytest.mark.parametrize(
-    'bank, wager, expected_bool',
+    'chips, test_wager, expected_bool',
     [
         (25.0, 15.0, True),
         (5.0, 15.0, False),
     ],
+    ids=[
+        'valid_wager_a',
+        'invalid_wager_a_broke',
+    ]
 )  
-def test_verify_insurance_bet(bank, wager, expected_bool):
-    player = Player(username='Test', bank=Bank(bank))
-    player_hand = PlayerHand(wager=wager)
+def test_verify_insurance_bet(chips, test_wager, expected_bool):
+    player = Player(username='Test', bank=Bank(chips))
+    player_hand = PlayerHand(wager=test_wager)
     assert conditions.verify_insurance_bet(player, player_hand) == expected_bool
 
 @pytest.mark.parametrize(
-    'wager, expected_bool',
+    'test_wager, expected_bool',
     [
         (15.0, True),
         (10, False),
         (16, True),
     ],
+    ids=[
+        'valid_wager_a',
+        'invalid_wager_a_small',
+        'valid_wager_b',
+    ]
 )  
-def test_verify_min_bet(wager, expected_bool):
-    player_hand = PlayerHand(wager=wager)  
+def test_verify_min_bet(test_wager, expected_bool):
+    player_hand = PlayerHand(wager=test_wager)  
     assert conditions.verify_min_bet(player_hand) == expected_bool
     

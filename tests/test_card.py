@@ -10,31 +10,31 @@ from blackjack.card import Card
 from blackjack.constants import CARD_RANKS, CARD_SUITS
 
 @pytest.mark.parametrize(
-	'raw_suit, raw_rank, expected_suit, expected_rank',
+	'raw_suit, raw_rank, exp_suit, exp_rank',
 	 [
 		('spaDEs', 5, 'Spades', 5),
 		('heArTs', 2, 'Hearts', 2),
 		('CLUbs', 10, 'Clubs', 10),
-		  ('DiaMONds', 'acE', 'Diamonds', 'Ace'),
+		('DiaMONds', 'acE', 'Diamonds', 'Ace'),
 		('SPadEs', 'jaCk', 'Spades', 'Jack'),
 		('HEArtS', 'queen', 'Hearts', 'Queen'),
 	],
 )
-def test_init_mismatch_conversion(raw_suit, raw_rank, expected_suit, expected_rank):
-	test_card = Card(raw_suit, raw_rank)
-	assert test_card.suit == expected_suit
-	assert test_card.rank == expected_rank
+def test_init_mismatch_conversion(raw_suit, raw_rank, exp_suit, exp_rank):
+	card = Card(raw_suit, raw_rank)
+	assert card.suit == exp_suit
+	assert card.rank == exp_rank
 
 @pytest.mark.parametrize(
-	'rank, suit',
+	'expected_rank, expected_suit',
 	[
 		(rank, suit) for rank in CARD_RANKS for suit in CARD_SUITS
 	],
 )
-def test_all_cards_correct_rank_and_suit(rank, suit):
-	card = Card(suit, rank)	
-	assert card.rank == rank
-	assert card.suit == suit
+def test_all_cards_correct_rank_and_suit(expected_rank, expected_suit):
+	card = Card(expected_suit, expected_rank)	
+	assert card.rank == expected_rank
+	assert card.suit == expected_suit
 
 @pytest.mark.parametrize(
 	'invalid_suit, invalid_rank, expected_err_msg',
@@ -47,7 +47,9 @@ def test_all_cards_correct_rank_and_suit(rank, suit):
 	],
 )
 def test_init_raises_valueerror_on_invalid_input(
-	invalid_suit, invalid_rank, expected_err_msg
+		invalid_suit, 
+ 		invalid_rank, 
+   		expected_err_msg
 ):
 	with pytest.raises(ValueError, match=expected_err_msg):
 		Card(invalid_suit, invalid_rank)

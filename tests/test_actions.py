@@ -33,7 +33,7 @@ def _generate_cards():
         [Card('Clubs', 'Ace'), Card('Hearts', 5), Card('Spades', 6)],
     ]
 
-def _generate_exected_values(flag):
+def _generate_expected_values(flag):
     if flag == 'normal':
         return [9, 20, 24, 16, 21, 16, 12, 12, 21, 12, 14, 20, 21, 12]
     elif flag == 'soft':
@@ -59,66 +59,65 @@ def _generate_card_ids():
     ]
 
 @pytest.mark.parametrize(
-    'cards, expected_value',
-    zip(_generate_cards(), _generate_exected_values('normal')),   
+    'test_cards, expected_value',
+    zip(_generate_cards(), _generate_expected_values('normal')),   
     ids=_generate_card_ids()
 )
-def test_hard_hand_values(cards, expected_value):
-    hand = Hand(cards=cards)
+def test_hard_hand_values(test_cards, expected_value):
+    hand = Hand(cards=test_cards)
     assert actions.get_hand_value(hand) == expected_value
 
 @pytest.mark.parametrize(
-    'cards, expected_value',
-    zip(_generate_cards(), _generate_exected_values('soft')),
+    'test_cards, expected_value',
+    zip(_generate_cards(), _generate_expected_values('soft')),
     ids=_generate_card_ids()
 )
-def test_soft_hand_values(cards, expected_value):
-    hand = Hand(cards=cards)
+def test_soft_hand_values(test_cards, expected_value):
+    hand = Hand(cards=test_cards)
     assert actions.get_soft_value(hand) == expected_value
 
 def test_copy_deck_has_valid_length():
-    deck1 = actions.create_and_shuffle()
-    deck2 = []
-    actions._copy_deck(deck2, deck1)
+    deck_a = actions.create_and_shuffle()
+    deck_b = []
+    actions._copy_deck(deck_b, deck_a)
     
-    assert len(deck1) == 52
-    assert len(deck2) == 52
+    assert len(deck_a) == 52
+    assert len(deck_b) == 52
 
 @pytest.fixture
-def base_table():
+def table():
     return Table (player=Player(username='Test'), deck=actions.create_and_shuffle())
 
-def test_create_split_hands(base_table):
-    base_table.player.hands = [PlayerHand(cards=[Card('Clubs', 6), Card('Hearts', 6)])]
-    actions.create_split_hands(base_table)
-    assert len(base_table.player.hands) == 2
-    assert base_table.player.hands[0].cards[0].to_string() == '♣6'
-    assert base_table.player.hands[1].cards[0].to_string() == '♥6'
+def test_create_split_hands_success(table):
+    table.player.hands = [PlayerHand(cards=[Card('Clubs', 6), Card('Hearts', 6)])]
+    actions.create_split_hands(table)
+    assert len(table.player.hands) == 2
+    assert table.player.hands[0].cards[0].to_string() == '♣6'
+    assert table.player.hands[1].cards[0].to_string() == '♥6'
     
-def test_hit_hand(base_table):
-    base_table.player.hands = [PlayerHand(cards=[Card('Clubs', 4), Card('Hearts', 6)])]
-    actions.hit_hand(base_table, base_table.player.hands[0])
-    assert len(base_table.player.hands[0].cards) == 3
+def test_hit_hand_success(table):
+    table.player.hands = [PlayerHand(cards=[Card('Clubs', 4), Card('Hearts', 6)])]
+    actions.hit_hand(table, table.player.hands[0])
+    assert len(table.player.hands[0].cards) == 3
 
-def test_hit_hand_empty_deck(base_table):
-    base_table.player.hands = [PlayerHand(cards=[])]    
-    for i in range(100):
-        actions.hit_hand(base_table, base_table.player.hands[0])
-    assert len(base_table.player.hands[0].cards) == 100
+def test_hit_hand_empty_deck(table):
+    table.player.hands = [PlayerHand(cards=[])]    
+    [actions.hit_hand(table, table.player.hands[0]) for _ in range(100)]
+    assert len(table.player.hands[0].cards) == 100
     
-def test_initial_round_deal(base_table):
-    actions.initial_round_deal(base_table)
-    assert len(base_table.player.hands) == 1
-    assert len(base_table.player.hands[0].cards) == 2
-    assert len(base_table.dealer.cards) == 2
+def test_initial_round_deal_correct_hand_length(table):
+    actions.initial_round_deal(table)
+    assert len(table.player.hands) == 1
+    assert len(table.player.hands[0].cards) == 2
+    assert len(table.dealer.cards) == 2
 
-def test_initial_round_deal_empty_deck(base_table):
-    base_table.deck.clear()
-    actions.initial_round_deal(base_table)
-    assert len(base_table.player.hands) == 1
-    assert len(base_table.player.hands[0].cards) == 2
-    assert len(base_table.dealer.cards) == 2
+def test_initial_round_deal_empty_deck(table):
+    table.deck.clear()
+    actions.initial_round_deal(table)
+    assert len(table.player.hands) == 1
+    assert len(table.player.hands[0].cards) == 2
+    assert len(table.dealer.cards) == 2
 
-def test_create_and_shuffle():
+def test_create_and_shuffle_success():
     deck = actions.create_and_shuffle()
     assert len(deck) == 52

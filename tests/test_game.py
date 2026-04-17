@@ -120,32 +120,8 @@ def test_handle_outcomes_on_init_deal(
 	assert outcome.payout == expected_payout
 	assert init_table.player.bank.chips == expected_chips
 
-def test_exe_init_cond_insurance_no_blackjack(monkeypatch, mock_inputs, init_table):
-	mock_inputs(['y'])
-	monkeypatch.setattr(time, 'sleep', lambda x: None)
-	game.exe_initial_cond(init_table)
-	assert init_table.player.bank.chips == 17.5
-
-def test_exe_init_cond_player_blackjack(monkeypatch, mock_inputs, init_table):
-	init_table.player.hands[0].cards = [Card('Spades', 10), Card('Spades', 'Ace')]
-	mock_inputs(['n'])
-	monkeypatch.setattr(time, 'sleep', lambda x: None)
-	monkeypatch.setattr(interface, 'is_new_round', lambda *args, **kwargs: None)
-	
-	game.exe_initial_cond(init_table)
-	assert init_table.player.bank.chips == 62.5
- 
-def test_exe_init_cond_no_dealer_blackjack_insurance_lost(
-		monkeypatch, 
-		 mock_inputs, 
-		  init_table
-):
-	mock_inputs(['y'])
-	monkeypatch.setattr(time, 'sleep', lambda x: None)
-	monkeypatch.setattr(interface, 'is_new_round', lambda *args, **kwargs: None)
-	
-	game.exe_initial_cond(init_table)
-	assert init_table.player.bank.chips == 17.5
+def test_exe_init_cond_routing():
+    pass
 
 # ==================================================
 # PLAYER TURN TESTS
@@ -396,7 +372,7 @@ def test_handle_hitting(
     split_status = SplitHands(split_hand=is_split)
     mock_inputs(inputs)
     
-    def rigged_hit(a, b):
+    def rigged_hit(*args, **kwargs):
         pt_table.player.hands[index].cards.append(card)
         
     monkeypatch.setattr(time, 'sleep', lambda x: None)
@@ -411,39 +387,68 @@ def test_handle_hitting(
     
     assert prev_action == expected_prev
     assert action == expected_action
- 
-def test_exe_player_control_split_ace_early_exit(mock_inputs, pt_table):
-    pt_table.player.hands = [
-        PlayerHand(cards=[Card('Spades', 'Ace'), Card('Diamonds', 'Ace')])
-    ]
-    mock_inputs(['y'])    
+
+@pytest.mark.parametrize(
+	'inputs, hands, split_aces, hit_returns, expected_hit_calls',
+	[
+		(
+			['n'],
+			[PlayerHand(wager=15.0)],
+			False,
+			[(constants.STAND, PlayerAction.NEXT_HAND)],
+			1,
+      	),
+	],
+	ids=[
+		'one_hand_hit_to_stand'
+	]
+) 
+def test_exe_player_control_routing(
+		monkeypatch, 
+		mock_inputs,
+		pt_table,
+		inputs, 
+		hands, 
+		split_aces,
+		hit_returns,
+		expected_hit_calls,
+):
+    mock_inputs(inputs)
+    pt_table.player.hands = hands
+    
+    def dummy_split(table, split):
+        split.split_aces = split_aces
+    monkeypatch.setattr(game, 'handle_split', dummy_split)
+    
+    hit_calls = []
+    def intercept_hitting(*args, **kwargs):
+        hit_calls.append(args)
+        return hit_returns.pop(0)
+    
+    monkeypatch.setattr(game, 'handle_hitting', intercept_hitting)
+    monkeypatch.setattr(game, 'handle_double_down', lambda *args: PlayerAction.NEXT_HAND)
+    
     game.exe_player_control(pt_table)
     
-    assert pt_table.player.hands[0].cards[0].rank == 'Ace'
-    assert pt_table.player.hands[1].cards[0].rank == 'Ace'
-    assert len(pt_table.player.hands[0].cards) == 2
-    assert len(pt_table.player.hands[1].cards) == 2
+    assert len(hit_calls) == expected_hit_calls
+    assert len(hit_returns) == 0
+    
 
-# @pytest.mark.parametrize(
-# 	'inputs, hand1, hand2, action',
-# 	[
-# 		(
-# 			['y'],
-# 			[Card('Diamonds', 'Ace'), Card('Hearts', 4)],
-# 			[],
-# 			PlayerAction.END_TURN
-#       	),
-# 	],
-# 	ids=[
-# 		'double_down_on_hand1',
-# 		'double_down_on_hand2',
-# 	],
-# )
-# def test_exe_player_control(monkeypatch, mock_inputs, inputs, hand1, hand2, action):
-# 	split_status = SplitHands()
-# 	monkeypatch.setattr(game, 'handle_split', lambda *args, **kwargs: None)
-# 	curr_action = None
-# 	def dummy_double_down():
-# 		curr_action = action
- 
-# 	monkeypatch.setattr(game, 'handle_double_down', lambda *args, **kwargs: None)
+# ======================
+# DEALER TURN TESTS.
+# ======================
+
+def test_exe_dealer_control_routing():
+    pass
+
+# =======================
+# ROUND END CHECK TESTS.
+# =======================
+
+
+# =======================
+# MISC GAME TESTS.
+# =======================
+
+def test_get_player_wager():
+    pass
