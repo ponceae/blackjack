@@ -53,7 +53,7 @@ def insurance_payout(insurance_cost: float) -> float:
 def get_insurance_cost(hand: PlayerHand) -> float:
 	"""
 	Return the cost for purchasing insurance (half the wager).
-	Usage: round down and then divide by 1/2. (Ex. 5.5 -> 5 -> 2.5))
+	Note: round down and then divide by 1/2. (Ex. 5.5 -> 5 -> 2.5))
 
 	Args:
 		hand (PlayerHand): The hand containing the wager.

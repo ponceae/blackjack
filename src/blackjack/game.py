@@ -41,16 +41,24 @@ def exe_initial_cond(table: Table) -> bool:
 		bool: True if the user wishes to start a new round, False otherwise.
 	"""  
 	insurance, outcome = Insurance(), Outcome()
+
 	player_hand = table.player.hands[0]
+	
 	outcome.flag = conditions.compare_initial_hands(table)
+	
 	handle_insurance(insurance, table)
  
 	if outcome.flag in (constants.PLAYER_WIN, constants.DEALER_WIN, constants.PUSH): 
 		handle_outcomes(outcome, insurance, table)
+		
 		interface.load_timer(constants.SHOW)
+		
 		table.dealer.is_hidden = False
+		
 		interface.clear_and_print(table) 
+		
 		table.player.hands[0].insurance_wager = 0
+		
 		interface.clear_and_print(table)
 		interface.print_initial_insurance_outcome(insurance) 
 		interface.print_initial_outcome(outcome, player_hand)
@@ -65,6 +73,7 @@ def exe_initial_cond(table: Table) -> bool:
 	
 	interface.clear_and_print(table)
 	interface.print_initial_insurance_outcome(insurance)
+
 	return False
 
 def handle_insurance(insurance: Insurance, table: Table) -> None:
@@ -81,17 +90,20 @@ def handle_insurance(insurance: Insurance, table: Table) -> None:
 		None
 	"""
 	insurance.cost = payout_calculator.get_insurance_cost(table.player.hands[0])
+	
 	player_hand = table.player.hands[0]
 	
 	if table.dealer.cards[0].rank == constants.ACE:
 		interface.load_timer(constants.INITIAL)
 		
-		  # Verify player has enough chips for insurance.
+		# Verify player has enough chips for insurance.
 		if (interface.request_insurance(insurance.cost) == constants.YES):
 			if conditions.verify_insurance_bet(table.player, player_hand):  
 				insurance.active = True
+
 				player_hand.insurance_wager = insurance.cost
 				table.player.bank.chips -= insurance.cost
+				
 				interface.clear_and_print(table)
 			else:
 				interface.clear_and_print(table)
@@ -166,12 +178,15 @@ def exe_player_control(table: Table) -> None:
 	if split.split_aces:
 		return   
 	
-	interface.clear_terminal()   
+	interface.clear_terminal()  
+ 
 	prev_action = None     
 	
 	for i, hand in enumerate(table.player.hands):
 		table.player.hands[i].is_active = True
+
 		interface.print_hands(table)
+
 		# User can only double down before hitting.
 		try:
 			if (
@@ -182,13 +197,16 @@ def exe_player_control(table: Table) -> None:
 				)
 			):
 				action = handle_double_down(table, i, split)
+
 				if action == PlayerAction.NEXT_HAND:
 					continue
 				else:
 					break
 			else:
 				interface.clear_and_print(table)
+
 				prev_action, action = handle_hitting(table, split, hand, i)		
+				
 				if action == PlayerAction.NEXT_HAND:
 					continue
 				
@@ -205,10 +223,10 @@ def exe_player_control(table: Table) -> None:
 			table.player.hands[i].is_active = False
 
 def handle_hitting(
-    	table: Table, 
-     	split: SplitHands, 
-      	hand: PlayerHand, 
-       	i: int
+	table: Table, 
+	split: SplitHands, 
+	hand: PlayerHand, 
+	i: int
 ) -> tuple[str, PlayerAction]:
 	"""
 	Main loop when a player decides to hit the current hand. Break out of the loop
@@ -222,14 +240,17 @@ def handle_hitting(
 		i (int): The current hand pointer.
 	Returns:
 		tuple[str, PlayerAction]: The previous recorded action and the 
-  								  next player action.
+  			next player action.
 	"""
 	while interface.hit_or_stand() == constants.HIT:
 		actions.hit_hand(table, hand)
+		
 		interface.clear_and_print(table)
 
 		if conditions.is_bust(hand): 
+
 			prev_action = constants.BUST
+			
 			interface.print_stand_or_bust(i, constants.BUST)
 
 			if hands_left(split, table.player.hands, i):
@@ -239,6 +260,7 @@ def handle_hitting(
 
 		elif conditions.is_twenty_one(hand):  
 			prev_action = constants.STAND
+
 			interface.print_stand_or_bust(i, constants.STAND)
 			
 			if hands_left(split, table.player.hands, i):
@@ -247,6 +269,7 @@ def handle_hitting(
 				return prev_action, PlayerAction.END_TURN
 	
 	prev_action = constants.STAND
+
 	if hands_left(split, table.player.hands, i):
 		return prev_action, PlayerAction.NEXT_HAND
 	else:
@@ -273,6 +296,7 @@ def hands_left(split: SplitHands, player_hands: list[PlayerHand], i: int) -> boo
 	# Normal flow, player turn is finished.
 	interface.load_timer(constants.SWITCH_TURN) 
 	interface.clear_terminal()
+
 	return False
 
 def handle_double_down(table: Table, i: int, split: SplitHands) -> PlayerAction:
@@ -291,9 +315,11 @@ def handle_double_down(table: Table, i: int, split: SplitHands) -> PlayerAction:
 			 			2: END_TURN
 	"""
 	table.player.bank.chips -= table.player.hands[i].wager
+
 	table.player.hands[i].wager += table.player.hands[i].wager
 	
 	actions.hit_hand(table, table.player.hands[i]) 
+
 	interface.clear_and_print(table)
  
 	if hands_left(split, table.player.hands, i): 
@@ -318,19 +344,24 @@ def handle_split(table: Table, split: SplitHands) -> None:
 		conditions.can_split(table.player.hands[0]) 
 		and interface.split_or_not() == constants.YES
 	)
+
 	if (
 		req_split
 		and conditions.verify_doubled_wager(table.player, table.player.hands[0])
 	): 
 		# User wishes to split & has enough chips.
 		split.split_hand = True 
+
 		split_aces = conditions.is_split_aces(table.player.hands[0])
+		
 		actions.create_split_hands(table)
 
 		table.player.bank.chips -= table.player.hands[0].wager
 		table.player.hands[1].wager = table.player.hands[0].wager
+
 		if split_aces:
 			split.split_aces = True
+
 	elif (
 		req_split 
 		and not conditions.verify_doubled_wager(table.player, table.player.hands[0])
@@ -355,18 +386,26 @@ def exe_dealer_control(table: Table):
 	interface.print_hands(table)
 	# Dealer will now show the hidden card
 	interface.load_timer(constants.SHOW) 
+
+
 	table.dealer.is_hidden = False
+	
 	interface.clear_and_print(table)
+	
 	while actions.get_hand_value(table.dealer) < 17: 
 		interface.load_timer(constants.DEALER) 
+		
 		actions.hit_hand(table, table.dealer) 
+		
 		interface.clear_and_print(table)
+		
 		if conditions.is_bust(table.dealer):
 			interface.print_dealer_state(constants.BUST)
 			return
 		elif conditions.is_twenty_one(table.dealer):
 			interface.print_dealer_state(constants.STAND)
 			return
+		
 	interface.print_dealer_state(constants.STAND)
 
 # ==================
@@ -385,28 +424,39 @@ def verify_round_end_cond(table: Table):
 		None
 	"""
 	tmp_buffer = []
+	
 	outcome = Outcome()
+	
 	dealer_bust = conditions.is_bust(table.dealer)
+	
 	table.dealer.is_hidden = False
+	
 	interface.print_hands(table)
+	
 	for i, hand in enumerate(table.player.hands):
 		player_bust = conditions.is_bust(hand)
+		
 		if player_bust:
 			tmp_buffer.append(interface.get_round_outcome_msg(i, constants.BUST))
 			# Check next hand if applicable or exit on a bust.
 			continue 
 		elif not player_bust and dealer_bust:
 			table.player.bank.chips += payout_calculator.standard_payout(hand)
+			
 			tmp_buffer.append(interface.get_round_outcome_msg(i, constants.WIN))
 			tmp_buffer.append(interface.get_round_outcome_payout_msg(hand))
 		elif not player_bust and not dealer_bust: 
 			msg, outcome.flag = interface.compare_hands(table, hand, i)
+			
 			tmp_buffer.append(msg)
+			
 			if outcome.flag == constants.PUSH:
 				table.player.bank.chips += payout_calculator.push_payout(hand)
 			elif outcome.flag == constants.PLAYER_WIN:
 				table.player.bank.chips += payout_calculator.standard_payout(hand)
+	
 	interface.clear_and_print(table)
+	
 	for strings in tmp_buffer:
 		print(*strings, sep='', end='')
 	if interface.is_new_round(table):
@@ -423,8 +473,11 @@ def get_player_wager(player: Player):
 		float | int: The wager amount.
 	"""
 	wager = interface.wager_prompt(player) 
+
 	interface.clear_terminal()
+	
 	player.bank.chips -= wager 
+	
 	return wager
 						
 def blackjack(deck: list, player_bank: Bank, username: str):
@@ -440,18 +493,26 @@ def blackjack(deck: list, player_bank: Bank, username: str):
 	"""
 	table = Table(Player(username=username, bank=player_bank))
 	table.deck = deck
+	
 	while True:
 		wager_amount = get_player_wager(table.player)    
+		
 		round_done = False		
+		
 		actions.initial_round_deal(table)
 		table.player.hands[0].wager = wager_amount
+		
 		interface.print_hands(table)
+		
 		round_done = round_done or exe_initial_cond(table)	
+		
 		if not round_done: 
 			exe_player_control(table)
 			exe_dealer_control(table)
+
 			interface.load_timer(constants.CHECK)
 			interface.clear_terminal()
+			
 			round_done = verify_round_end_cond(table)
 		if not round_done:
 			break
@@ -465,10 +526,14 @@ def main():
 		'Dealer Stands on Soft 17\n' +
 		  'Insurance Pays 2:1\n')
 	input('Press Enter to Continue\n')
+	
 	interface.clear_terminal()
+	
 	chips, username = storage.pull_user_info()
 	player_bank = Bank(chips)
+	
 	interface.clear_terminal()
+	
 	blackjack(actions.create_and_shuffle(), player_bank, username)
  
 if __name__ == '__main__':

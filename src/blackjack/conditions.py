@@ -14,13 +14,13 @@ from.payout_calculator import get_insurance_cost
 
 def can_split(hand: Hand) -> bool:
 	"""
-	Return True if the first two cards in the hand have the same rank.
+	Return True if the first two cards in `hand` have the same rank.
 	
 	Args:
 		hand (Hand): The hand to check.
 	
 	Returns:
-		bool: True if the hand can be split, False otherwise.
+		bool: True if `hand` can be split, False otherwise.
 	"""
 	return hand.cards[0].rank == hand.cards[1].rank
 
@@ -34,9 +34,9 @@ def compare_initial_hands(table: Table) -> int:
 	
 	Returns:
 		int: Outcome flag of the round.
-			 PLAYER_WIN if the player has blackjack, 
-			 DEALER_WIN if the dealer has blackjack, 
-			 PUSH if both have blackjack.
+			PLAYER_WIN if the player has blackjack, 
+			DEALER_WIN if the dealer has blackjack, 
+			PUSH if both have blackjack.
 	"""
 	player_blackjack = is_twenty_one(table.player.hands[0])
 	dealer_blackjack = is_twenty_one(table.dealer)
@@ -47,6 +47,7 @@ def compare_initial_hands(table: Table) -> int:
 		return PLAYER_WIN
 	elif not player_blackjack and dealer_blackjack:
 		return DEALER_WIN
+	
 	return 0
 
 def is_bust(hand: Hand) -> bool:
@@ -110,6 +111,7 @@ def is_valid_wager(player: Player, wager: float) -> bool:
 	"""
 	if not (0 < wager >= MIN_BET):
 		return False
+	
 	return wager <= player.bank.chips
           
 def verify_chip_bounds(chips: float) -> bool:

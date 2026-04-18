@@ -13,13 +13,17 @@ from blackjack import storage
 @pytest.fixture
 def mock_inputs(monkeypatch):
     def _mock_inputs(values):
+
         inputs = iter(values)
+        
         def mock_input(prompt):
             try:
                 return next(inputs)
             except StopIteration:
                 pytest.fail(f'Test ran out of mock inputs.\nLast Prompt: {prompt}\n')
+
         monkeypatch.setattr('builtins.input', mock_input)
+    
     return _mock_inputs
 
 @pytest.mark.parametrize(
@@ -42,6 +46,7 @@ def mock_inputs(monkeypatch):
 def test_create_new_user(mock_inputs, data, username, inputs, expected_chips):
     mock_inputs(inputs)
     storage.create_new_user(data, username)
+
     assert data[username] == {PLAYER_CHIPS: expected_chips}
 
 def _generate_test_data_params():
@@ -57,115 +62,123 @@ def _generate_test_data_params():
         *_generate_test_data_params()
     ]
 ) 
-def test_load_data_from_json_success(monkeypatch, tmp_path, test_data, expected_chips):
-    test_file = tmp_path / 'test_file.json'
+def test_load_data_from_json_success(monkeypatch, tmp_path, data, expected_chips):
+    tmp_file = tmp_path / 'test_file.json'
     
-    # Write to the test_file so we can extract the test_data.
-    with open(test_file, 'w') as data_file:
-        json.dump(test_data, data_file)
+    with open(tmp_file, 'w') as f:
+        json.dump(data, f)
         
-    monkeypatch.setattr('blackjack.storage.FILE_PATH', str(test_file))
+    monkeypatch.setattr('blackjack.storage.FILE_PATH', str(tmp_file))
+
     loaded_data = storage.load_user_data()
     
-    assert loaded_data == test_data
+    assert loaded_data == data
     assert loaded_data['Test'][PLAYER_CHIPS] == expected_chips
 
 @pytest.mark.parametrize(
-    'test_data, exp_chips',
+    'data, expected_chips',
     [
         *_generate_test_data_params()
     ]
 )
-def test_write_user_data_success(monkeypatch, tmp_path, test_data, exp_chips):
-    test_file = tmp_path / 'test_file.json'
-    monkeypatch.setattr('blackjack.storage.FILE_PATH', str(test_file))
+def test_write_user_data_success(monkeypatch, tmp_path, data, expected_chips):
+    tmp_file = tmp_path / 'test_file.json'
+
+    monkeypatch.setattr('blackjack.storage.FILE_PATH', str(tmp_file))
     
-    storage.write_user_data(test_data)
-    assert test_file.exists()
+    storage.write_user_data(data)
+    assert tmp_file.exists()
     
-    # Open the test file in order to pull the test_data.
-    with open(test_file, 'r') as data_file:
-        loaded_data = json.load(data_file)
+    with open(tmp_file, 'r') as f:
+        loaded_data = json.load(f)
         
-    assert loaded_data == test_data
-    assert loaded_data['Test'][PLAYER_CHIPS] == exp_chips
+    assert loaded_data == data
+    assert loaded_data['Test'][PLAYER_CHIPS] == expected_chips
 
 def test_save_chips_existing_user(monkeypatch):
     username = 'Test'
-    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    data = {'Test': {PLAYER_CHIPS: 15.0}}
     chips = 37.5
     
     monkeypatch.setattr(storage, 'write_user_data', lambda *args, **kwargs: None)
     monkeypatch.setattr(storage, 'create_new_user', lambda *args, **kwargs: None)
     
-    storage.save_chips(username, chips, test_data)
-    assert test_data[username][PLAYER_CHIPS] == chips
+    storage.save_chips(username, chips, data)
+
+    assert data[username][PLAYER_CHIPS] == chips
     
 def test_save_chips_new_user(monkeypatch):
     username = 'New Test'
-    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    data = {'Test': {PLAYER_CHIPS: 15.0}}
     chips = 37.5
 
     monkeypatch.setattr(storage, 'write_user_data', lambda *args, **kwargs: None)
     
-    # Intercept the storage.create_new_user() function call.
-    dummy_create_args = []
-    def dummy_create_new_user(data, username):
-        dummy_create_args.append((data, username))
+    create_user_calls = []
+
+    def spy_create_new_user(data, username):
+        create_user_calls.append((data, username))
         
-    monkeypatch.setattr(storage, 'create_new_user', dummy_create_new_user)
-    storage.save_chips(username, chips, test_data)
+    monkeypatch.setattr(storage, 'create_new_user', spy_create_new_user)
+
+    storage.save_chips(username, chips, data)
     
-    assert len(dummy_create_args) == 1
-    assert dummy_create_args[0] == (test_data, 'New Test')
+    assert len(create_user_calls) == 1
+    assert create_user_calls[0] == (data, 'New Test')
         
 def test_pull_user_info_existing_user_success(monkeypatch, mock_inputs):
-    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    data = {'Test': {PLAYER_CHIPS: 15.0}}
     
-    # Force load_user_data() to return my test_data.
-    monkeypatch.setattr(storage, 'load_user_data', lambda: test_data)    
+    monkeypatch.setattr(storage, 'load_user_data', lambda: data)    
     monkeypatch.setattr(storage, 'create_new_user', lambda *args, **kwargs: None)
     
-    # Intercept the storage.save_chips() function call.
-    dummy_save_args = []
-    def dummy_save(a, b, c):
-        dummy_save_args.append((a, b, c))
+    save_calls = []
+
+    def spy_save_chips(a, b, c):
+        save_calls.append((a, b, c))
     
+    monkeypatch.setattr(storage, 'save_chips', spy_save_chips)
+
     mock_inputs(['Test'])
-    monkeypatch.setattr(storage, 'save_chips', dummy_save)
+
     chips, username = storage.pull_user_info()
     
-    assert len(dummy_save_args) == 1
-    assert dummy_save_args[0] == ('Test', 15.0, test_data)
+    assert len(save_calls) == 1
+    assert save_calls[0] == ('Test', 15.0, data)
+
     assert chips == 15.0
     assert username == 'Test'
 
 def test_pull_user_info_new_user_creation(monkeypatch, mock_inputs):
-    test_data = {'Test': {PLAYER_CHIPS: 15.0}}
+    data = {'Test': {PLAYER_CHIPS: 15.0}}
     
-    # Force load_user_data() to return my test_data.
-    monkeypatch.setattr(storage, 'load_user_data', lambda: test_data)
+    monkeypatch.setattr(storage, 'load_user_data', lambda: data)
     
-    # Intercept the storage.create_new_user() function call and create
-    # a dummy dictionary entry.
-    args_create = []
-    def dummy_create(a, b):
-        args_create.append((a, b))
+    create_user_calls = []
+
+    def spy_create_new_user(a, b):
+        create_user_calls.append((a, b))
         a[b] = {PLAYER_CHIPS: 20.0}
-    monkeypatch.setattr(storage, 'create_new_user', dummy_create)
+
+    monkeypatch.setattr(storage, 'create_new_user', spy_create_new_user)
+
     mock_inputs(['New Test'])
     
-    # Intercept the storage.save_chips() function call.
-    args_save = []
-    def dummy_save(a, b, c):
-        args_save.append((a, b, c))  
-    monkeypatch.setattr(storage, 'save_chips', dummy_save)
+    save_calls = []
+    
+    def spy_save_chips(a, b, c):
+        save_calls.append((a, b, c))  
+
+    monkeypatch.setattr(storage, 'save_chips', spy_save_chips) 
     
     chips, username = storage.pull_user_info()
-    assert len(args_create) == 1
-    assert args_create[0] == (test_data, 'New Test')
-    assert len(args_save) == 1
-    assert args_save[0] == ('New Test', 20.0, test_data)
+
+    assert len(create_user_calls) == 1
+    assert create_user_calls[0] == (data, 'New Test')
+
+    assert len(save_calls) == 1
+    assert save_calls[0] == ('New Test', 20.0, data)
+
     assert chips == 20.0
     assert username == 'New Test'
     

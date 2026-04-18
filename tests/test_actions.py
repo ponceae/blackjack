@@ -26,7 +26,7 @@ def _generate_cards():
             Card('Clubs', 'Ace'), 
             Card('Hearts', 'Ace'), 
             Card('Spades', 'Ace'), 
-            Card('Diamonds', 'Ace')
+            Card('Diamonds', 'Ace'),
         ],  
         [Card('Clubs', 'Ace'), Card('Hearts', 9)],
         [Card('Clubs', 'Ace'), Card('Hearts', 4), Card('Spades', 6)],
@@ -76,48 +76,48 @@ def test_soft_hand_values(test_cards, expected_value):
     hand = Hand(cards=test_cards)
     assert actions.get_soft_value(hand) == expected_value
 
-def test_copy_deck_has_valid_length():
-    deck_a = actions.create_and_shuffle()
-    deck_b = []
-    actions._copy_deck(deck_b, deck_a)
-    
-    assert len(deck_a) == 52
-    assert len(deck_b) == 52
-
 @pytest.fixture
 def table():
-    return Table (player=Player(username='Test'), deck=actions.create_and_shuffle())
+    return Table(player=Player(username='Test'), deck=actions.create_and_shuffle())
 
-def test_create_split_hands_success(table):
+def test_create_split_hands_created_new_hand(table):
     table.player.hands = [PlayerHand(cards=[Card('Clubs', 6), Card('Hearts', 6)])]
+
     actions.create_split_hands(table)
+
     assert len(table.player.hands) == 2
     assert table.player.hands[0].cards[0].to_string() == '♣6'
     assert table.player.hands[1].cards[0].to_string() == '♥6'
     
-def test_hit_hand_success(table):
+def test_hit_hand_added_card(table):
     table.player.hands = [PlayerHand(cards=[Card('Clubs', 4), Card('Hearts', 6)])]
     actions.hit_hand(table, table.player.hands[0])
+
     assert len(table.player.hands[0].cards) == 3
 
-def test_hit_hand_empty_deck(table):
+def test_hit_hand_continues_after_empty_deck(table):
     table.player.hands = [PlayerHand(cards=[])]    
-    [actions.hit_hand(table, table.player.hands[0]) for _ in range(100)]
+
+    for _ in range(100):
+        actions.hit_hand(table, table.player.hands[0])
+
     assert len(table.player.hands[0].cards) == 100
     
-def test_initial_round_deal_correct_hand_length(table):
+def test_initial_round_dealt_correct_num_cards(table):
     actions.initial_round_deal(table)
+
     assert len(table.player.hands) == 1
     assert len(table.player.hands[0].cards) == 2
     assert len(table.dealer.cards) == 2
 
-def test_initial_round_deal_empty_deck(table):
+def test_initial_round_deal_success_on_empty_deck(table):
     table.deck.clear()
     actions.initial_round_deal(table)
+
     assert len(table.player.hands) == 1
     assert len(table.player.hands[0].cards) == 2
     assert len(table.dealer.cards) == 2
 
-def test_create_and_shuffle_success():
+def test_create_and_shuffle_created_new_deck():
     deck = actions.create_and_shuffle()
     assert len(deck) == 52

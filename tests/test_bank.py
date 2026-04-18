@@ -18,9 +18,9 @@ from blackjack.bank import Bank
         (0, 0.0),
         ('15', 15.0),
         ('7.5', 7.5),
-    ]
+    ],
 )
-def test_initial_bank_state(test_chips, expected_amount):
+def test_initial_bank_creation(test_chips, expected_amount):
     bank = Bank(test_chips)
     assert bank.chips == expected_amount
 
@@ -34,12 +34,12 @@ def test_initial_bank_state(test_chips, expected_amount):
         ('4.56num', 'Invalid Chip Count, must be a number.'),
     ],
     ids=[
-        'one_over_hundredth_place',
-        'negative_int',
-        'negative_float',
-        'string_invalid_a',
-        'string_invalid_b',
-    ]
+        'invalid_count_a_big_float',
+        'invalid_count_b_negative_int',
+        'invalid_count_c_negative_float',
+        'invalid_count_d_string_a',
+        'invalid_count_e_string_b',
+    ],
 )
 def test_init_raises_valueerror_on_invalid_input(invalid_input, expected_err_msg):
     with pytest.raises(ValueError, match=expected_err_msg):
@@ -93,7 +93,14 @@ def test_setting_bank_chips(bank, set_amount, expected_balance):
         ('number string', 'Invalid Chip Count, must be a number.'),
         (None, 'Invalid Chip Count, must be a number.'),
         ([], 'Invalid Chip Count, must be a number.'),
-    ]
+    ],
+    ids=[
+        'invalid_value_a_negative_float_a',
+        'invalid_value_b_negative_float_b',
+        'invalid_value_c_string',
+        'invalid_value_d_type_mismatch_a',
+        'invalid_value_e_type_mismatch_b',
+    ],
 )
 def test_bank_chips_setter_raises_valueerror_on_invalid_value(
         bank, 

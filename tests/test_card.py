@@ -22,6 +22,7 @@ from blackjack.constants import CARD_RANKS, CARD_SUITS
 )
 def test_init_mismatch_conversion(raw_suit, raw_rank, exp_suit, exp_rank):
 	card = Card(raw_suit, raw_rank)
+
 	assert card.suit == exp_suit
 	assert card.rank == exp_rank
 
@@ -33,6 +34,7 @@ def test_init_mismatch_conversion(raw_suit, raw_rank, exp_suit, exp_rank):
 )
 def test_all_cards_correct_rank_and_suit(expected_rank, expected_suit):
 	card = Card(expected_suit, expected_rank)	
+
 	assert card.rank == expected_rank
 	assert card.suit == expected_suit
 
@@ -45,11 +47,18 @@ def test_all_cards_correct_rank_and_suit(expected_rank, expected_suit):
 		('Diamonds', 1, 'Invalid Rank, Usage: 2-10, Jack, King, Queen, Ace'),
 		('Card', 'Ace', 'Invalid Suit, Usage: Clubs, Diamonds, Hearts, Spades'),
 	],
+	ids=[
+		'invalid_suit_a_int',
+		'invalid_rank_a_string',
+		'invalid_rank_b_big',
+		'invalid_rank_c_small',
+		'invalid_suit_b_err',
+	],
 )
 def test_init_raises_valueerror_on_invalid_input(
-		invalid_suit, 
- 		invalid_rank, 
-   		expected_err_msg
+	invalid_suit, 
+	invalid_rank, 
+	expected_err_msg
 ):
 	with pytest.raises(ValueError, match=expected_err_msg):
 		Card(invalid_suit, invalid_rank)

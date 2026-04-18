@@ -22,17 +22,21 @@ def create_new_user(data: dict, username: str) -> None:
 	Returns:
 		None
 	"""
-	if not data or username not in data.keys():
+	if not data or username not in data:
 		print('Creating new user.')
+
 		while True:
 			raw_chip_count = input('Enter the amount of chips to add.\n')
+			
 			try:
 				chip_count = float(raw_chip_count)
+				
 				if verify_chip_bounds(chip_count):
 					data[username] = {PLAYER_CHIPS: chip_count}
 					break
 				else:
 					print('Invalid Input, Must be a number between 15 - 1000.')
+			
 			except ValueError:
 				print('Invalid Input, Must be a number')		
 
@@ -43,8 +47,9 @@ def load_user_data() -> dict:
 	Returns:
 		dict: The JSON data.
 	"""
-	with open(FILE_PATH, 'r') as data_file:
-		data = json.load(data_file)
+	with open(FILE_PATH, 'r') as f:
+		data = json.load(f)
+
 	return data
 
 def pull_user_info() -> tuple[float, str]:
@@ -58,7 +63,7 @@ def pull_user_info() -> tuple[float, str]:
 	username = input('Enter a username to store/pull your chips: \n')
 	data = load_user_data()
  
-	if not data or username not in data.keys():
+	if not data or username not in data:
 		create_new_user(data, username)
   
 	chip_count = data[username][PLAYER_CHIPS]
@@ -79,10 +84,11 @@ def save_chips(username: str, chips: float | int, data: dict) -> None:
 	Returns:
 		None
 	"""
-	if username in data.keys():
+	if username in data:
 		data[username][PLAYER_CHIPS] = chips
 	else:
 		create_new_user(data, username)
+
 	write_user_data(data)  
 
 def write_user_data(data: dict) -> None:
@@ -93,5 +99,6 @@ def write_user_data(data: dict) -> None:
 		data (dict): The JSON data represented as a dictionary.
 	"""
 	tmp = json.dumps(data, indent=4)
-	with open(FILE_PATH, 'w') as data_file:
-		data_file.write(tmp)
+
+	with open(FILE_PATH, 'w') as f:
+		f.write(tmp)

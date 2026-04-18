@@ -17,19 +17,6 @@ from .deck import create_deck, shuffle_deck
 # Hand modification & initialization
 # ==========================================
 
-def _copy_deck(old_deck: list[Card], new_deck: list[Card]) -> None:
-	"""
-	Copy the shuffled `new_deck` into `old_deck`.
-	
-	Args:
-		old_deck (list[Card]): The deck to overwrite.
-		new_deck (list[Card]): The deck to copy from.
-
-	Returns:
-		None
-	"""
-	old_deck[:] = new_deck
-
 def create_split_hands(table: Table) -> None:
 	"""
 	Create a new split hand for the player by popping a card from the first initial 
@@ -42,10 +29,9 @@ def create_split_hands(table: Table) -> None:
 		None
 	"""
 	popped_card = table.player.hands[0].cards.pop()
- 
 	new_hand = PlayerHand(cards=[popped_card])
 	table.player.hands.append(new_hand)
- 
+
 	for hand in table.player.hands:
 		hit_hand(table, hand)
   
@@ -60,16 +46,14 @@ def hit_hand(table: Table, hand: Hand) -> None:
 	Returns:
 		None
 	"""
-	while True:
-		if table.deck:
-			hand.cards.append(table.deck.pop())
-			break
-		print('Deck is empty. Adding cards.')
-		_copy_deck(table.deck, create_and_shuffle())
+	if not table.deck:
+		table.deck = create_and_shuffle()
 
+	hand.cards.append(table.deck.pop())
+	
 def initial_round_deal(table: Table) -> None:
 	"""
-	Create a new player and dealer hand, then deal two cards each.
+	Create a new PlayerHand and DealerHand, then deal two cards each.
 
 	Args:
 		table (Table): The current game table containing the player, dealer, and deck.
@@ -82,9 +66,10 @@ def initial_round_deal(table: Table) -> None:
  
 	for i in range(4):
 		if not table.deck:
-			print('Deck is empty. Adding cards.')
-			_copy_deck(table.deck, create_and_shuffle())
+			table.deck = create_and_shuffle()	
+
 		card = table.deck.pop()
+		
 		if i % 2 == 0:
 			table.player.hands[0].cards.append(card)
 		else:
@@ -109,22 +94,21 @@ def get_hand_value(hand: Hand) -> int:
  
 	for card in hand.cards:
 		if card.rank == 'Ace':	
-			# Default ace value is 11
-			value += DEFAULT_ACE_VALUE 
+			value += DEFAULT_ACE_VALUE # Default ace value is 11.
 			ace_count += 1 
 		else:
 			value += card.get_rank_value()
    
 	while ace_count > 0 and value > 21: 
 		value -= DEFAULT_ACE_VALUE
-		# Alternate ace value is 1
-		value += ACE_ALT_VALUE 
+		value += ACE_ALT_VALUE # Alternate ace value is 1.
 		ace_count -= 1
+	
 	return value
 	
 def get_soft_value(hand: Hand) -> int:
 	"""
-	Return the hand value, treating all Aces as 1 (soft value).
+	Return the `hand` value, treating all Aces as 1 (soft value).
 	
 	Args: 
 		hand (Hand): The hand to calculate.
@@ -135,11 +119,11 @@ def get_soft_value(hand: Hand) -> int:
 	soft_value = 0
  
 	for card in hand.cards:
-		if card.rank == 'Ace':
-			# Alternate ace value is 1
-			soft_value += ACE_ALT_VALUE 
+		if card.rank == 'Ace':		
+			soft_value += ACE_ALT_VALUE # Alternate ace value is 1.
 		else:
 			soft_value += card.get_rank_value()
+
 	return soft_value
 
 # ==========================================

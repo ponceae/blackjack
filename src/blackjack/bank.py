@@ -1,22 +1,24 @@
 """
-Store and manage a player's virtual chips.
+Define the Bank class for the storage and management of a player's chips.
 
 Author: Adrien P.
 """
 
 class Bank:
-    """Represents a player's bank (or wallet)"""
+    """Represent a player's bank (or wallet)."""
 
     def __init__(self, chips: float):
         """
-        Initialize a player Bank with the given chips.
+        Initialize a Bank with the given chips.
 
         Args:
             chips (float): The amount of chips in the player's bank.
         """
         chips = self._to_float(chips)
+
         if not (0 <= chips <= 1000):
             raise ValueError('Invalid Chip Count, must be a number between 0 - 1000')
+        
         self._chips = chips
     
     @staticmethod
@@ -26,6 +28,7 @@ class Bank:
         
         Args:
             value (float): The value to validate and convert.
+            
         Returns:
             float: The converted value.
         """
@@ -47,8 +50,10 @@ class Bank:
     @chips.setter
     def chips(self, value: float) -> None:
         value = self._to_float(value)
+
         if value < 0:
             raise ValueError('Invalid Value, `value` is less than 0.')
+        
         self._chips = value
     
     def to_string(self):

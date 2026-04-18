@@ -21,13 +21,14 @@ class Card:
 
 		Args:
 			suit (str): The suit of the card ('Clubs', 'Diamonds', 'Hearts', 'Spades').
-			rank (int | str): The rank of the card. (2-10, 'Jack', 'Queen', 'King', 
-				'Ace').
+			rank (int | str): The rank of the card. 
+				(2-10, 'Jack', 'Queen', 'King', 'Ace').
 		"""
 		if isinstance(suit, str) and suit.capitalize() in CARD_SUITS:
 			self.suit = suit.capitalize()
 		else:
 			raise ValueError('Invalid Suit, Usage: Clubs, Diamonds, Hearts, Spades')
+		
 		if isinstance(rank, int) and (2 <= rank <= 11):
 			self.rank = rank
 		elif isinstance(rank, str) and rank.capitalize() in NAMED_CARD_RANKS:
@@ -46,11 +47,10 @@ class Card:
 			return self.rank
 		elif isinstance(self.rank, str):
 			if self.rank != 'Ace':
-				# Value of 10
-				return FACE_CARD_VALUE 
+				return FACE_CARD_VALUE # Value of 10.
 			else:
-				# Value of 11
-				return DEFAULT_ACE_VALUE 
+				return DEFAULT_ACE_VALUE # Value of 11.
+			
 		return 0
 	
 	def to_string(self):

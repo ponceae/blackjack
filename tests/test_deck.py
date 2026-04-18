@@ -15,11 +15,12 @@ def test_create_deck_success():
 def test_shuffle_deck_is_valid():
     deck = create_deck()
     shuffled = shuffle_deck(deck)
+
     assert len(shuffled) == 52
 
     standard_set = set((card.suit, card.rank) for card in deck)
     shuffled_set = set((card.suit, card.rank) for card in shuffled)
-
+   
     assert standard_set == shuffled_set
     assert len(shuffled) == len(shuffled_set)
     

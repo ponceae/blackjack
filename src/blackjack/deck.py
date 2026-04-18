@@ -19,18 +19,18 @@ def create_deck() -> list[Card]:
 	"""
 	return [Card(suit, rank) for suit in CARD_SUITS for rank in CARD_RANKS]
 		
-def shuffle_deck(deck: list) -> list[Card]:
+def shuffle_deck(deck: list[Card]) -> list[Card]:
 	"""
 	 Shuffle and return the `deck`.
 
 	Args:
-		deck (list): The list of Card objects to shuffle.
+		deck (list[Card]): The list of Card objects to shuffle.
 
 	Returns:
 		list[Card]: The deck of cards.
 	"""
 	for i in range(len(deck) - 1, 0, -1):
-		seed = random.randint(0, i)
-		deck[i], deck[seed] = deck[seed], deck[i]
+		j = random.randint(0, i)
+		deck[i], deck[j] = deck[j], deck[i]
 	return deck
 		

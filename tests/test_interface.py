@@ -23,13 +23,17 @@ from blackjack import interface
 @pytest.fixture
 def mock_inputs(monkeypatch):
 	def _mock_inputs(values):
+		
 		inputs = iter(values)
+		
 		def mock_input(prompt):
 			try:
 				return next(inputs)
 			except StopIteration:
 				pytest.fail(f'Test ran out of mock inputs.\nLast Prompt: {prompt}\n')
+		
 		monkeypatch.setattr('builtins.input', mock_input)
+	
 	return _mock_inputs
 
 def _generate_basic_input_arg_params(flag):
@@ -49,7 +53,9 @@ def _generate_basic_input_arg_params(flag):
 )
 def test_yes_flow(mock_inputs, capsys, function, args, expected_choice):
 	mock_inputs(['yes', '0', 'sadf', 'y'])
+
 	choice = function(*args)
+
 	console = capsys.readouterr()
  
 	assert console.out.count('Invalid Choice, (Y) YES / (N) NO\n') == 3
@@ -63,14 +69,16 @@ def test_yes_flow(mock_inputs, capsys, function, args, expected_choice):
 )
 def test_no_flow(mock_inputs, capsys, function, args, expected_choice):
 	mock_inputs(['no', '0', 'sadf', 'n'])
+
 	choice = function(*args)
+	
 	console = capsys.readouterr()
  
 	assert console.out.count('Invalid Choice, (Y) YES / (N) NO\n') == 3
 	assert choice == expected_choice
 
 @pytest.mark.parametrize(
-	'player_cards, player_wager, index, dealer_cards, expected_msg, expected_flag',
+	'player_cards, test_wager, index, dealer_cards, expected_msg, expected_flag',
 	[
 		(
 			[Card('Spades', 5), Card('Clubs', 5)], 
@@ -97,27 +105,34 @@ def test_no_flow(mock_inputs, capsys, function, args, expected_choice):
 			constants.PLAYER_WIN,	
 		),
 	],
+	ids=[
+		'dealer_win_output',
+		'push_output',
+		'player_win_output',
+	]
 )
 def test_compare_hands_output(
 		player_cards, 
-		  player_wager, 
+		test_wager, 
 		index, 
-		 dealer_cards, 
-		  expected_msg, 
-		   expected_flag,
+		dealer_cards, 
+		expected_msg, 
+		expected_flag,
 ):
 	if index == 0:
-		player_hand1 = PlayerHand(cards=player_cards, wager=player_wager)
+		player_hand1 = PlayerHand(cards=player_cards, wager=test_wager)
 		player_hand2 = PlayerHand(cards=[], wager=0.0)
 	elif index == 1:
 		player_hand1 = PlayerHand(cards=[], wager=0.0)
-		player_hand2 = PlayerHand(cards=player_cards, wager=player_wager)
+		player_hand2 = PlayerHand(cards=player_cards, wager=test_wager)
+	
 	table = Table(
 		player=Player(username='Test', hands=[player_hand1, player_hand2]),
 		dealer=DealerHand(cards=dealer_cards)
 	)
 	
 	msg, flag = interface.compare_hands(table, table.player.hands[index], index)
+
 	assert msg == expected_msg
 	assert flag == expected_flag
 
@@ -133,13 +148,14 @@ def base_table():
 		dealer=DealerHand(cards=[Card('Clubs', 'Ace'), Card('Diamonds', 3)]),
 	)
 	
-def test_print_player_hands_init_deal(capsys, base_table):
-	# Test initial deal no insurance display. 
+def test_print_player_hands_init_deal_no_insurance(capsys, base_table):
 	base_table.player.bank = Bank(30.0)
  
 	interface.clear_and_print(base_table)
-	console = capsys.readouterr()
-	assert console.out == (
+
+	output = capsys.readouterr()
+	
+	assert output.out == (
 		'Dealer: 11\n'
 		'♣Ace\n'
 		'?\n'
@@ -152,13 +168,14 @@ def test_print_player_hands_init_deal(capsys, base_table):
 	)
 
 def test_print_player_hands_init_deal_with_insurance(capsys, base_table):
-	# Test initial deal with insurance display.
 	base_table.player.bank = Bank(22.5)
 	base_table.player.hands[0].insurance_wager = 7.5
  
 	interface.clear_and_print(base_table)
-	console = capsys.readouterr() 
-	assert console.out == (
+	
+	output = capsys.readouterr() 
+	
+	assert output.out == (
 		'Dealer: 11\n'
 		'♣Ace\n'
 		'?\n'
@@ -172,10 +189,10 @@ def test_print_player_hands_init_deal_with_insurance(capsys, base_table):
 	)
 
 @pytest.fixture
-def base_split_table():
+def split_hand_table():
 	return Table(
 		player=Player(
-			  username='Test',
+			username='Test',
 			bank=Bank(50.0),
 			hands=[
 				PlayerHand(
@@ -191,14 +208,15 @@ def base_split_table():
 		dealer=(DealerHand(is_hidden=False)),
 	)
 
-def test_print_player_hands_dealer_showing_both_soft(capsys, base_split_table):
-	# Test dealer showing both cards, non-soft.
-	base_split_table.player.hands[0].is_active = True
-	base_split_table.dealer.cards = [Card('Spades', 'Ace'), Card('Hearts', 4)]
+def test_print_player_hands_dealer_showing_both_cards_soft(capsys, split_hand_table):
+	split_hand_table.player.hands[0].is_active = True
+	split_hand_table.dealer.cards = [Card('Spades', 'Ace'), Card('Hearts', 4)]
 	
-	interface.print_hands(base_split_table)
-	console = capsys.readouterr() 
-	assert console.out == (
+	interface.print_hands(split_hand_table)
+
+	output = capsys.readouterr() 
+
+	assert output.out == (
 		'Dealer: 5 / 15\n'
 		'♠Ace\n'
 		'♥4\n'
@@ -215,14 +233,18 @@ def test_print_player_hands_dealer_showing_both_soft(capsys, base_split_table):
 		'Chips: $50.00\n'
 	)
 
-def test_print_player_hands_dealer_showing_both_non_soft(capsys, base_split_table):
-	# Test dealer showing both cards, non-soft.
-	base_split_table.player.hands[1].is_active = True
-	base_split_table.dealer.cards = [Card('Spades', 8), Card('Hearts', 4)]
+def test_print_player_hands_dealer_showing_both_cards_non_soft(
+	capsys, 
+	split_hand_table
+):
+	split_hand_table.player.hands[1].is_active = True
+	split_hand_table.dealer.cards = [Card('Spades', 8), Card('Hearts', 4)]
 	
-	interface.print_hands(base_split_table)
-	console = capsys.readouterr() 
-	assert console.out == (
+	interface.print_hands(split_hand_table)
+	
+	output = capsys.readouterr() 
+	
+	assert output.out == (
 		'Dealer: 12\n'
 		'♠8\n'
 		'♥4\n'
@@ -240,47 +262,74 @@ def test_print_player_hands_dealer_showing_both_non_soft(capsys, base_split_tabl
 	)
 
 @pytest.mark.parametrize(
-	'wager, flag, expected_display, expected_payout',
+	'test_wager, flag, expected_display, expected_payout',
 	[
 		(15.0, constants.PUSH, 'Round Push, Returned $15.00\n', 0.0),
 		(15.0, constants.PLAYER_WIN, 'Player Blackjack, You Won $37.50\n', 37.5),
 		(15.0, constants.DEALER_WIN, 'Dealer Blackjack, You Lose\n', 0.0),
 		(15.0, 0, '', 0.0),
+	],
+	ids=[
+		'initial_push_outcome',
+		'initial_player_blackjack_outcome',
+		'initial_dealer_blackjack_outcome',
+		'initial_no_outcome',
 	]
 )
 def test_initial_outcome_display(
-		capsys, wager, flag, expected_display, expected_payout
+	capsys, 
+	test_wager, 
+	flag, 
+	expected_display, 
+	expected_payout
 ):
-	hand = PlayerHand(wager=wager)
+	hand = PlayerHand(wager=test_wager)
 	outcome = Outcome(flag=flag, payout=expected_payout)
+
 	interface.print_initial_outcome(outcome, hand)    
-	console = capsys.readouterr()
-	assert console.out == expected_display
+
+	output = capsys.readouterr()
+
+	assert output.out == expected_display
 
 @pytest.mark.parametrize(
-	'active, win, payout, expected_display',
+	'test_active, test_win, test_payout, expected_display',
 	[
 		(True, True, 15.0, 'You Won $15.00 With Insurance.\n'),
 		(True, False, 0.0, 'No Dealer Blackjack, Insurance Lost.\n'),
 		(False, False, 0.0, ''),
+	],
+	ids=[
+		'insurance_win',
+		'insurance_lost',
+		'no_insurance',
 	]
 )
 def test_initial_insurance_outcome_display(
-		capsys, active, win, payout, expected_display
+	capsys, 
+	test_active, 
+	test_win, 
+	test_payout, 
+	expected_display
 ):
-	insurance = Insurance(active=active, win=win, payout=payout)
+	insurance = Insurance(active=test_active, win=test_win, payout=test_payout)
+
 	interface.print_initial_insurance_outcome(insurance)
-	console = capsys.readouterr()
-	assert console.out == expected_display
+	
+	output = capsys.readouterr()
+
+	assert output.out == expected_display
 
 def test_hit_hand_decision(mock_inputs, capsys):
 	mock_inputs(['hit', 'n', '4', 'h'])
 
 	choice = interface.hit_or_stand()
 
-	console = capsys.readouterr()
-	assert 'Invalid Choice, (H) HIT / (S) STAND\n' in console.out
-	assert console.out.count('Invalid Choice, (H) HIT / (S) STAND\n') == 3
+	output = capsys.readouterr()
+
+	assert 'Invalid Choice, (H) HIT / (S) STAND\n' in output.out
+	assert output.out.count('Invalid Choice, (H) HIT / (S) STAND\n') == 3
+
 	assert choice == 'H'
 
 def test_stand_hand_decision(mock_inputs, capsys):
@@ -288,13 +337,15 @@ def test_stand_hand_decision(mock_inputs, capsys):
 
 	choice = interface.hit_or_stand()
 
-	console = capsys.readouterr()
-	assert 'Invalid Choice, (H) HIT / (S) STAND\n' in console.out
-	assert console.out.count('Invalid Choice, (H) HIT / (S) STAND\n') == 4
+	output = capsys.readouterr()
+
+	assert 'Invalid Choice, (H) HIT / (S) STAND\n' in output.out
+	assert output.out.count('Invalid Choice, (H) HIT / (S) STAND\n') == 4
+
 	assert choice == 'S'
 
 @pytest.mark.parametrize(
-	'input_list, bank, expected_chips',
+	'input, chips, expected_chips',
 	[
 		(
 			['y', '10', '35'],
@@ -308,100 +359,117 @@ def test_stand_hand_decision(mock_inputs, capsys):
 		)
 	]
 )
-def test_add_chips_to_player_bank(mock_inputs, input_list, bank, expected_chips):
-	test_player = Player(username='Test', bank=Bank(bank))
-	mock_inputs(input_list)
+def test_add_chips_to_player_bank(mock_inputs, input, chips, expected_chips):
+	test_player = Player(username='Test', bank=Bank(chips))
+
+	mock_inputs(input)
+
 	interface._add_chips(test_player)
+
 	assert test_player.bank.chips == expected_chips
  
 def test_is_new_round_continue(mock_inputs):
 	table = Table(Player(username='Test'))
+
 	mock_inputs(['y'])
+
 	assert interface.is_new_round(table) == True
 	
 def test_is_new_round_exit_branch(mock_inputs, monkeypatch):
 	table = Table(Player(username='Test'))
+
 	mock_inputs(['n'])
+
 	monkeypatch.setattr(interface, 'save_chips', lambda *args, **kwargs: None)
 	
 	with pytest.raises(SystemExit) as exe_info:
 		interface.is_new_round(table)
+
 	assert exe_info.value.code is None
 
 @pytest.mark.parametrize(
-		'bank, input_list, expected_wager',
-		[
-			(25, ['15'], 15.0),
-			(30.0, ['14', 'n', '20'], 20.0),
-			(1.0, ['15', '20', 'y', '20', '15'], 15.0),
-			(15.0, ['asdf', '15'], 15.0),
-		],
-		ids=[
-			'wager_prompt_has_enough_chips',
-			'wager_prompt_not_enough_chips_for_min_bet',
-			'wager_prompt_player_bank_is_broke',
-			'wager_invalid_input_caught_gracefully',
-		]
+	'chips, input, expected_wager',
+	[
+		(25, ['15'], 15.0),
+		(30.0, ['14', 'n', '20'], 20.0),
+		(1.0, ['15', '20', 'y', '20', '15'], 15.0),
+		(15.0, ['asdf', '15'], 15.0),
+	],
+	ids=[
+		'wager_prompt_has_enough_chips',
+		'wager_prompt_not_enough_chips_for_min_bet',
+		'wager_prompt_player_bank_is_broke',
+		'wager_invalid_input_caught_gracefully',
+	]
 )
-def test_wager_prompt(mock_inputs, bank, input_list, expected_wager):
-	test_player = Player(username='Test', bank=Bank(bank))
-	mock_inputs(input_list)
+def test_wager_prompt(mock_inputs, chips, input, expected_wager):
+	test_player = Player(username='Test', bank=Bank(chips))
+
+	mock_inputs(input)
+
 	assert interface.wager_prompt(test_player) == expected_wager
 
 @pytest.mark.parametrize(
-		'key, expected_output',
-		[
-			(1, 'Dealer is peeking...'),
-			(2, 'Switching active hand...'),
-			(3, 'Switching to dealer...'),
-			(4, 'Dealer is hitting...'),
-			(5, 'Comparing hand values...'),
-			(6, 'Dealer is flipping card...'),
-			(7, 'You cannot afford that...'),
-			(-1, ''),
-			(999, ''),
-		]
+	'key, expected_output',
+	[
+		(1, 'Dealer is peeking...'),
+		(2, 'Switching active hand...'),
+		(3, 'Switching to dealer...'),
+		(4, 'Dealer is hitting...'),
+		(5, 'Comparing hand values...'),
+		(6, 'Dealer is flipping card...'),
+		(7, 'You cannot afford that...'),
+		(-1, ''),
+		(999, ''),
+	]
 )
 def test_load_timer(capsys, monkeypatch, key, expected_output):
 	monkeypatch.setattr(time, 'sleep', lambda x: None)
+	
 	interface.load_timer(key)
-	console = capsys.readouterr()
-	assert expected_output in console.out
+	
+	output = capsys.readouterr()
+	
+	assert expected_output in output.out
 
 @pytest.mark.parametrize(
-		'flag, expected_display',
-		[
-			(constants.STAND, 'Dealer is Standing\n'),
-			(constants.BUST, 'Dealer has Busted\n'),
-		]
+	'flag, expected_display',
+	[
+		(constants.STAND, 'Dealer is Standing\n'),
+		(constants.BUST, 'Dealer has Busted\n'),
+	]
 )
 def test_display_dealer_state(capsys, flag, expected_display):
 	interface.print_dealer_state(flag)
-	console = capsys.readouterr()
-	assert expected_display in console.out
+	
+	output = capsys.readouterr()
+	
+	assert expected_display in output.out
 
 @pytest.mark.parametrize(
-		'flag, index, expected_display',
-		[
-			(constants.BUST, 0, 'Hand I Busted & Lost\n'),
-			(constants.BUST, 1, 'Hand II Busted & Lost\n'),
-			(constants.PLAYER_WIN, 0, 'Hand I Win. '),
-			(constants.PLAYER_WIN, 1, 'Hand II Win. '),
-		]
+	'flag, index, expected_display',
+	[
+		(constants.BUST, 0, 'Hand I Busted & Lost\n'),
+		(constants.BUST, 1, 'Hand II Busted & Lost\n'),
+		(constants.PLAYER_WIN, 0, 'Hand I Win. '),
+		(constants.PLAYER_WIN, 1, 'Hand II Win. '),
+	]
 )
 def test_get_round_outcome_msg(flag, index, expected_display):
 	assert interface.get_round_outcome_msg(index, flag) == expected_display
 
 @pytest.mark.parametrize(
-		'flag, index, expected_display',
-		[
-			(constants.STAND, 0, 'Hand I is Standing\n'),
-			(constants.STAND, 1, 'Hand II is Standing\n'),
-			(constants.BUST, 0, 'Hand I has Busted\n'),
-			(constants.BUST, 1, 'Hand II has Busted\n')
-		]
+	'flag, index, expected_display',
+	[
+		(constants.STAND, 0, 'Hand I is Standing\n'),
+		(constants.STAND, 1, 'Hand II is Standing\n'),
+		(constants.BUST, 0, 'Hand I has Busted\n'),
+		(constants.BUST, 1, 'Hand II has Busted\n')
+	]
 )
 def test_print_stand_or_bust(capsys, index, flag, expected_display):
 	interface.print_stand_or_bust(index, flag)
+	
 	console = capsys.readouterr()
+	
 	assert expected_display in console.out

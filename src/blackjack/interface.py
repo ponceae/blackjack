@@ -51,7 +51,7 @@ from .storage import load_user_data, save_chips
 
 def compare_hands(table: Table, hand: PlayerHand, index: int) -> tuple[str, int]:
 	"""
-	Compare the player and dealer hands at the end of the round and displays the 
+	Compare the PlayerHand(s) and DealerHand at the end of the round and display the 
 	outcome. Return the round outcome flag.
 
 	Args:
@@ -60,10 +60,11 @@ def compare_hands(table: Table, hand: PlayerHand, index: int) -> tuple[str, int]
 	
 	Returns:
 		tuple[str, int]: A tuple containing:
-			- A string containing the display message.
-  			- The flag determining the round outcome.
+			A string containing the display message.
+  			The flag determining the round outcome.
 	"""
 	msg = 'Hand ' + ROMAN_NUMERALS[index + 1]
+
 	player_hand_value = get_hand_value(hand)
 	dealer_hand_value = get_hand_value(table.dealer)
 	
@@ -73,11 +74,12 @@ def compare_hands(table: Table, hand: PlayerHand, index: int) -> tuple[str, int]
 		return (f'{msg} Win, You Won ${standard_payout(hand):.2f}\n'), PLAYER_WIN
 	elif player_hand_value < dealer_hand_value:
 		return (f'{msg} Lost\n'), DEALER_WIN
+	
 	return '', 0
 
 def clear_and_print(table: Table) -> None:
 	"""
-	Clears the CLI display and then displays the game hands.
+	Clear the CLI display and display the table hands.
 
 	Args:
 		table (Table): The current game table containing the player and dealer hands.
@@ -90,7 +92,7 @@ def clear_and_print(table: Table) -> None:
 
 def print_hands(table: Table) -> None:
 	"""
-	Display the player and dealer hands to the CLI.
+	Display the PlayerHand(s) and DealerHand to the CLI.
 
 	Args: 
 		table (Table): The current game table containing the player and dealer hands.
@@ -99,16 +101,18 @@ def print_hands(table: Table) -> None:
 		None
 	"""
 	buffers = Buffers([], [], [])
+
 	_print_dealer_hands(table, buffers)
 	_print_player_hands(table, buffers)
 
 	for strings in buffers.main:
 		print(*strings, sep='', end='')
+
 	print()
 
 def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 	"""
-	Display the dealer hands or the dealer's first card depending on the game state.
+	Display the DealerHand or the dealer's first card depending on the game state.
 	Display insurance if purchased by the player.
 
 	Args:
@@ -122,18 +126,19 @@ def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 	dealer_soft_value = str(get_soft_value(table.dealer))
 	
 	buffers.dealer.append('Dealer: ')
-	# Dealer showing one card
-	if table.dealer.is_hidden: 
+
+	if table.dealer.is_hidden: # Dealer showing one card.
 		buffers.dealer.append(
 			f'{table.dealer.cards[0].get_rank_value()}\n'
 			f'{table.dealer.cards[0].to_string()}\n'
 			'?\n'
-		)
-	# Dealer showing both cards.
-	else: 
+		)	
+	else: # Dealer showing both cards.
 		if is_soft(table.dealer) and not is_twenty_one(table.dealer):
 			buffers.dealer.append(f'{dealer_soft_value} / ')
+
 		buffers.dealer.append(f'{dealer_hand_value}\n')
+		
 		for card in table.dealer.cards:
 			buffers.dealer.append(f'{card.to_string()}\n')
 	
@@ -141,12 +146,14 @@ def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 		buffers.dealer.append(
 			f'Insurance [${table.player.hands[0].insurance_wager:.2f}]\n'
 		)
+
 	buffers.dealer.append('--------------------\n')
+
 	buffers.main.append(buffers.dealer)
 
 def _print_player_hands(table: Table, buffers: Buffers) -> None:
 	"""
-	Display the player's hands and wager. If player hands are split, display the
+	Display the PlayerHand(s) and `wager`. If PlayerHand is split, display the
 	active hand.
 
 	Args:
@@ -157,12 +164,15 @@ def _print_player_hands(table: Table, buffers: Buffers) -> None:
 		None
 	"""
 	player_hand_values = [str(get_hand_value(hand)) for hand in table.player.hands]
+
 	player_soft_values = [str(get_soft_value(hand)) for hand in table.player.hands]
 
 	for i, hand in enumerate(table.player.hands):
 		buffers.player.append(f'Hand {ROMAN_NUMERALS[i + 1]}: ')
+
 		if is_soft(hand) and not is_twenty_one(hand): # Show soft value
 			buffers.player.append(f'{player_soft_values[i]} / ')
+
 		buffers.player.append(
 			f'{player_hand_values[i]}'
 			f'{_print_wager(table.player.hands[i].wager)}'
@@ -174,9 +184,11 @@ def _print_player_hands(table: Table, buffers: Buffers) -> None:
 			buffers.player.append('\n')
 		for card in hand.cards:
 			buffers.player.append(f'{card.to_string()}\n')
+
 		buffers.player.append('--------------------\n')
 	
 	buffers.player.append(table.player.bank.to_string())
+
 	buffers.main.append(buffers.player)
 
 def print_initial_outcome(outcome: Outcome, hand: PlayerHand) -> None:
@@ -232,9 +244,11 @@ def _add_chips(player: Player) -> None:
 	if request_chips() == YES:
 		while True:
 			chips = float(input('Enter the amount of chips to add.\n'))
+			
 			if verify_chip_bounds(chips):
 				player.bank.chips += chips
 				break
+			
 			print('Invalid Input, Must be a number between 15 - 1000.')
 
 def double_or_not() -> str:
@@ -247,8 +261,10 @@ def double_or_not() -> str:
 	"""
 	while True:
 		choice = input('\nDouble Down? (Y) / (N)\n')
+
 		if choice.upper() in (YES, NO):
 			return choice.upper()
+		
 		print('Invalid Choice, (Y) YES / (N) NO')
 
 def hit_or_stand() -> str:
@@ -260,8 +276,10 @@ def hit_or_stand() -> str:
 	"""
 	while True:
 		choice = input('\n(H) HIT / (S) STAND\n')
+
 		if choice.upper() in (HIT, STAND):
 			return choice.upper()
+		
 		print('Invalid Choice, (H) HIT / (S) STAND')
 
 def is_new_round(table: Table) -> bool:
@@ -273,6 +291,7 @@ def is_new_round(table: Table) -> bool:
 		bool: True if the user wants to continue, otherwise exit the program.
 	"""
 	input = request_new_round()
+
 	if input == NO:
 		print('\nExiting Blackjack & Saving Data.')
 		save_chips(table.player.username, table.player.bank.chips, load_user_data())
@@ -280,6 +299,7 @@ def is_new_round(table: Table) -> bool:
 	elif input == YES:
 		clear_terminal()
 		return True
+	
 	return False
 
 def wager_prompt(player: Player) -> float:
@@ -294,12 +314,14 @@ def wager_prompt(player: Player) -> float:
 		float: The validated wager
 	"""
 	print(_print_min_bet(player.bank))
+
 	while True:
 		try:
 			if not verify_chip_count(player.bank.chips):
 				_wager_prompt_helper(player)
 
 			wager = float(input('Enter Wager:\n'))
+
 			valid_bet = is_valid_wager(player, wager)
 			verified_bet = verify_chip_bounds(wager)
 		
@@ -309,6 +331,7 @@ def wager_prompt(player: Player) -> float:
 				_wager_prompt_helper(player)
 			elif not verified_bet:
 				print('Wager is Too Small.')
+
 		except ValueError:
 			print('Please Enter a Valid Number.')
 
@@ -323,7 +346,9 @@ def _wager_prompt_helper(player: Player):
 		None
 	"""
 	print('Not Enough Chips.')
+
 	_add_chips(player)
+
 	clear_terminal()
 	print(_print_min_bet(player.bank))
 
@@ -336,8 +361,10 @@ def request_chips():
 	"""
 	while True:
 		choice = input('Add Chips? (Y) / (N)\n')
+		
 		if choice.upper() in (YES, NO):
 			return choice.upper()
+		
 		print('Invalid Choice, (Y) YES / (N) NO')
 
 def request_insurance(cost: float | int):
@@ -349,8 +376,10 @@ def request_insurance(cost: float | int):
 	"""
 	while True:
 		choice = input(f'\nInsurance? ${cost:.2f} (Y) / (N)\n')
+		
 		if choice.upper() in (YES, NO):
 			return choice.upper()
+		
 		print('Invalid Choice, (Y) YES / (N) NO')
 
 def request_new_round():
@@ -363,8 +392,10 @@ def request_new_round():
 	"""
 	while True:
 		choice = input('\nContinue? (Y) / (N)\n')
+		
 		if choice.upper() in (YES, NO):
 			return choice.upper()
+		
 		print('Invalid Choice, (Y) YES / (N) NO')
 
 def split_or_not():
@@ -376,8 +407,10 @@ def split_or_not():
 	"""
 	while True:
 		choice = input('\nSplit? (Y) / (N)\n')
+		
 		if choice.upper() in (YES, NO):
 			return choice.upper()
+		
 		print('Invalid Choice, (Y) YES / (N) NO')
   
 # ==========================================
@@ -419,7 +452,9 @@ def load_timer(timer_flag_key: int=-1):
 		None
 	"""
 	timer_message = TIMER_MESSAGES.get(timer_flag_key, '{}')
+	
 	print()
+
 	for i in range(3, 0, -1):
 		print(timer_message.format(i), end='\r')
 		time.sleep(1)
