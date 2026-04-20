@@ -95,7 +95,7 @@ def handle_insurance(insurance: Insurance, table: Table) -> None:
 	
 	if table.dealer.cards[0].rank == constants.ACE:
 		interface.load_timer(constants.INITIAL)
-		
+		interface.clear_and_print(table)
 		# Verify player has enough chips for insurance.
 		if (interface.request_insurance(insurance.cost) == constants.YES):
 			if conditions.verify_insurance_bet(table.player, player_hand):  
@@ -179,9 +179,7 @@ def exe_player_control(table: Table) -> None:
 		return   
 	
 	interface.clear_terminal()  
- 
-	prev_action = None     
-	
+ 	
 	for i, hand in enumerate(table.player.hands):
 		table.player.hands[i].is_active = True
 
@@ -205,20 +203,11 @@ def exe_player_control(table: Table) -> None:
 			else:
 				interface.clear_and_print(table)
 
-				prev_action, action = handle_hitting(table, split, hand, i)		
+				action = handle_hitting(table, split, hand, i)		
 				
 				if action == PlayerAction.NEXT_HAND:
 					continue
-				
-				if prev_action not in (constants.BUST, constants.STAND): 
-					interface.clear_and_print(table)
-					interface.print_stand_or_bust(i, constants.STAND)
-					print()
 
-					if hands_left(split, table.player.hands, i):
-						continue
-					else:
-						break
 		finally:
 			table.player.hands[i].is_active = False
 
@@ -227,7 +216,7 @@ def handle_hitting(
 	split: SplitHands, 
 	hand: PlayerHand, 
 	i: int
-) -> tuple[str, PlayerAction]:
+) -> PlayerAction:
 	"""
 	Main loop when a player decides to hit the current hand. Break out of the loop
 	when the user stops hitting or when a bust or 21 condition is met, and return
@@ -239,41 +228,33 @@ def handle_hitting(
 		hand (PlayerHand): The current player hand to modify.
 		i (int): The current hand pointer.
 	Returns:
-		tuple[str, PlayerAction]: The previous recorded action and the 
-  			next player action.
+		PlayerAction: The next player action.
 	"""
 	while interface.hit_or_stand() == constants.HIT:
 		actions.hit_hand(table, hand)
 		
 		interface.clear_and_print(table)
 
-		if conditions.is_bust(hand): 
-
-			prev_action = constants.BUST
-			
+		if conditions.is_bust(hand): 	
 			interface.print_stand_or_bust(i, constants.BUST)
 
 			if hands_left(split, table.player.hands, i):
-				return prev_action, PlayerAction.NEXT_HAND
+				return PlayerAction.NEXT_HAND
 			else:
-				return prev_action, PlayerAction.END_TURN
+				return PlayerAction.END_TURN
 
 		elif conditions.is_twenty_one(hand):  
-			prev_action = constants.STAND
-
 			interface.print_stand_or_bust(i, constants.STAND)
 			
 			if hands_left(split, table.player.hands, i):
-				return prev_action, PlayerAction.NEXT_HAND
+				return PlayerAction.NEXT_HAND
 			else:
-				return prev_action, PlayerAction.END_TURN
+				return PlayerAction.END_TURN
 	
-	prev_action = constants.STAND
-
 	if hands_left(split, table.player.hands, i):
-		return prev_action, PlayerAction.NEXT_HAND
+		return PlayerAction.NEXT_HAND
 	else:
-		return prev_action, PlayerAction.END_TURN
+		return PlayerAction.END_TURN
 
 def hands_left(split: SplitHands, player_hands: list[PlayerHand], i: int) -> bool:
 	"""
@@ -386,7 +367,6 @@ def exe_dealer_control(table: Table):
 	interface.print_hands(table)
 	# Dealer will now show the hidden card
 	interface.load_timer(constants.SHOW) 
-
 
 	table.dealer.is_hidden = False
 	
