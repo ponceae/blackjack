@@ -1,67 +1,84 @@
 """
-Define the Bank class for the storage and management of a player's chips.
+Manages the storage of a player's chips. 
 
-Author: Adrien P.
+This module provides the `Bank` class, which acts as a player's wallet and manages,
+modifies, and stores casino chips based on the player's current game state.
 """
 
-class Bank:
-    """Represent a player's bank (or wallet)."""
+__author__ = 'Adrien P'
 
-    def __init__(self, chips: float):
+from typing import Any
+
+class Bank:
+    """
+    Represents a player's wallet for storing casino chips.
+
+    Attributes:
+        chips (float): The current total count of chips that the player owns.
+    """
+
+    def __init__(self, chips: float) -> None:
         """
-        Initialize a Bank with the given chips.
+        Initialize the player's `Bank` with the given amount of chips.
 
         Args:
-            chips (float): The amount of chips in the player's bank.
+            chips (float): The amount of chips to add to the player's bank.
+
+        Raises:
+            ValueError: If the `chips` value is not a valid number, is less than 0,
+                or exceeds the maximum allowed bounds.
         """
         chips = self._to_float(chips)
 
         if not (0 <= chips <= 1000):
-            raise ValueError('Invalid Chip Count, must be a number between 0 - 1000')
-        
+            raise ValueError('Invalid Value, `chips` must be a number between 0 - 1000')
+
         self._chips = chips
-    
+
     @staticmethod
-    def _to_float(value) -> float:
+    def _to_float(value: Any) -> float:
         """ 
-        Helper, validate value type and float conversion.
-        
+        Validate value type and handle float conversion.
+
         Args:
-            value (float): The value to validate and convert.
-            
+            value (Any): The value to validate and convert.
+
         Returns:
             float: The converted value.
+
+        Raises:
+            ValueError: If the value cannot be converted to a float.
         """
         try:
             return float(value)
         except (ValueError, TypeError):
-            raise ValueError('Invalid Chip Count, must be a number.')
-    
+            raise ValueError('Invalid Value, `value` must be a number.')
+
     @property
     def chips(self) -> float:
         """
-        The current chip balance of the bank.
-        
-        Returns:
-            The current chip balance.
+        float: The player's current chip balance.
+
+        Raises:
+            ValueError: If the assigned value is less than 0 or cannot be converted
+                to a float.
         """
         return self._chips
-    
+
     @chips.setter
     def chips(self, value: float) -> None:
         value = self._to_float(value)
 
         if value < 0:
             raise ValueError('Invalid Value, `value` is less than 0.')
-        
+
         self._chips = value
-    
-    def to_string(self):
+
+    def to_string(self) -> str:
         """
-        Return the string representation of the bank.
+        Return the string representation of the player's `Bank`.
 
         Returns:
-            The string representation (e.g., Chips: $15.00).
+            str: The string representation (e.g., Chips: $15.00).
         """
         return f'Chips: ${self.chips:.2f}'
-    

@@ -7,7 +7,7 @@ Author: Adrien P.
 
 import json 
 
-from .conditions import verify_chip_bounds
+from .conditions import is_valid_chip_bounds
 from .constants import FILE_PATH, PLAYER_CHIPS
 
 def create_new_user(data: dict, username: str) -> None:
@@ -31,7 +31,7 @@ def create_new_user(data: dict, username: str) -> None:
 			try:
 				chip_count = float(raw_chip_count)
 				
-				if verify_chip_bounds(chip_count):
+				if is_valid_chip_bounds(chip_count):
 					data[username] = {PLAYER_CHIPS: chip_count}
 					break
 				else:

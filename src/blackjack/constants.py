@@ -74,5 +74,5 @@ PLAYER_CHIPS = 'player_chips'
 FILE_PATH = Path(__file__).parent / 'save_data.json'
 
 # Miscellaneous constants
-MIN_BET = 15
+MIN_WAGER = 15
 ROMAN_NUMERALS = {1: 'I', 2: 'II'}

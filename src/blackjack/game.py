@@ -98,7 +98,7 @@ def handle_insurance(insurance: Insurance, table: Table) -> None:
 		interface.clear_and_print(table)
 		# Verify player has enough chips for insurance.
 		if (interface.request_insurance(insurance.cost) == constants.YES):
-			if conditions.verify_insurance_bet(table.player, player_hand):  
+			if conditions.is_valid_insurance_wager(table.player, player_hand):  
 				insurance.active = True
 
 				player_hand.insurance_wager = insurance.cost
@@ -189,7 +189,7 @@ def exe_player_control(table: Table) -> None:
 		try:
 			if (
 				interface.double_or_not() == constants.YES 
-				and conditions.verify_doubled_wager(
+				and conditions.is_valid_doubled_wager(
 					table.player, 
 					table.player.hands[i],
 				)
@@ -328,7 +328,7 @@ def handle_split(table: Table, split: SplitHands) -> None:
 
 	if (
 		req_split
-		and conditions.verify_doubled_wager(table.player, table.player.hands[0])
+		and conditions.is_valid_doubled_wager(table.player, table.player.hands[0])
 	): 
 		# User wishes to split & has enough chips.
 		split.split_hand = True 
@@ -345,7 +345,7 @@ def handle_split(table: Table, split: SplitHands) -> None:
 
 	elif (
 		req_split 
-		and not conditions.verify_doubled_wager(table.player, table.player.hands[0])
+		and not conditions.is_valid_doubled_wager(table.player, table.player.hands[0])
 	):
 		interface.load_timer(constants.BROKE)
 

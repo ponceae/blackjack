@@ -1,8 +1,11 @@
 """ 
-Tests for the bank class module.
+Tests for the `bank.py` module.
 
-Author: Adrien P.
+Ensures that the `Bank` class correctly initializes and validates the player's chips,
+and enforces the minimum and maximum chip balance bounds.
 """
+
+__author__ = 'Adrien P.'
 
 import pytest
 
@@ -27,11 +30,11 @@ def test_initial_bank_creation(test_chips, expected_amount):
 @pytest.mark.parametrize(
     'invalid_input, expected_err_msg',
     [
-        (1000.01, 'Invalid Chip Count, must be a number between 0 - 1000'),
-        (-3, 'Invalid Chip Count, must be a number between 0 - 1000'),
-        (-2.56, 'Invalid Chip Count, must be a number between 0 - 1000'),
-        ('4a', 'Invalid Chip Count, must be a number.'),
-        ('4.56num', 'Invalid Chip Count, must be a number.'),
+        (1000.01, 'Invalid Value, `chips` must be a number between 0 - 1000'),
+        (-3, 'Invalid Value, `chips` must be a number between 0 - 1000'),
+        (-2.56, 'Invalid Value, `chips` must be a number between 0 - 1000'),
+        ('4a', 'Invalid Value, `value` must be a number.'),
+        ('4.56num', 'Invalid Value, `value` must be a number.'),
     ],
     ids=[
         'invalid_count_a_big_float',
@@ -46,7 +49,8 @@ def test_init_raises_valueerror_on_invalid_input(invalid_input, expected_err_msg
         Bank(invalid_input)
 
 @pytest.fixture
-def bank():
+def bank() -> Bank:
+    """Provide a `Bank` instance with a moderate balance."""
     return Bank(225.50)
 
 @pytest.mark.parametrize(
@@ -90,9 +94,9 @@ def test_setting_bank_chips(bank, set_amount, expected_balance):
     [
         (-5.5, 'Invalid Value, `value` is less than 0.'),
         (-0.01, 'Invalid Value, `value` is less than 0.'),
-        ('number string', 'Invalid Chip Count, must be a number.'),
-        (None, 'Invalid Chip Count, must be a number.'),
-        ([], 'Invalid Chip Count, must be a number.'),
+        ('number string', 'Invalid Value, `value` must be a number.'),
+        (None, 'Invalid Value, `value` must be a number.'),
+        ([], 'Invalid Value, `value` must be a number.'),
     ],
     ids=[
         'invalid_value_a_negative_float_a',

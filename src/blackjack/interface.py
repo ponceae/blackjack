@@ -11,20 +11,20 @@ import subprocess
 import sys
 import time
 
-from .actions import get_hand_value, get_soft_value
+from .actions import get_hand_value, get_hard_value
 from .bank import Bank
 from .conditions import (
 	is_soft, 
 	is_twenty_one, 
-	is_valid_wager, 
-	verify_chip_bounds, 
-	verify_chip_count,
+	is_valid_player_wager, 
+	is_valid_chip_bounds, 
+	is_valid_wager,
 )
 from .constants import (
 	BUST,
 	DEALER_WIN, 
 	HIT, 
-	MIN_BET,
+	MIN_WAGER,
 	NO, 
 	PLAYER_WIN, 
 	PUSH, 
@@ -123,7 +123,7 @@ def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 		None
 	"""
 	dealer_hand_value = str(get_hand_value(table.dealer))
-	dealer_soft_value = str(get_soft_value(table.dealer))
+	dealer_hard_value = str(get_hard_value(table.dealer))
 	
 	buffers.dealer.append('Dealer: ')
 
@@ -135,7 +135,7 @@ def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 		)	
 	else: # Dealer showing both cards.
 		if is_soft(table.dealer) and not is_twenty_one(table.dealer):
-			buffers.dealer.append(f'{dealer_soft_value} / ')
+			buffers.dealer.append(f'{dealer_hard_value} / ')
 
 		buffers.dealer.append(f'{dealer_hand_value}\n')
 		
@@ -165,13 +165,13 @@ def _print_player_hands(table: Table, buffers: Buffers) -> None:
 	"""
 	player_hand_values = [str(get_hand_value(hand)) for hand in table.player.hands]
 
-	player_soft_values = [str(get_soft_value(hand)) for hand in table.player.hands]
+	player_hard_values = [str(get_hard_value(hand)) for hand in table.player.hands]
 
 	for i, hand in enumerate(table.player.hands):
 		buffers.player.append(f'Hand {ROMAN_NUMERALS[i + 1]}: ')
 
-		if is_soft(hand) and not is_twenty_one(hand): # Show soft value
-			buffers.player.append(f'{player_soft_values[i]} / ')
+		if is_soft(hand) and not is_twenty_one(hand):
+			buffers.player.append(f'{player_hard_values[i]} / ')
 
 		buffers.player.append(
 			f'{player_hand_values[i]}'
@@ -245,7 +245,7 @@ def _add_chips(player: Player) -> None:
 		while True:
 			chips = float(input('Enter the amount of chips to add.\n'))
 			
-			if verify_chip_bounds(chips):
+			if is_valid_chip_bounds(chips):
 				player.bank.chips += chips
 				break
 			
@@ -317,13 +317,13 @@ def wager_prompt(player: Player) -> float:
 
 	while True:
 		try:
-			if not verify_chip_count(player.bank.chips):
+			if not is_valid_wager(player.bank.chips):
 				_wager_prompt_helper(player)
 
 			wager = float(input('Enter Wager:\n'))
 
-			valid_bet = is_valid_wager(player, wager)
-			verified_bet = verify_chip_bounds(wager)
+			valid_bet = is_valid_player_wager(player, wager)
+			verified_bet = is_valid_chip_bounds(wager)
 		
 			if valid_bet and verified_bet:
 				return wager
@@ -438,7 +438,7 @@ def _print_min_bet(player_bank: Bank):
 	"""
 	return (
 		f'{player_bank.to_string()}\n'
-		f'Minimum Bet is: $' + f'{MIN_BET:.2f}\n'
+		f'Minimum Bet is: $' + f'{MIN_WAGER:.2f}\n'
 	)
 
 def load_timer(timer_flag_key: int=-1):
