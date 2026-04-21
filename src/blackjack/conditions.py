@@ -8,7 +8,7 @@ player bank statuses.
 __author__ = 'Adrien P.'
 
 from .actions import get_hand_value, get_hard_value
-from .constants import ACE, DEALER_WIN, MIN_WAGER, PLAYER_WIN, PUSH
+from .constants import ACE, DEALER_WIN, MAX_WAGER, MIN_WAGER, PLAYER_WIN, PUSH
 from .datatypes import Hand, Player, PlayerHand, Table
 from.payout_calculator import get_insurance_cost
 
@@ -120,14 +120,14 @@ def is_valid_player_wager(player: Player, wager: float) -> bool:
 def is_valid_chip_bounds(chips: float) -> bool:
     """
     Return `True` if the given chips fall within the valid range of 
-    15 to 1000 (inclusive).
+    `MIN_WAGER` to `MAX_WAGER` (inclusive).
 
     Args:
         chips (float): The chip balance to validate.
     Returns:
         bool: `True` if the chips are within bounds, `False` otherwise.
     """
-    return isinstance(chips, (int, float)) and 15 <= chips <= 1000
+    return isinstance(chips, (int, float)) and MIN_WAGER <= chips <= MAX_WAGER
 
 def is_valid_doubled_wager(player: Player, hand: PlayerHand) -> bool:
     """ 

@@ -1,53 +1,60 @@
 """ 
-Create a container to store player and dealer data and game state information.
+Data containers for game state information.
 
-Author: Adrien P.
+Provides the core data structures used to track game state, including:
+- Dataclasses for entities (Player, Dealer, Hands, and the Table)
+- Dataclasses for round mechanics (Insurance, Outcomes, and Splits)
+- Enums and NamedTuples for tracking actions and UI buffers
 """
 
+__author__ = 'Adrien P.'
+
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import NamedTuple
 
-from dataclasses import dataclass, field
 from .bank import Bank
-from .card import Card    
+from .card import Card
 
 # ==============================
-# MISCELLANEOUS GAME STATE DATA.
+# BLACKJACK ACTIONS AND DISPLAY
 # ==============================
 
 class Buffers(NamedTuple):
-	dealer: list
-	player: list
-	main: list
+    """Stores output display for game state changes."""
+    dealer: list
+    player: list
+    main: list
 
 class PlayerAction(Enum):
     NEXT_HAND = 1
     END_TURN = 2
 
-# =======================
-# GAME STATE INFORMATION.
-# =======================
+# ==========================
+# BLACKJACK ROUND MECHANICS
+# ==========================
 
 @dataclass
 class Insurance():
     active: bool = False
     win: bool = False
-    payout: int | float = 0
-    cost: int | float = 0
+    payout: float = 0
+    cost: float = 0
 
 @dataclass
 class Outcome():
-     flag: int = 0
-     payout: int | float = 0
+    """Tracks winning entity flag and the corresponding payout."""
+    flag: int = 0
+    payout: float = 0
 
 @dataclass
 class SplitHands:
     split_hand: bool = False
     split_aces: bool = False
 
-# ============================================
-# DEALER, PLAYER, AND GAME TABLE INFORMATION.
-# ============================================
+# ===================
+# BLACKJACK ENTITIES
+# ===================
 
 @dataclass
 class Hand:
@@ -75,4 +82,3 @@ class Table:
     player: Player
     dealer: DealerHand = field(default_factory=DealerHand)
     deck: list[Card] = field(default_factory=list)
-    

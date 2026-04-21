@@ -159,10 +159,10 @@ def player():
 @pytest.mark.parametrize(
     'chips, expected_bool',
     [
-        (15, True),
-        (1000.0, True),
-        (14.99, False),
-        (1000.01, False),
+        (constants.MIN_WAGER, True),
+        (constants.MAX_WAGER, True),
+        (constants.MIN_WAGER - 0.01, False),
+        (constants.MAX_WAGER + 0.01, False),
         (500, True),
         (27.5, True),
         (-33.6, False),

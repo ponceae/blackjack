@@ -1,14 +1,20 @@
 """
-Constants for configuring game information. Does not contain any functions.
+Global constants and configuration values for Blackjack.
 
-Author: Adrien P.
+Provides a single source for static game data, including:
+- Card definitions (card ranks, suits, and numeric values)
+- Game logic variables (user inputs, round outcomes, and timer messages)
+- Monetary settings (wager and bank limits and configuration)
+- File system constants (JSON file paths)
 """
+
+__author__ = 'Adrien P.'
 
 from pathlib import Path
 
-# ==================
-# CARD VARIABLES
-# ==================
+# ===============
+# CARD CONSTANTS
+# ===============
 
 ACE_ALT_VALUE = 1
 ACE = 'Ace'
@@ -25,29 +31,32 @@ CARD_SUIT_SYMBOLS = {
     'Spades': '♠',
 }
 
-# ==================
+# ==========
 # I/O FLAGS
-# ==================
+# ==========
 
 HIT = 'H'
 STAND = 'S'
+
 NO = 'N'
 YES = 'Y'
+
 BUST = 'B'
 DOUBLE = 'D'
+
 WIN = 'W'
 
-# ==================
+# ==============
 # OUTCOME FLAGS
-# ==================
+# ==============
 
 PLAYER_WIN = 1
 DEALER_WIN = 2
 PUSH = 3
 
-# ==================
+# ============
 # TIMER FLAGS
-# ==================
+# ============
 
 INITIAL = 1
 PLAYER = 2
@@ -56,6 +65,7 @@ DEALER = 4
 CHECK = 5
 SHOW = 6
 BROKE = 7
+
 TIMER_MESSAGES = {
     1: 'Dealer is peeking... {}',  
     2: 'Switching active hand... {}',  
@@ -66,13 +76,24 @@ TIMER_MESSAGES = {
     7: 'You cannot afford that... {}',
 }
 
-# ==================
-# JSON FILE INFO
-# ==================
+# ==========
+# JSON INFO
+# ==========
 
 PLAYER_CHIPS = 'player_chips'
 FILE_PATH = Path(__file__).parent / 'save_data.json'
 
-# Miscellaneous constants
+# ==============
+# WAGERS & BANK 
+# ==============
+
+MAX_BANK = 1000000 # 1 Million
+
 MIN_WAGER = 15
+MAX_WAGER = 1000
+
+# ===============
+# MISCELLANEOUS
+# ===============
+
 ROMAN_NUMERALS = {1: 'I', 2: 'II'}

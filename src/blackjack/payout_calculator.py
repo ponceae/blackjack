@@ -1,88 +1,83 @@
 """ 
 Blackjack payout functions.
 
-This module contains functions for calculating the payout for a blackjack win, an 
-insurance win, double down and splits, and pushes.
-
-Author: Adrien P.
+This module contains functions for calculating the payouts for a blackjack, 
+insurance, and double down win as well as returning the wager on a push.
 """
+
+__author__ = 'Adrien P.'
 
 import math
 
 from .datatypes import Insurance, Player, PlayerHand
 
 def blackjack_payout(hand: PlayerHand) -> float:
-	"""
-	Return the payout for a natural blackjack win (3:2 odds)
+    """
+    Return the payout for a natural blackjack win with 3:2 odds.
 
-	Args: 
-		hand (PlayerHand): The hand containing the wager.
+    Args: 
+        hand (PlayerHand): The hand containing the wager.
 
-	Returns:
-		float | int: The blackjack payout.
-	"""
-	return hand.wager * 2.5
+    Returns:
+        float: The blackjack payout.
+    """
+    return hand.wager * 2.5
 
 def insurance_logic(insurance: Insurance, player: Player) -> None:
-	"""
-	Payout the insurance wager to the player, and update their bank.
+    """
+    Calculate the insurance payout and add it to the player's bank.
 
-	Args:
-		insurance (Insurance): Contains the insurance information.
-		hand (PlayerHand): The hand containing the wager.
-		player (Player): The player to payout the wager to.
-
-	Returns:
-		None
-	"""
-	insurance.payout = insurance_payout(insurance.cost)
-	player.bank.chips += insurance.payout
+    Args:
+        insurance (Insurance): The active insurance data containing the wager cost.
+        player (Player): The player receiving the payout.
+    """
+    insurance.payout = insurance_payout(insurance.cost)
+    player.bank.chips += insurance.payout
 
 def insurance_payout(insurance_cost: float) -> float:
-	"""
-	Return the insurance payout (half the wager) if the dealer has blackjack.
+    """
+    Return the insurance payout with 2:1 odds.
 
-	Args:
-		insurance_cost (float | int): The cost for purchasing insurance
+    Args:
+        insurance_cost (float): The cost of purchasing insurance.
 
-	Returns:
-		float: The insurance payout.
-	"""
-	return insurance_cost * 2.0
+    Returns:
+        float: The insurance payout.
+    """
+    return insurance_cost * 2.0
 
 def get_insurance_cost(hand: PlayerHand) -> float:
-	"""
-	Return the cost for purchasing insurance (half the wager).
-	Note: round down and then divide by 1/2. (Ex. 5.5 -> 5 -> 2.5))
+    """
+    Return the cost for purchasing insurance.
 
-	Args:
-		hand (PlayerHand): The hand containing the wager.
-	
-	Returns:
-		float: The cost for insurance.
-	"""
-	return math.floor(hand.wager) * 0.5
+    Args:
+        hand (PlayerHand): The hand containing the wager.
+
+    Returns:
+        float: The insurance cost.
+    """
+    return math.floor(hand.wager) * 0.5
 
 def push_payout(hand: PlayerHand) -> float:
-	"""
-	Return the original wager back to the player.
+    """
+    Return the payout amount for a push (tied hand).
 
-	Args:
-		hand (PlayerHand): The hand containing the wager.
+    Args:
+        hand (PlayerHand): The hand containing the wager.
 
-	Returns:
-		float: The original wager.
-	"""
-	return hand.wager
+    Returns:
+        float: The original wager.
+    """
+    return hand.wager
 
 def standard_payout(hand: PlayerHand) -> float:
-	"""
-	Return the standard payout for a win (1:1 odds).
+    """
+    Return the payout for a standard win with 1:1 odds.
 
-	Args:
-		hand (PlayerHand): The hand containing the wager.
+    Args:
+        hand (PlayerHand): The hand containing the wager.
 
-	Returns:
-		float: The standard payout.
-	"""
-	return hand.wager * 2.0
+    Returns:
+        float: The standard payout.
+    """
+    return hand.wager * 2.0

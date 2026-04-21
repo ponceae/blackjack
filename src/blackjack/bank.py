@@ -9,6 +9,8 @@ __author__ = 'Adrien P'
 
 from typing import Any
 
+from blackjack.constants import MAX_BANK
+
 class Bank:
     """
     Represents a player's wallet for storing casino chips.
@@ -30,8 +32,10 @@ class Bank:
         """
         chips = self._to_float(chips)
 
-        if not (0 <= chips <= 1000):
-            raise ValueError('Invalid Value, `chips` must be a number between 0 - 1000')
+        if not (0 <= chips <= MAX_BANK):
+            raise ValueError(
+                f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}'
+            )
 
         self._chips = chips
 
@@ -81,4 +85,4 @@ class Bank:
         Returns:
             str: The string representation (e.g., Chips: $15.00).
         """
-        return f'Chips: ${self.chips:.2f}'
+        return f'Chips: ${self.chips:,.2f}'

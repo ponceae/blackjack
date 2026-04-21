@@ -32,7 +32,7 @@ class Card:
 
         Args:
             suit (str): The suit name to give to the card
-                   (`'Clubs'`, `'Diamonds'`, `'Hearts'`, `'Spades'`).
+                (`'Clubs'`, `'Diamonds'`, `'Hearts'`, `'Spades'`).
             rank (int | str): The rank to give to the card
                 (`2` through `10`, `'Jack'`, `'Queen'`, `'King'`, `'Ace'`).
 

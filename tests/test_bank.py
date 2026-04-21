@@ -10,6 +10,7 @@ __author__ = 'Adrien P.'
 import pytest
 
 from blackjack.bank import Bank
+from blackjack.constants import MAX_BANK
 
 @pytest.mark.parametrize(
     'test_chips, expected_amount',
@@ -30,11 +31,26 @@ def test_initial_bank_creation(test_chips, expected_amount):
 @pytest.mark.parametrize(
     'invalid_input, expected_err_msg',
     [
-        (1000.01, 'Invalid Value, `chips` must be a number between 0 - 1000'),
-        (-3, 'Invalid Value, `chips` must be a number between 0 - 1000'),
-        (-2.56, 'Invalid Value, `chips` must be a number between 0 - 1000'),
-        ('4a', 'Invalid Value, `value` must be a number.'),
-        ('4.56num', 'Invalid Value, `value` must be a number.'),
+        (
+            MAX_BANK + 0.01, 
+            f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}',
+        ),
+        (
+            -3, 
+            f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}',
+        ),
+        (
+            -2.56, 
+            f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}',
+        ),
+        (
+            '4a', 
+            'Invalid Value, `value` must be a number.',
+        ),
+        (
+            '4.56num', 
+            'Invalid Value, `value` must be a number.',
+        ),
     ],
     ids=[
         'invalid_count_a_big_float',
@@ -118,7 +134,7 @@ def test_bank_chips_setter_raises_valueerror_on_invalid_value(
     'chips, expected_display',
     [
         (15.0, 'Chips: $15.00'),
-        (1000.0, 'Chips: $1000.00'),
+        (1000.0, 'Chips: $1,000.00'),
         (34.5, 'Chips: $34.50'),
         (14.99, 'Chips: $14.99'),
         (0.0, 'Chips: $0.00'),
