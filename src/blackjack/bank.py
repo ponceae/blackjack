@@ -34,7 +34,8 @@ class Bank:
 
         if not (0 <= chips <= MAX_BANK):
             raise ValueError(
-                f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}'
+                f'Invalid value, `chips` must be a number between '
+                f'0 and {MAX_BANK:,.2f}.'
             )
 
         self._chips = chips
@@ -56,7 +57,7 @@ class Bank:
         try:
             return float(value)
         except (ValueError, TypeError):
-            raise ValueError('Invalid Value, `value` must be a number.')
+            raise ValueError('Invalid value, `value` must be a number.')
 
     @property
     def chips(self) -> float:
@@ -74,7 +75,7 @@ class Bank:
         value = self._to_float(value)
 
         if value < 0:
-            raise ValueError('Invalid Value, `value` is less than 0.')
+            raise ValueError('Invalid value, `value` is less than 0.')
 
         self._chips = value
 

@@ -45,7 +45,7 @@ class Card:
             self.suit = suit.capitalize()
         else:
             raise ValueError(
-                "Invalid Value, `suit` must be one of: "
+                "Invalid suit, `suit` must be one of: "
                 "'Clubs', 'Diamonds', 'Hearts', 'Spades'."
               )
 
@@ -55,7 +55,7 @@ class Card:
             self.rank = rank.capitalize()
         else:
             raise ValueError(
-                "Invalid Value, `rank` must be one of: "
+                "Invalid rank, `rank` must be one of: "
                 "'2' through '10', 'Jack', 'King', 'Queen', 'Ace'."
             )
 

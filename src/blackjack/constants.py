@@ -16,20 +16,20 @@ from pathlib import Path
 # CARD CONSTANTS
 # ===============
 
-ACE_ALT_VALUE = 1
 ACE = 'Ace'
+ACE_ALT_VALUE = 1
 DEFAULT_ACE_VALUE = 11
 FACE_CARD_VALUE = 10
 
 CARD_RANKS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'Jack', 'Queen', 'King', 'Ace']
 CARD_SUITS = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
-NAMED_CARD_RANKS = ['Ace', 'Jack', 'Queen', 'King']
 CARD_SUIT_SYMBOLS = {
     'Clubs': '♣', 
     'Diamonds': '♦', 
     'Hearts': '♥', 
     'Spades': '♠',
 }
+NAMED_CARD_RANKS = ['Ace', 'Jack', 'Queen', 'King']
 
 # ==========
 # I/O FLAGS
@@ -80,8 +80,8 @@ TIMER_MESSAGES = {
 # JSON INFO
 # ==========
 
-PLAYER_CHIPS = 'player_chips'
 FILE_PATH = Path(__file__).parent / 'save_data.json'
+PLAYER_CHIPS = 'player_chips'
 
 # ==============
 # WAGERS & BANK 

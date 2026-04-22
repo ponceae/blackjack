@@ -34,9 +34,10 @@ def compare_initial_hands(table: Table) -> int:
 
     Returns:
         int: The outcome flag of the round.
-            `PLAYER_WIN` if the player has blackjack, 
-            `DEALER_WIN` if the dealer has blackjack, 
-            or `PUSH` if both have blackjack.
+            - `PLAYER_WIN` for a player blackjack.
+            - `DEALER_WIN` for a dealer blackjack. 
+            - `PUSH` for a player and dealer blackjack.
+            - `0` if none of the above conditions occurred.
     """
     player_blackjack = is_twenty_one(table.player.hands[0])
     dealer_blackjack = is_twenty_one(table.dealer)

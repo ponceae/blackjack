@@ -70,7 +70,7 @@ class PlayerHand(Hand):
     wager: float = 0.0
     insurance_wager: float = 0.0
     is_active: bool = False
- 
+
 @dataclass
 class Player:
     username: str

@@ -442,7 +442,7 @@ def verify_round_end_cond(table: Table):
 	if interface.is_new_round(table):
 		return True
 
-def get_player_wager(player: Player):
+def get_player_wager(table: Table):
 	"""
 	Prompt the user for a wager amount.
 
@@ -452,11 +452,11 @@ def get_player_wager(player: Player):
 	Returns:
 		float | int: The wager amount.
 	"""
-	wager = interface.wager_prompt(player) 
+	wager = interface.wager_prompt(table) 
 
 	interface.clear_terminal()
 	
-	player.bank.chips -= wager 
+	table.player.bank.chips -= wager 
 	
 	return wager
 						
@@ -475,7 +475,7 @@ def blackjack(deck: list, player_bank: Bank, username: str):
 	table.deck = deck
 	
 	while True:
-		wager_amount = get_player_wager(table.player)    
+		wager_amount = get_player_wager(table)    
 		
 		round_done = False		
 		

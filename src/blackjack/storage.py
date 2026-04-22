@@ -18,10 +18,10 @@ def create_new_user(data: dict, username: str) -> None:
     
     If the `username` is not found in the `data` dictionary, this function will
     continuously prompt the console until a valid balance is entered, then update
-    the dictionary. 
+    the dictionary.
 
     Args:
-        data (dict): The dictionary containing the saved player profiles.
+        data (dict): The dictionary containing all saved player profiles.
         username (str): The username of the profile to create.
     """
     if not data or username not in data:
@@ -38,20 +38,19 @@ def create_new_user(data: dict, username: str) -> None:
                     break
                 else:
                     print(
-                        f'Invalid Input, Please enter a number between '
-                        f'{MIN_WAGER:.2f} - ' 
-                        f'{MAX_BANK:,.2f}'
+                        f'Invalid input, please enter a number between '
+                        f'{MIN_WAGER:.2f} and {MAX_BANK:,.2f}'
                     )
 
             except ValueError:
-                print('Invalid Value, Please enter a number.')
+                print('Invalid value, please enter a number.')
 
 def load_user_data() -> dict:
     """
-    Read the JSON file and return the JSON object as a dictionary.
+    Load the game data from the local JSON file.
 
     Returns:
-        dict: The JSON data.
+        dict: The dictionary containing all saved player profiles.
     """
     with open(FILE_PATH, 'r') as f:
         data = json.load(f)
@@ -60,35 +59,41 @@ def load_user_data() -> dict:
 
 def pull_user_info() -> tuple[float, str]:
     """
-    Prompt the user for a username and pull or modify data from the JSON file and 
-    return the chip count from the JSON.
+    Prompt for a username and retrieve or initialize the user's profile.
+    
+    Checks the data file for an existing profile. If the profile is not found, a 
+    new one is created. 
 
     Returns:
-        tuple[float, str]: The chip count from the JSON and the associated username.
+        tuple[float, str]: A tuple containing:
+            - float: The player's current chip balance
+            - str: The player's associated username.
     """
-    username = input('Enter a username to store/pull your chips: \n')
+    username = input(
+        'Enter your username to load your profile (or create a new one):\n> '
+    )
     data = load_user_data()
- 
+
     if not data or username not in data:
         create_new_user(data, username)
-  
+
     chip_count = data[username][PLAYER_CHIPS]
     save_chips(username, chip_count, data)
 
     return chip_count, username
 
-def save_chips(username: str, chips: float | int, data: dict) -> None:
+def save_chips(username: str, chips: float, data: dict) -> None:
     """
-    Verify that the username exists and store the data in the JSON. Create a new
-    user if the username does not exist by creating a new JSON entry.
+    Update the user's chip balance in the data dictionary.
+
+    If the `username` exists in the `data` dictionary, their profile is updated
+    with the new chip balance. If the profile does not exist, a new entry is
+    created for them automatically.
 
     Args:
-        username (str): The username of the user to check.
-        chips (float | int): The chip count to store in the JSON.
-        data (dict): The JSON data represented as a dictionary.
-
-    Returns:
-        None
+        username (str): The player's username.
+        chips (float): The player's current chip balance.
+        data (dict): The dictionary containing all saved player profiles.
     """
     if username in data:
         data[username][PLAYER_CHIPS] = chips
@@ -99,10 +104,10 @@ def save_chips(username: str, chips: float | int, data: dict) -> None:
 
 def write_user_data(data: dict) -> None:
     """
-    Initialize a JSON object from the data dictionary and write to the JSON.
+    Save the given data dictionary to the local JSON file.
 
     Args:
-        data (dict): The JSON data represented as a dictionary.
+        data (dict): The dictionary containing all saved player profiles.
     """
     tmp = json.dumps(data, indent=4)
 
