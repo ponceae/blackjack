@@ -11,7 +11,11 @@ import pytest
 
 from blackjack.bank import Bank
 from blackjack.constants import MAX_BANK
-from tests.test_constants import BANK_BOUNDS_ERR_MSG, BANK_INVALID_VALUE_ERR_MSG, BANK_NEGATIVE_VALUE_ERR_MSG
+from tests.data.constants import (
+    BANK_BOUNDS_ERR_MSG, 
+    BANK_INVALID_VALUE_ERR_MSG, 
+    BANK_NEGATIVE_VALUE_ERR_MSG
+)
 
 @pytest.mark.parametrize(
     'test_chips, expected_amount',

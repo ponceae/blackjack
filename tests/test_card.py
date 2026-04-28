@@ -11,6 +11,7 @@ import pytest
 
 from blackjack.card import Card
 from blackjack.constants import CARD_RANKS, CARD_SUITS
+from tests.data.constants import CARD_INVALID_RANK_ERR_MSG, CARD_INVALID_SUIT_ERR_MSG
 
 @pytest.mark.parametrize(
     'raw_suit, raw_rank, exp_suit, exp_rank',
@@ -44,11 +45,11 @@ def test_all_cards_have_correct_rank_and_suit(expected_rank, expected_suit):
 @pytest.mark.parametrize(
     'invalid_suit, invalid_rank, expected_err_msg',
     [
-        (5, 8, "Invalid Value, `suit` must be one of: 'Clubs', 'Diamonds', 'Hearts', 'Spades'."),
-        ('Spades', '5', "Invalid Value, `rank` must be one of: '2' through '10', 'Jack', 'King', 'Queen', 'Ace'."),
-        ('Hearts', 12, "Invalid Value, `rank` must be one of: '2' through '10', 'Jack', 'King', 'Queen', 'Ace'."),
-        ('Diamonds', 1, "Invalid Value, `rank` must be one of: '2' through '10', 'Jack', 'King', 'Queen', 'Ace'."),
-        ('Card', 'Ace', "Invalid Value, `suit` must be one of: 'Clubs', 'Diamonds', 'Hearts', 'Spades'."),
+        (5, 8, CARD_INVALID_SUIT_ERR_MSG),
+        ('Spades', '5', CARD_INVALID_RANK_ERR_MSG),
+        ('Hearts', 12, CARD_INVALID_RANK_ERR_MSG),
+        ('Diamonds', 1, CARD_INVALID_RANK_ERR_MSG),
+        ('Card', 'Ace', CARD_INVALID_SUIT_ERR_MSG),
     ],
     ids=[
         'invalid_suit_a_int',
