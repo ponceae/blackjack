@@ -27,8 +27,9 @@ from blackjack import interface
 
 def _generate_basic_input_arg_params(choice):
     """
-    Provide a list of functions with their corresponding test arguments.
-    and mock inputs to enter once the function is called.
+    Provide a list of functions with the following:
+    - Test arguments (all but one are None).
+    - List of mock inputs to use when the function is called.
     """
     return [
         (interface.double_or_not, [], choice),
@@ -102,7 +103,7 @@ def test_no_flow(mock_inputs, capsys, function, args, expected_choice):
         'dealer_win_output',
         'push_output',
         'player_win_output',
-    ]
+    ],
 )
 def test_compare_hands_output(
         player_cards,
@@ -144,7 +145,7 @@ def base_table():
         ),
         dealer=DealerHand(cards=[Card('Clubs', 'Ace'), Card('Diamonds', 3)]),
     )
-    
+
 def test_print_player_hands_init_deal_no_insurance(capsys, base_table):
     base_table.player.bank = Bank(30.0)
 
@@ -169,7 +170,7 @@ def test_print_player_hands_init_deal_with_insurance(capsys, base_table):
     base_table.player.hands[0].insurance_wager = 7.5
 
     interface.clear_and_print(base_table)
-    
+
     result = capsys.readouterr() 
 
     assert result.out == (
@@ -275,7 +276,7 @@ def test_print_player_hands_dealer_showing_both_cards_non_soft(
         'initial_player_blackjack_outcome',
         'initial_dealer_blackjack_outcome',
         'initial_no_outcome',
-    ]
+    ],
 )
 def test_initial_outcome_display(
     capsys,
@@ -345,29 +346,22 @@ def test_stand_hand_decision(mock_inputs, capsys):
 
     assert choice == 'S'
 
-@pytest.mark.parametrize(
-    'input, chips, expected_chips',
-    [
-        (
-            ['y', '10', '35'],
-            10.0,
-            45.0,
-        ),
-        (
-            ['n', '10', '10'],
-            10.0,
-            10.0,
-        ),
-    ],
-)
-def test_add_chips_to_player_bank(mock_inputs, input, chips, expected_chips):
-    test_player = Player(username='Test', bank=Bank(chips))
+def test_add_chips_to_player_bank(mock_inputs, base_table):
+    mock_inputs(['y', '10', '35'])
 
-    mock_inputs(input)
+    base_table.player.bank = Bank(10.0)
 
-    interface._add_chips(test_player)
+    interface._add_chips(base_table)
 
-    assert test_player.bank.chips == expected_chips
+    assert base_table.player.bank.chips == 45.0
+
+def test_add_chips_deny_and_program_exit(mock_inputs, base_table):
+    mock_inputs(['n'])
+
+    with pytest.raises(SystemExit) as exe_info:
+        interface._add_chips(base_table)
+
+    assert exe_info.value.code == None
 
 def test_is_new_round_continue(mock_inputs):
     table = Table(Player(username='Test'))
@@ -392,23 +386,31 @@ def test_is_new_round_exit_branch(mock_inputs, monkeypatch):
     'chips, input, expected_wager',
     [
         (25, ['15'], 15.0),
-        (30.0, ['14', 'n', '20'], 20.0),
         (1.0, ['15', '20', 'y', '20', '15'], 15.0),
         (15.0, ['asdf', '15'], 15.0),
     ],
     ids=[
         'wager_prompt_has_enough_chips',
-        'wager_prompt_not_enough_chips_for_min_bet',
         'wager_prompt_player_bank_is_broke',
         'wager_invalid_input_caught_gracefully',
     ]
 )
-def test_wager_prompt(mock_inputs, chips, input, expected_wager):
-    test_player = Player(username='Test', bank=Bank(chips))
+def test_wager_prompt(mock_inputs, chips, input, expected_wager, base_table):
+    base_table.player.bank = Bank(chips)
 
     mock_inputs(input)
 
-    assert interface.wager_prompt(test_player) == expected_wager
+    assert interface.wager_prompt(base_table) == expected_wager
+
+def test_wager_prompt_deny_adding_chips(mock_inputs, base_table):
+    mock_inputs(['14', 'n'])
+
+    base_table.player.bank = Bank(30.0)
+
+    with pytest.raises(SystemExit) as exe_info:
+        interface.wager_prompt(base_table)
+
+    assert exe_info.value.code is None
 
 @pytest.mark.parametrize(
     'key, expected_output',
@@ -426,11 +428,11 @@ def test_wager_prompt(mock_inputs, chips, input, expected_wager):
 )
 def test_load_timer(capsys, monkeypatch, key, expected_output):
     monkeypatch.setattr(time, 'sleep', lambda x: None)
-    
+
     interface.load_timer(key)
-    
+
     output = capsys.readouterr()
-    
+
     assert expected_output in output.out
 
 @pytest.mark.parametrize(
@@ -442,9 +444,9 @@ def test_load_timer(capsys, monkeypatch, key, expected_output):
 )
 def test_display_dealer_state(capsys, flag, expected_display):
     interface.print_dealer_state(flag)
-    
+
     output = capsys.readouterr()
-    
+
     assert expected_display in output.out
 
 @pytest.mark.parametrize(
@@ -470,7 +472,7 @@ def test_get_round_outcome_msg(flag, index, expected_display):
 )
 def test_print_stand_or_bust(capsys, index, flag, expected_display):
     interface.print_stand_or_bust(index, flag)
-    
+
     console = capsys.readouterr()
-    
+
     assert expected_display in console.out

@@ -11,6 +11,7 @@ import pytest
 
 from blackjack.bank import Bank
 from blackjack.constants import MAX_BANK
+from tests.test_constants import BANK_BOUNDS_ERR_MSG, BANK_INVALID_VALUE_ERR_MSG, BANK_NEGATIVE_VALUE_ERR_MSG
 
 @pytest.mark.parametrize(
     'test_chips, expected_amount',
@@ -31,26 +32,11 @@ def test_initial_bank_creation(test_chips, expected_amount):
 @pytest.mark.parametrize(
     'invalid_input, expected_err_msg',
     [
-        (
-            MAX_BANK + 0.01, 
-            f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}',
-        ),
-        (
-            -3, 
-            f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}',
-        ),
-        (
-            -2.56, 
-            f'Invalid Value, `chips` must be a number between 0 - {MAX_BANK:,.2f}',
-        ),
-        (
-            '4a', 
-            'Invalid Value, `value` must be a number.',
-        ),
-        (
-            '4.56num', 
-            'Invalid Value, `value` must be a number.',
-        ),
+        (MAX_BANK + 0.01, BANK_BOUNDS_ERR_MSG,),
+        (-3, BANK_BOUNDS_ERR_MSG),
+        (-2.56, BANK_BOUNDS_ERR_MSG),
+        ('4a', BANK_INVALID_VALUE_ERR_MSG),
+        ('4.56num', BANK_INVALID_VALUE_ERR_MSG,),
     ],
     ids=[
         'invalid_count_a_big_float',
@@ -108,11 +94,11 @@ def test_setting_bank_chips(bank, set_amount, expected_balance):
 @pytest.mark.parametrize(
     'invalid_value, expected_err_msg',
     [
-        (-5.5, 'Invalid Value, `value` is less than 0.'),
-        (-0.01, 'Invalid Value, `value` is less than 0.'),
-        ('number string', 'Invalid Value, `value` must be a number.'),
-        (None, 'Invalid Value, `value` must be a number.'),
-        ([], 'Invalid Value, `value` must be a number.'),
+        (-5.5, BANK_NEGATIVE_VALUE_ERR_MSG),
+        (-0.01, BANK_NEGATIVE_VALUE_ERR_MSG),
+        ('number string', BANK_INVALID_VALUE_ERR_MSG),
+        (None, BANK_INVALID_VALUE_ERR_MSG),
+        ([], BANK_INVALID_VALUE_ERR_MSG),
     ],
     ids=[
         'invalid_value_a_negative_float_a',

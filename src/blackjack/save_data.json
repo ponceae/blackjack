@@ -1,5 +1,8 @@
 {
     "Adrien": {
         "player_chips": 610.0
+    },
+    "Test": {
+        "player_chips": 30.0
     }
 }

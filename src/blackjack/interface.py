@@ -526,7 +526,7 @@ def load_timer(key: int = -1) -> None:
         time.sleep(1)
   
 def print_dealer_state(flag: str) -> None:
-    """ 
+    """
     Display the dealer's state at the end of the round using the provided flag.
 
     Args:
@@ -538,10 +538,10 @@ def print_dealer_state(flag: str) -> None:
         print('Dealer has Busted')
 
 def print_stand_or_bust(index: int, flag: str) -> None:
-    """ 
+    """
     Display the current hand status based on the provided flag.
 
-        Arguments:
+    Args:
         index (int): The index of the current hand.
         flag (str): The flag containing the hand status.
     """
@@ -558,6 +558,6 @@ def _print_wager(wager: float) -> str:
         wager (float): The player's current placed wager.
 
     Returns:
-        The formatted string.
+        str: The formatted string.
     """
     return f' [${wager:.2f}]'
