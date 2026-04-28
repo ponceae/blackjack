@@ -362,7 +362,7 @@ def _handle_split(table: Table, split: SplitHands) -> None:
 # DEALER TURN ACTIONS.
 # ======================
 
-def exe_dealer_control(table: Table):
+def exe_dealer_control(table: Table) -> None:
     """
     Execute the dealer turn. 
 
@@ -526,6 +526,6 @@ def main():
     interface.clear_terminal()
 
     blackjack(actions.create_and_shuffle(), player_bank, username)
- 
+
 if __name__ == '__main__':
     main()
