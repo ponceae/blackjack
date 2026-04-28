@@ -2,10 +2,10 @@
 Tests for the payout `calculator.py` module.
 
 Contains tests for validating various Blackjack payout amounts, including:
-- Natural blackjack (3:2)
-- Standard win (1:1)
-- Insurance win (2:1)
-- Push (Return of original wager)
+- Natural blackjack (3:2).
+- Standard win (1:1).
+- Insurance win (2:1).
+- Push (Return of original wager).
 """
 
 __author__ = 'Adrien P.'

@@ -1,7 +1,7 @@
 """ 
 Tests for the `conditions.py` module.
 
-This module tests the validation of various game, hand, and player states.
+Validates various game, hand, and player states.
 """
 
 __author__ = 'Adrien P.'

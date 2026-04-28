@@ -1,7 +1,7 @@
 """
 Tests for the `deck.py` module.
 
-This module tests validation for deck initialization and modification.
+Validates game deck initialization and modification.
 """
 
 __author__ = 'Adrien P.'

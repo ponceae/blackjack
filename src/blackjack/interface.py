@@ -476,9 +476,9 @@ def clear_terminal() -> None:
     subprocess.run('cls', shell=True)
 
 def get_round_outcome_msg(index: int, flag: str) -> str:
-    """ 
-    Return a formatted string of the end of the player's game state using 
-    the provided flag.
+    """
+    Return a formatted string of the player's end of round state based on the 
+    provided flag.
 
     Args:
         index (int): The index of the player's current hand.
@@ -495,7 +495,8 @@ def get_round_outcome_msg(index: int, flag: str) -> str:
 
 def get_round_outcome_payout_msg(hand: PlayerHand) -> str:
     """ 
-    Return a formatted string for a player's standard blackjack win.
+    Return a formatted string for a standard blackjack win based off of the player's
+    current wager.
 
     Args:
         hand (PlayerHand): The hand containing the placed wager.
@@ -538,27 +539,25 @@ def print_dealer_state(flag: str) -> None:
 
 def print_stand_or_bust(index: int, flag: str) -> None:
     """ 
-    Display which hand is standing or if it has already busted.
-    
-    Arguments:
-        index (int): The index of the hand.
-        flag (str): The flag that determines the state of the hand.
-     Returns:
-        None
+    Display the current hand status based on the provided flag.
+
+        Arguments:
+        index (int): The index of the current hand.
+        flag (str): The flag containing the hand status.
     """
     if flag == STAND:
         print(f'Hand {ROMAN_NUMERALS[index + 1]} is Standing')
     elif flag == BUST:
         print(f'Hand {ROMAN_NUMERALS[index + 1]} has Busted')
 
-def _print_wager(wager: float | int):
+def _print_wager(wager: float) -> str:
     """
-    Display the player wager in two-decimal format.
+    Return a formatted string for the player's current wager.
 
     Args:
-        wager (float | int): The current wager on the player hand.
+        wager (float): The player's current placed wager.
 
     Returns:
-        The string representation of the player wager.
+        The formatted string.
     """
     return f' [${wager:.2f}]'

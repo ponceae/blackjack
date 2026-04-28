@@ -2,9 +2,9 @@
 Tests for the `storage.py` module.
 
 Contains tests for validating data management, inlcuding:
-- Loading game state from the local JSON file
-- Creating and initializing new user profiles
-- Updating existing user chip balances in memory
+- Loading game state from the local JSON file.
+- Creating and initializing new user profiles.
+- Updating existing user chip balances in memory.
 - Saving modified data back to memory.
 """
 
