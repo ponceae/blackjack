@@ -190,8 +190,9 @@ def exe_player_control(table: Table) -> None:
 
         # User can only double down before hitting.
         try:
+            ans = interface.double_or_not()
             if (
-                interface.double_or_not() == constants.YES 
+                ans == constants.YES 
                 and conditions.is_valid_doubled_wager(
                     table.player, 
                     table.player.hands[i],
@@ -203,12 +204,21 @@ def exe_player_control(table: Table) -> None:
                     continue
                 else:
                     break
-            else:
+            elif (
+                ans == constants.YES
+                and not conditions.is_valid_doubled_wager(
+                    table.player,
+                    table.player.hands[i],
+                )
+            ):
+                interface.load_timer(constants.BROKE)
                 interface.clear_and_print(table)
 
-                action = _handle_hitting(table, split, hand, i)
-                
-                if action == PlayerAction.NEXT_HAND:
+            interface.clear_and_print(table)
+
+            action = _handle_hitting(table, split, hand, i)
+            
+            if action == PlayerAction.NEXT_HAND:
                     continue
 
         finally:
@@ -399,7 +409,7 @@ def exe_dealer_control(table: Table) -> None:
 # ROUND END CHECK.
 # ==================
 
-def verify_round_end_cond(table: Table) -> None:
+def verify_round_end_cond(table: Table) -> bool:
     """
     Compare the hand values at the end of the round and determine the winner.
 
@@ -448,6 +458,7 @@ def verify_round_end_cond(table: Table) -> None:
         print(*strings, sep='', end='')
     if interface.is_new_round(table):
         return True
+    return False
 
 def _get_player_wager(table: Table) -> float:
     """

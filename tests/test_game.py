@@ -129,7 +129,7 @@ def test_handle_outcomes_on_init_deal(
 ):
     outcome = Outcome(flag=outcome_flag)
 
-    monkeypatch.setattr(game, 'insurance_helper', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_insurance_helper', lambda *args, **kwargs: None)
 
     game._handle_outcomes(outcome, Insurance(), init_table)
 
@@ -138,7 +138,7 @@ def test_handle_outcomes_on_init_deal(
     assert init_table.player.bank.chips == expected_chips
 
 def test_exe_init_no_winners_no_insurance_purchased(monkeypatch, init_table):
-    monkeypatch.setattr(game, 'handle_insurance', lambda *args, **kwargs: None)	
+    monkeypatch.setattr(game, '_handle_insurance', lambda *args, **kwargs: None)	
 
     assert game.exe_initial_cond(init_table) == False
 
@@ -148,7 +148,7 @@ def test_exe_init_no_winners_no_insurance_win(monkeypatch, init_table):
     def fake_handle_insurance(insurance, table):
         insurance.active = True
 
-    monkeypatch.setattr(game, 'handle_insurance', fake_handle_insurance)
+    monkeypatch.setattr(game, '_handle_insurance', fake_handle_insurance)
 
     assert game.exe_initial_cond(init_table) == False
 
@@ -162,8 +162,8 @@ def test_exe_init_round_ending_cond_no_new_round(mock_inputs, monkeypatch, init_
         lambda _: constants.PLAYER_WIN
     )
 
-    monkeypatch.setattr(game, 'handle_insurance', lambda *args, **kwargs: None)
-    monkeypatch.setattr(game, 'handle_outcomes', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_handle_insurance', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_handle_outcomes', lambda *args, **kwargs: None)
 
     monkeypatch.setattr(
         "blackjack.interface.request_new_round",
@@ -182,8 +182,8 @@ def test_exe_init_round_ending_cond_with_new_round(monkeypatch, init_table):
         'blackjack.conditions.compare_initial_hands', 
         lambda _: constants.PLAYER_WIN
     )
-    monkeypatch.setattr(game, 'handle_insurance', lambda *args, **kwargs: None)
-    monkeypatch.setattr(game, 'handle_outcomes', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_handle_insurance', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_handle_outcomes', lambda *args, **kwargs: None)
 
     monkeypatch.setattr(
         "blackjack.interface.request_new_round",
@@ -497,14 +497,14 @@ def test_exe_player_control_split_aces_early_exit(monkeypatch, full_table):
         split.split_aces = True
         called_split.append(True)
 
-    monkeypatch.setattr(game, 'handle_split', fake_handle_split)
+    monkeypatch.setattr(game, '_handle_split', fake_handle_split)
 
     game.exe_player_control(full_table)
 
     assert called_split
 
 def test_exe_player_control_double_down_no_hands_left(monkeypatch, full_table):
-    monkeypatch.setattr(game, 'handle_split', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_handle_split', lambda *args, **kwargs: None)
 
     monkeypatch.setattr('blackjack.interface.double_or_not', lambda: constants.YES)
     monkeypatch.setattr(
@@ -514,7 +514,7 @@ def test_exe_player_control_double_down_no_hands_left(monkeypatch, full_table):
 
     monkeypatch.setattr(
         game, 
-        'handle_double_down', 
+        '_handle_double_down', 
         lambda *args, **kwargs: PlayerAction.END_TURN
     )
 
@@ -523,9 +523,11 @@ def test_exe_player_control_double_down_no_hands_left(monkeypatch, full_table):
     assert full_table.player.hands[0].is_active == False
 
 def test_exe_player_control_double_down_hands_left(monkeypatch, full_table):
-    full_table.player.hands.append(PlayerHand([Card('Hearts', 3), Card('Spades', 4)]))
+    full_table.player.hands.append(
+            PlayerHand(cards=[Card('Hearts', 3), Card('Spades', 4)])
+        )
 
-    monkeypatch.setattr(game, 'handle_split', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_handle_split', lambda *args, **kwargs: None)
 
     monkeypatch.setattr('blackjack.interface.double_or_not', lambda: constants.YES)
     monkeypatch.setattr(
@@ -540,7 +542,7 @@ def test_exe_player_control_double_down_hands_left(monkeypatch, full_table):
 
     monkeypatch.setattr(
         game, 
-        'handle_double_down', 
+        '_handle_double_down', 
         lambda *args, **kwargs: next(actions)
     )
 
@@ -549,7 +551,9 @@ def test_exe_player_control_double_down_hands_left(monkeypatch, full_table):
     assert all(not hand.is_active for hand in full_table.player.hands)
 
 def exe_player_control_next_hand(monkeypatch, full_table):
-    full_table.player.hands.append(PlayerHand([Card('Hearts', 3), Card('Spades', 4)]))
+    full_table.player.hands.append(
+        PlayerHand(cards=[Card('Hearts', 3), Card('Spades', 4)])
+    )
 
     def fake_handle_split(table, split):
         split.split_hand = True
@@ -563,7 +567,7 @@ def exe_player_control_next_hand(monkeypatch, full_table):
         handle_hitting_calls.append(i)
         return PlayerAction.NEXT_HAND
 
-    monkeypatch.setattr(game, 'handle_hitting', fake_handle_hitting)
+    monkeypatch.setattr(game, '_handle_hitting', fake_handle_hitting)
 
     game.exe_player_control(full_table)
 
@@ -583,7 +587,7 @@ def exe_player_control_end_turn(monkeypatch, full_table):
         handle_hitting_calls.append(i)
         return PlayerAction.END_TURN
     
-    monkeypatch.setattr(game, 'handle_hitting', fake_handle_hitting)
+    monkeypatch.setattr(game, '_handle_hitting', fake_handle_hitting)
 
     game.exe_player_control(full_table)
 
@@ -781,7 +785,7 @@ def test_get_player_wager(monkeypatch, full_table):
     assert game._get_player_wager(full_table) == 25.0
 
 def test_blackjack_round_done(monkeypatch, full_table):
-    monkeypatch.setattr(game, 'get_player_wager', lambda *args, **kwargs: None)
+    monkeypatch.setattr(game, '_get_player_wager', lambda *args, **kwargs: None)
 
     monkeypatch.setattr('blackjack.actions.initial_round_deal', lambda *args, **kwargs: None)
 
@@ -794,7 +798,7 @@ def test_blackjack_routing(monkeypatch, full_table):
         call_count['wager_calls'] += 1
         return 25.0
 
-    monkeypatch.setattr(game, 'get_player_wager', fake_get_player_wager)
+    monkeypatch.setattr(game, '_get_player_wager', fake_get_player_wager)
 
     monkeypatch.setattr(game, 'verify_round_end_cond', lambda _: False)
     monkeypatch.setattr(game, 'exe_initial_cond', lambda _: False)

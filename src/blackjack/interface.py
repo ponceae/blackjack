@@ -468,7 +468,7 @@ def _print_min_wager(bank: Bank) -> str:
     """
     return (
         f'{bank.to_string()}\n'
-        f'Minimum Bet is: $' + f'{MIN_WAGER:.2f}\n'
+        f'Minimum Wager is: $' + f'{MIN_WAGER:.2f}\n'
     )
 
 def clear_terminal() -> None:

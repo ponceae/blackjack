@@ -11,7 +11,7 @@ import pytest
 
 from blackjack.card import Card
 from blackjack.constants import CARD_RANKS, CARD_SUITS
-from tests.data.constants import CARD_INVALID_RANK_ERR_MSG, CARD_INVALID_SUIT_ERR_MSG
+from data.constants import CARD_INVALID_RANK_ERR_MSG, CARD_INVALID_SUIT_ERR_MSG
 
 @pytest.mark.parametrize(
     'raw_suit, raw_rank, exp_suit, exp_rank',

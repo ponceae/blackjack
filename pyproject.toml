@@ -1,7 +1,7 @@
 
 [project]
 name = "blackjack"
-version = "3.2.26"
+version = "1.0"
 requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
