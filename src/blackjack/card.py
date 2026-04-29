@@ -45,8 +45,8 @@ class Card:
             self.suit = suit.capitalize()
         else:
             raise ValueError(
-                "Invalid suit, `suit` must be one of: "
-                "'Clubs', 'Diamonds', 'Hearts', 'Spades'."
+                f'Invalid suit, `suit` must be one of: '
+                f'\'Clubs\', \'Diamonds\', \'Hearts\', \'Spades\'.'
               )
 
         if isinstance(rank, int) and (2 <= rank <= 11):
@@ -55,8 +55,8 @@ class Card:
             self.rank = rank.capitalize()
         else:
             raise ValueError(
-                "Invalid rank, `rank` must be one of: "
-                "'2' through '10', 'Jack', 'King', 'Queen', 'Ace'."
+                f'Invalid rank, `rank` must be one of: '
+                f'\'2\' through \'10\', \'Jack\', \'King\', \'Queen\', \'Ace\'.'
             )
 
     def get_rank_value(self) -> int:
