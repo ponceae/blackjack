@@ -47,11 +47,15 @@ def create_new_user(data: dict, username: str) -> None:
 
 def load_user_data() -> dict:
     """
-    Load the game data from the local JSON file.
+    Load the game data from the local JSON file. If the file does not exist,
+    create an empty JSON file.
 
     Returns:
         dict: The dictionary containing all saved player profiles.
     """
+    if not FILE_PATH.exists():
+        FILE_PATH.write_text('{}')
+
     with open(FILE_PATH, 'r') as f:
         data = json.load(f)
 
