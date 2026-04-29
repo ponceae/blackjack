@@ -56,9 +56,12 @@ def load_user_data() -> dict:
     if not FILE_PATH.exists():
         FILE_PATH.write_text('{}')
 
-    with open(FILE_PATH, 'r') as f:
-        data = json.load(f)
-
+    try:
+        with open(FILE_PATH, 'r') as f:
+            data = json.load(f)
+    except json.JSONDecodeError:
+        return {}
+    
     return data
 
 def pull_user_info() -> tuple[float, str]:
