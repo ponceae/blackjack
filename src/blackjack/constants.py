@@ -90,7 +90,7 @@ PLAYER_CHIPS = 'player_chips'
 MAX_BANK = 1000000 # 1 Million
 
 MIN_WAGER = 15
-MAX_WAGER = 1000
+MAX_WAGER = 1000000 # 1 Million
 
 # ===============
 # MISCELLANEOUS

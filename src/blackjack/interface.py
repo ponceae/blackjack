@@ -71,9 +71,9 @@ def compare_hands(table: Table, hand: PlayerHand, index: int) -> tuple[str, int]
     dealer_hand_value = get_hand_value(table.dealer)
 
     if player_hand_value == dealer_hand_value:
-        return (f'{msg} Push, Returned ${push_payout(hand):.2f}\n'), PUSH
+        return (f'{msg} Push, Returned ${push_payout(hand):,.2f}\n'), PUSH
     elif player_hand_value > dealer_hand_value:
-        return (f'{msg} Win, You Won ${standard_payout(hand):.2f}\n'), PLAYER_WIN
+        return (f'{msg} Win, You Won ${standard_payout(hand):,.2f}\n'), PLAYER_WIN
     elif player_hand_value < dealer_hand_value:
         return (f'{msg} Lost\n'), DEALER_WIN
 
@@ -143,7 +143,7 @@ def _print_dealer_hands(table: Table, buffers: Buffers) -> None:
 
     if table.player.hands[0].insurance_wager > 0:
         buffers.dealer.append(
-            f'Insurance [${table.player.hands[0].insurance_wager:.2f}]\n'
+            f'Insurance [${table.player.hands[0].insurance_wager:,.2f}]\n'
         )
 
     buffers.dealer.append('--------------------\n')
@@ -201,9 +201,9 @@ def print_initial_outcome(outcome: Outcome, hand: PlayerHand) -> None:
         hand (PlayerHand): The current player hand containing the wager.
     """
     if outcome.flag == PUSH:
-        print(f'Round Push, Returned ${hand.wager:.2f}')
+        print(f'Round Push, Returned ${hand.wager:,.2f}')
     elif outcome.flag == PLAYER_WIN:
-        print(f'Player Blackjack, You Won ${outcome.payout:.2f}')
+        print(f'Player Blackjack, You Won ${outcome.payout:,.2f}')
     elif outcome.flag == DEALER_WIN:
         print('Dealer Blackjack, You Lose')
 
@@ -215,7 +215,7 @@ def print_initial_insurance_outcome(insurance: Insurance) -> None:
         insurance (Insurance): Contains the insurance activity, win, and payout status.
     """
     if insurance.active and insurance.win:
-        print(f'You Won ${insurance.payout:.2f} With Insurance.')
+        print(f'You Won ${insurance.payout:,.2f} With Insurance.')
     elif insurance.active and not insurance.win:
         print('No Dealer Blackjack, Insurance Lost.')
 
@@ -248,7 +248,7 @@ def _add_chips(table: Table) -> None:
 
                 print(
                     f'Invalid input, please enter a number between '
-                    f'{MIN_WAGER:.2f} and {MAX_WAGER:,.2f}.'
+                    f'{MIN_WAGER:,.2f} and {MAX_WAGER:,.2f}.'
                 )
 
             except ValueError:
@@ -356,7 +356,7 @@ def wager_prompt(table: Table) -> float:
             elif not valid_wager_bounds:
                 print(
                     f'Invalid wager, please enter a number between '
-                    f'{MIN_WAGER:.2f} and {MAX_WAGER:,.2f}'
+                    f'{MIN_WAGER:,.2f} and {MAX_WAGER:,.2f}'
                 )
 
         except ValueError:
@@ -408,7 +408,7 @@ def request_insurance(cost: float) -> str:
         str: The user's decision.
     """
     while True:
-        choice = input(f'\nInsurance? ${cost:.2f} (Y) / (N)\n>')
+        choice = input(f'\nInsurance? ${cost:,.2f} (Y) / (N)\n>')
         
         if choice.upper() in (YES, NO):
             return choice.upper()
@@ -468,7 +468,7 @@ def _print_min_wager(bank: Bank) -> str:
     """
     return (
         f'{bank.to_string()}\n'
-        f'Minimum Wager is: $' + f'{MIN_WAGER:.2f}\n'
+        f'Minimum Wager is: $' + f'{MIN_WAGER:,.2f}\n'
     )
 
 def clear_terminal() -> None:
@@ -504,7 +504,7 @@ def get_round_outcome_payout_msg(hand: PlayerHand) -> str:
     Returns:
         str: The formatted payout message.
     """
-    return f'You Won ${standard_payout(hand):.2f}\n'
+    return f'You Won ${standard_payout(hand):,.2f}\n'
 
 def load_timer(key: int = -1) -> None:
     """
@@ -560,4 +560,4 @@ def _print_wager(wager: float) -> str:
     Returns:
         str: The formatted string.
     """
-    return f' [${wager:.2f}]'
+    return f' [${wager:,.2f}]'

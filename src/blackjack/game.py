@@ -527,7 +527,7 @@ def main():
             f'Dealer Stands on Soft 17\n'
             f'Insurance Pays 2:1\n'
         )
-    input('Press Enter to Continue\n')
+    input('Press Enter to Continue\n>')
 
     interface.clear_terminal()
 
