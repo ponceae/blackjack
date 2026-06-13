@@ -28,7 +28,7 @@ def create_new_user(data: dict, username: str) -> None:
         print('Creating new user.')
 
         while True:
-            raw_chip_count = input('Enter the amount of chips to add.\n')
+            raw_chip_count = input('Enter the amount of chips to add.\n>')
 
             try:
                 chip_count = float(raw_chip_count)
